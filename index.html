@@ -1408,8 +1408,10 @@ async function sheetsEnsureHeader(){
 async function sheetsWriteVisit(visitData){
   if(!driveToken||!SHEET_ID){console.warn('Sheets: not configured');return;}
   await sheetsEnsureHeader();
+  // Normalize field name aliases (S uses ptName, sheet expects patientName)
+  const normalized={...visitData, patientName: visitData.patientName||visitData.ptName||''};
   const row=SHEET_HEADERS.map(k=>{
-    const v=visitData[k];
+    const v=normalized[k];
     if(Array.isArray(v))return v.join(', ');
     return v!==undefined&&v!==null?String(v):'';
   });
@@ -1849,29 +1851,184 @@ function ptRows(){
 }
 function buildPrintHTML(d){
   const npi=cfg.npi?`NPI: ${cfg.npi}`:'';const ein=cfg.ein?`EIN: ${cfg.ein}`:'';
-  return`<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'DM Sans',sans-serif;margin:0;padding:0;background:#fff;color:#182820;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.nh{background:#1e3d2a;padding:16px 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}.nl{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff;}.nl em{color:#8dc8a0;font-style:italic;}.nb{padding:16px 24px;}.ptb{background:#eff7f2;border:1px solid #b8d8c4;border-radius:7px;padding:12px 15px;margin-bottom:12px;}.ptb h4{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:#2f5c43;font-weight:700;margin-bottom:8px;}.sec{margin-bottom:13px;}.sec h3{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:#2f5c43;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #eaf4ee;font-weight:700;}table{width:100%;border-collapse:collapse;}td{vertical-align:top;padding:3px 0;}.k{font-weight:700;color:#677a6e;font-size:.78rem;min-width:150px;padding-right:8px;}hr{border:none;border-top:1px solid #e2ede7;margin:10px 0;}.sb{background:#eff7f2;border:1px solid #b8d8c4;border-radius:7px;padding:11px 13px;font-size:.83rem;line-height:1.75;}.sigb{border:1px solid #c8dcd0;border-radius:5px;background:#fafefc;padding:3px;display:inline-flex;}.sigb img{max-width:230px;height:48px;object-fit:contain;}.rf{background:#fdf0ee;border:1.5px solid #e8b4ad;border-radius:6px;padding:8px 11px;font-size:.82rem;color:#c0392b;font-weight:700;margin-bottom:9px;}@media print{.nh{background:#1e3d2a!important;}.ptb{background:#eff7f2!important;}.sb{background:#eff7f2!important;}}</style></head><body><div class="nh"><div><div class="nl">${d.clinicName} <em>Check-In</em></div><div style="font-size:.67rem;color:rgba(255,255,255,.5);margin-top:2px;">${cfg.address||''} ${cfg.phone?'· '+cfg.phone:''} ${npi?'· '+npi:''} ${ein?'· '+ein:''}</div></div><div style="text-align:right;font-size:.78rem;color:rgba(255,255,255,.6);">SOAP Progress Note<br><strong style="color:#fff;">${d.date}</strong></div></div><div class="nb">${S.redFlags==='Yes'?'<div class="rf">⚠️ RED FLAG: Neurological symptoms — URGENT EVALUATION</div>':''}<div class="ptb"><h4>Subjective (S) — ${d.date} at ${d.now}${S.isOneTap?' [One-Tap — No Changes]':''}</h4><table><tr><td class="k">Patient:</td><td><strong>${S.ptName}</strong></td></tr><tr><td class="k">Date/Appt:</td><td>${S.ptDate} · ${apptLbl()}</td></tr><tr><td class="k">Overall/Pain:</td><td>${S.overall} · ${S.pain}/10</td></tr><tr><td class="k">Regions:</td><td>${S.regions.join(', ')||'—'}${S.otherReg?' ('+S.otherReg+')':''}</td></tr><tr><td class="k">Symptoms:</td><td>${S.symptoms.join(', ')||'—'}</td></tr><tr><td class="k">Functional:</td><td>${S.funcImpact} · ROM: ${S.rom} · Walk: ${S.walk} · ADLs: ${S.adl}</td></tr><tr><td class="k">New Injury:</td><td>${S.newInjury}${S.injuryTxt?' — '+S.injuryTxt:''}</td></tr><tr><td class="k">Red Flags:</td><td>${S.redFlags==='Yes'?'⚠️ YES — Evaluate urgently':'None'}</td></tr><tr><td class="k">Goals:</td><td>${S.goals.join(', ')||'—'}</td></tr>${S.ptNotes?`<tr><td class="k">Patient Note:</td><td>${S.ptNotes}</td></tr>`:''}</table><div style="margin-top:8px;font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2f5c43;margin-bottom:4px;">Narrative</div><div class="sb">${S._soapS||'—'}</div>${S.ptSig?`<div style="margin-top:7px;"><div style="font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2f5c43;margin-bottom:3px;">${S.sigSkipped&&S.ptPostSig?'Post-Treatment Attestation':'Intake Consent'}</div><div class="sigb"><img src="${S.ptSig}"></div><div style="font-size:.73rem;color:#677a6e;margin-top:2px;">${S.ptName} · ${S.ptSigTime}</div></div>`:''}</div><hr><div class="sec"><h3>Objective (O)</h3><table><tr><td class="k">Palpation:</td><td>${d.palp||'None'}</td></tr><tr><td class="k">Leg Length:</td><td>${rd('leglen')} ${rd('legfix')!=='—'?'→ '+rd('legfix'):''}</td></tr><tr><td class="k">Response/Progress:</td><td>${rd('resp')} · ${rd('prog')}</td></tr><tr><td class="k">Case Type:</td><td>${rd('ctype')}</td></tr><tr><td class="k">Obj Notes:</td><td>${document.getElementById('obj-notes').value||'—'}</td></tr></table></div><hr><div class="sec"><h3>Assessment (A)</h3><table><tr><td class="k">Diagnoses:</td><td>${d.dx.join('<br>')||'—'}</td></tr><tr><td class="k">DX Status:</td><td>${rd('dx-st')}</td></tr></table></div><hr><div class="sec"><h3>Plan (P)</h3><table><tr><td class="k">Adj. Codes:</td><td>${d.adjCodes||'—'}</td></tr><tr><td class="k">Technique:</td><td>${d.tech}</td></tr><tr><td class="k">Levels:</td><td>${d.spAdj}</td></tr><tr><td class="k">Modalities:</td><td>${d.ml.join('<br>')||'None'}</td></tr><tr><td class="k">Visit:</td><td>${document.getElementById('v-num').value||'—'} of ${document.getElementById('v-tot').value||'—'} · ${document.getElementById('freq').value||'—'}</td></tr><tr><td class="k">Return:</td><td>${document.getElementById('dret').value||'—'}</td></tr><tr><td class="k">Home Care:</td><td>${rd('hc')} ${document.getElementById('hc-detail').value?'— '+document.getElementById('hc-detail').value:''}</td></tr></table></div><hr><div class="sec"><h3>Clinician Signature</h3>${S.docSig?`<div class="sigb"><img src="${S.docSig}"></div>`:''}<div style="font-size:.79rem;color:#677a6e;margin-top:5px;"><strong>${d.doctor}</strong> · ${d.clinicName} · ${S.docSignDate} ${npi?'· '+npi:''}</div><div style="font-size:.72rem;color:#677a6e;margin-top:3px;">Services personally performed/supervised. Medical necessity confirmed. E-sig: ${S.docSigTime}</div></div>
-${S.sigSkipped&&S.ptPostSig?`<hr><div class="sec"><h3>Patient Post-Treatment Attestation</h3><p style="font-size:.8rem;color:#3b4e41;line-height:1.7;margin-bottom:8px;">Patient confirms receipt of services documented above, consents to treatment provided, and authorizes billing of insurance and/or accepts financial responsibility for today's visit.</p><div class="sigb"><img src="${S.ptPostSig}"></div><div style="font-size:.73rem;color:#677a6e;margin-top:3px;">${S.ptName} · ${S.ptPostSigTime}</div></div>`:''}
-</div></body></html>`;
+  const addr=[cfg.address,cfg.phone?'Tel: '+cfg.phone:'',npi,ein].filter(Boolean).join('  ·  ');
+  const rf=S.redFlags==='Yes';
+  const ptSigLabel=S.sigSkipped&&S.ptPostSig?'Post-Treatment Attestation':'Intake Consent & Authorization';
+
+  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#1a2e22;font-size:10.5px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+/* ── Header ── */
+.hd{background:#1e3d2a;padding:18px 28px 14px;display:flex;justify-content:space-between;align-items:flex-start;}
+.hd-left{}
+.clinic-name{font-family:'DM Serif Display',Georgia,serif;font-size:18px;color:#fff;letter-spacing:-.01em;line-height:1.1;}
+.clinic-name em{color:#7ec99a;font-style:italic;}
+.clinic-addr{font-size:8.5px;color:rgba(255,255,255,.55);margin-top:4px;letter-spacing:.03em;}
+.hd-right{text-align:right;}
+.note-type{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:600;}
+.note-date{font-size:15px;font-weight:700;color:#fff;margin-top:2px;}
+
+/* ── Patient banner ── */
+.pt-banner{background:#eef6f0;border-left:4px solid #3a7a52;padding:10px 28px;display:flex;gap:28px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #cde3d4;}
+.pt-banner-name{font-family:'DM Serif Display',serif;font-size:16px;color:#1a2e22;font-weight:400;}
+.pt-banner-meta{font-size:9px;color:#4a7060;letter-spacing:.04em;}
+.pt-banner-meta strong{color:#1a2e22;font-size:10px;}
+
+/* ── Red flag ── */
+.rf-bar{background:#fdf0ee;border-left:4px solid #c0392b;padding:8px 28px;font-size:10px;font-weight:700;color:#c0392b;letter-spacing:.04em;}
+
+/* ── Body ── */
+.body{padding:16px 28px 24px;}
+
+/* ── Section ── */
+.sec{margin-bottom:16px;}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1.5px solid #d4e8da;}
+.sec-label{font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#3a7a52;}
+.sec-tag{font-size:7px;background:#3a7a52;color:#fff;padding:2px 7px;border-radius:100px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── Data table ── */
+table.dt{width:100%;border-collapse:collapse;}
+table.dt td{vertical-align:top;padding:3.5px 0;border-bottom:1px solid #f0f5f1;}
+table.dt tr:last-child td{border-bottom:none;}
+table.dt td.k{font-weight:600;color:#4a7060;font-size:9px;letter-spacing:.03em;width:140px;padding-right:10px;}
+table.dt td.v{color:#1a2e22;font-size:10px;}
+
+/* ── Narrative box ── */
+.narr{background:#f4faf6;border:1px solid #c8e0d0;border-radius:6px;padding:10px 13px;font-size:10px;line-height:1.75;color:#1a2e22;margin-top:8px;}
+.narr-lbl{font-size:7px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#3a7a52;margin-bottom:4px;}
+
+/* ── Signature block ── */
+.sig-block{margin-top:8px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+.sig-box{border:1px solid #b8d4c0;border-radius:6px;background:#f8fcf9;padding:4px 8px;display:inline-flex;align-items:center;justify-content:center;}
+.sig-box img{height:52px;max-width:200px;object-fit:contain;}
+.sig-meta{font-size:9px;color:#4a7060;line-height:1.6;}
+.sig-meta strong{color:#1a2e22;font-size:10px;}
+.sig-label{font-size:7px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#3a7a52;margin-bottom:4px;}
+
+/* ── Divider ── */
+hr.sec-div{border:none;border-top:1px solid #d4e8da;margin:14px 0;}
+
+/* ── Post-treatment attestation ── */
+.post-attest{background:#f0f7f2;border:1.5px solid #3a7a52;border-radius:8px;padding:12px 16px;margin-top:14px;}
+.post-attest-title{font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#3a7a52;margin-bottom:6px;}
+.post-attest-text{font-size:9.5px;color:#2a4a35;line-height:1.7;margin-bottom:10px;}
+
+/* ── Print ── */
+@media print{
+  .hd{background:#1e3d2a!important;}
+  .pt-banner{background:#eef6f0!important;}
+  .narr{background:#f4faf6!important;}
+  .post-attest{background:#f0f7f2!important;}
+  .sig-box{background:#f8fcf9!important;}
+}
+</style></head><body>
+
+<div class="hd">
+  <div class="hd-left">
+    <div class="clinic-name">${d.clinicName} <em>Check-In</em></div>
+    <div class="clinic-addr">${addr}</div>
+  </div>
+  <div class="hd-right">
+    <div class="note-type">SOAP Progress Note</div>
+    <div class="note-date">${d.date}</div>
+  </div>
+</div>
+
+<div class="pt-banner">
+  <div class="pt-banner-name">${S.ptName||'—'}</div>
+  <div class="pt-banner-meta">Date &nbsp;<strong>${S.ptDate||'—'}</strong></div>
+  <div class="pt-banner-meta">Appointment &nbsp;<strong>${apptLbl()}</strong></div>
+  <div class="pt-banner-meta">Overall &nbsp;<strong>${S.overall||'—'}</strong></div>
+  <div class="pt-banner-meta">Pain &nbsp;<strong>${S.pain}/10 NRS</strong></div>
+  ${S.isOneTap?'<div class="pt-banner-meta" style="background:#3a7a52;color:#fff;padding:2px 8px;border-radius:100px;">✓ One-Tap — No Changes</div>':''}
+</div>
+
+${rf?'<div class="rf-bar">⚠️  RED FLAG: Neurological symptoms reported — URGENT EVALUATION REQUIRED</div>':''}
+
+<div class="body">
+
+  <!-- ── SUBJECTIVE ── -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Subjective</span><span class="sec-tag">S</span></div>
+    <table class="dt">
+      <tr><td class="k">Regions</td><td class="v">${S.regions.join(', ')||'—'}${S.otherReg?' ('+S.otherReg+')':''}</td></tr>
+      <tr><td class="k">Symptoms</td><td class="v">${S.symptoms.join(', ')||'—'}</td></tr>
+      <tr><td class="k">Functional Impact</td><td class="v">${S.funcImpact||'—'} &nbsp;·&nbsp; ROM: ${S.rom||'—'} &nbsp;·&nbsp; Walking: ${S.walk||'—'} &nbsp;·&nbsp; ADLs: ${S.adl||'—'}</td></tr>
+      <tr><td class="k">New Injury</td><td class="v">${S.newInjury||'—'}${S.injuryTxt?' — '+S.injuryTxt:''}</td></tr>
+      <tr><td class="k">Red Flags</td><td class="v">${rf?'<strong style="color:#c0392b;">⚠️ YES — Evaluate urgently</strong>':'None reported'}</td></tr>
+      <tr><td class="k">Goals</td><td class="v">${S.goals.join(', ')||'—'}</td></tr>
+      ${S.ptNotes?`<tr><td class="k">Patient Note</td><td class="v">${S.ptNotes}</td></tr>`:''}
+    </table>
+    <div class="narr-lbl" style="margin-top:10px;">Clinical Narrative</div>
+    <div class="narr">${S._soapS||'—'}</div>
+    ${S.ptSig?`<div style="margin-top:10px;"><div class="sig-label">${ptSigLabel}</div><div class="sig-block"><div class="sig-box"><img src="${S.ptSig}"></div><div class="sig-meta"><strong>${S.ptName}</strong><br>${S.ptSigTime}</div></div></div>`:''}
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ── OBJECTIVE ── -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Objective</span><span class="sec-tag">O</span></div>
+    <table class="dt">
+      <tr><td class="k">Palpation</td><td class="v">${d.palp||'None noted'}</td></tr>
+      <tr><td class="k">Leg Length</td><td class="v">${rd('leglen')}${rd('legfix')!=='—'?' → '+rd('legfix'):''}</td></tr>
+      <tr><td class="k">Response / Progress</td><td class="v">${rd('resp')} &nbsp;·&nbsp; ${rd('prog')}</td></tr>
+      <tr><td class="k">Case Type</td><td class="v">${rd('ctype')}</td></tr>
+      ${document.getElementById('obj-notes').value?`<tr><td class="k">Objective Notes</td><td class="v" style="white-space:pre-line;">${document.getElementById('obj-notes').value}</td></tr>`:''}
+    </table>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ── ASSESSMENT ── -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Assessment</span><span class="sec-tag">A</span></div>
+    <table class="dt">
+      <tr><td class="k">Diagnoses</td><td class="v">${d.dx.join('<br>')||'—'}</td></tr>
+      <tr><td class="k">DX Status</td><td class="v">${rd('dx-st')}</td></tr>
+    </table>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ── PLAN ── -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Plan</span><span class="sec-tag">P</span></div>
+    <table class="dt">
+      <tr><td class="k">Adjustment Codes</td><td class="v">${d.adjCodes||'—'}</td></tr>
+      <tr><td class="k">Technique</td><td class="v">${d.tech||'—'}</td></tr>
+      <tr><td class="k">Spinal Levels</td><td class="v">${d.spAdj||'—'}</td></tr>
+      <tr><td class="k">Modalities</td><td class="v">${d.ml.join('<br>')||'None'}</td></tr>
+      <tr><td class="k">Visit Count</td><td class="v">${document.getElementById('v-num').value||'—'} of ${document.getElementById('v-tot').value||'—'} &nbsp;·&nbsp; ${document.getElementById('freq').value||'—'}</td></tr>
+      <tr><td class="k">Return</td><td class="v">${document.getElementById('dret').value||'—'}</td></tr>
+      <tr><td class="k">Home Care</td><td class="v">${rd('hc')}${document.getElementById('hc-detail').value?' — '+document.getElementById('hc-detail').value:''}</td></tr>
+    </table>
+  </div>
+
+  <hr class="sec-div">
+
+  <!-- ── CLINICIAN SIGNATURE ── -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Clinician Attestation &amp; Signature</span></div>
+    <div style="font-size:9px;color:#4a7060;line-height:1.7;margin-bottom:8px;">I attest that I personally performed or directly supervised all services rendered for this patient on this date. The documentation accurately reflects the services provided and my clinical findings and judgment. All services were medically necessary.</div>
+    ${S.docSig?`<div class="sig-block"><div class="sig-box"><img src="${S.docSig}"></div><div class="sig-meta"><strong>${d.doctor}</strong><br>${d.clinicName}${npi?' &nbsp;·&nbsp; '+npi:''}<br>Date Signed: ${S.docSignDate||d.date}<br>E-Signature timestamp: ${S.docSigTime}</div></div>`:''}
+  </div>
+
+  ${S.sigSkipped&&S.ptPostSig?`
+  <hr class="sec-div">
+  <div class="post-attest">
+    <div class="post-attest-title">Patient Post-Treatment Attestation</div>
+    <div class="post-attest-text">By signing below the patient confirms receipt of the chiropractic services documented in this visit note, consents to the treatment provided, and authorizes billing of insurance and/or accepts financial responsibility for today's services.</div>
+    <div class="sig-block"><div class="sig-box"><img src="${S.ptPostSig}"></div><div class="sig-meta"><strong>${S.ptName}</strong><br>${S.ptPostSigTime}</div></div>
+  </div>`:''}
+
+</div>
+</body></html>`;
 }
 
-// ════════════════════════════════════════════════════
-// MISC HELPERS
-// ════════════════════════════════════════════════════
-function rd(name){const e=document.querySelector(`input[name="${name}"]:checked`);return e?e.value:'—';}
-function getChk(ids){return ids.filter(id=>document.getElementById(id)?.checked).map(id=>(document.querySelector(`label[for="${id}"]`)?.textContent||id).trim()).join(', ')||'None';}
-function getSpinalAdj(){const o=[];document.querySelectorAll('[id^="lv"]:checked').forEach(cb=>{o.push(cb.id.replace('lv','').replace(/L$/,' (L)').replace(/R$/,' (R)'));});return o.join(', ')||'None';}
-function getModLines(){const l=[];MODALITIES.forEach(m=>{const cb=document.getElementById('mod-'+m.id);if(cb?.checked){const chips=S.modDetails[m.id]?.chips||[];const notes=document.getElementById('modn-'+m.id)?.value||'';l.push(`${m.lbl} [CPT ${m.cpt}]${chips.length?' — '+chips.join(', '):''}${notes?' · '+notes:''}`);}});return l;}
-function apptLbl(){const s=document.getElementById('pt-appt');if(!s)return'—';const o=s.options[s.selectedIndex];return o&&o.value?o.textContent:'—';}
-function updateFilename(){
-  const name=S.ptName||document.getElementById('pt-name')?.value||'';
-  const lname=document.getElementById('pt-lastname')?.value||name.split(' ').slice(-1)[0]||'';
-  const fi=name.trim().charAt(0).toUpperCase()||'?';
-  const d=(document.getElementById('pt-date')?.value||'').split('-');
-  const dstr=d.length===3?`${d[1]}-${d[2]}-${d[0].slice(2)}`:new Date().toLocaleDateString();
-  const fname=lname?`${fi}.${lname} ${dstr}.pdf`:'Complete note to get filename';
-  const el=document.getElementById('filename-preview');if(el)el.textContent=fname;
-}
-function copyText(id){const el=document.getElementById(id);if(!el)return;const txt=el.textContent||el.innerText;navigator.clipboard.writeText(txt).then(()=>{const c=document.getElementById('copy-confirm');if(c){c.style.display='inline';setTimeout(()=>c.style.display='none',2000);}}).catch(()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});}
 function copySoap(){const s=S._soapS||'';const o=`O: ${document.getElementById('obj-notes')?.value||''}`;const a=`A: ${getActiveDx().join('; ')||'—'}`;const p=`P: ${getModLines().join(', ')||''} · Return: ${document.getElementById('dret')?.value||'—'}`;navigator.clipboard.writeText(`S: ${s}\n\n${o}\n\n${a}\n\n${p}`).then(()=>alert('SOAP copied!')).catch(()=>alert('Copy failed.'));}
 function doPrint(){if(!_noteHTMLForDrive){alert('Please generate the note first.');return;}const w=window.open('','_blank','width=900,height=700');w.document.write(_noteHTMLForDrive);w.document.close();setTimeout(()=>{w.focus();w.print();},800);}
 
@@ -2239,8 +2396,54 @@ function vpApply(){
     if(f.caseType){const map={CP:'ct-cp','CI-DM':'ct-ci','CI-DNM':'ct-cdn',OP:'ct-op'};const id=map[f.caseType];if(id){const el=document.getElementById(id);if(el){el.checked=true;n++;}}}
     // Onset
     if(f.onsetTxt){const el=document.getElementById('onset-txt');if(el){el.value=f.onsetTxt;flash(el);n++;}}
-    // Obj notes
-    if(f.objNotes){const el=document.getElementById('obj-notes');if(el){el.value+=(el.value?'\n':'')+f.objNotes;flash(el);n++;}}
+    // Obj notes — also parse palpation keywords and auto-activate findings
+    if(f.objNotes){
+      const el=document.getElementById('obj-notes');
+      if(el){el.value+=(el.value?'\n':'')+f.objNotes;flash(el);n++;}
+      // Auto-detect palpation findings from objNotes text
+      const txt=f.objNotes.toLowerCase();
+      const palpKeywords={
+        hyper:['hypertonicity','hypertonic','tight','tightness','tone'],
+        spasm:['spasm','spasms','muscle spasm'],
+        tend:['tenderness','tender','point tender','painful'],
+        edema:['edema','swelling','swollen'],
+        rom:['restricted','restriction','limited range'],
+        imbal:['imbalance','asymmetry','asymmetric']
+      };
+      // Region detection from text
+      const regionKeywords={
+        'Cervical':['cervical','neck','c-spine','c1','c2','c3','c4','c5','c6','c7'],
+        'Thoracic':['thoracic','t-spine','upper back','mid back','trap','traps','trapezius','t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12'],
+        'Lumbar':['lumbar','l-spine','lower back','low back','erector','l1','l2','l3','l4','l5'],
+        'Sacral/SI':['sacral','si joint','sacroiliac','si','s1'],
+        'Hip':['hip','piriformis','glute','gluteal'],
+        'Shoulder':['shoulder','rotator','supraspinatus','infraspinatus'],
+      };
+      Object.entries(palpKeywords).forEach(([findingId,keywords])=>{
+        if(keywords.some(k=>txt.includes(k))){
+          const cb=document.getElementById('pfcb-'+findingId);
+          const row=document.getElementById('pf-'+findingId);
+          if(cb&&row){
+            cb.checked=true;
+            row.classList.add('active','open');
+            // Find matching regions
+            Object.entries(regionKeywords).forEach(([region,rkeys])=>{
+              if(rkeys.some(k=>txt.includes(k))){
+                if(!palpState[findingId])palpState[findingId]={};
+                if(!palpState[findingId][region])palpState[findingId][region]=new Set();
+                // Mark region button selected
+                document.querySelectorAll('#pfr-'+findingId+' .preg').forEach(btn=>{
+                  if(btn.textContent===region)btn.classList.add('sel');
+                });
+                refreshPalpTags(findingId);
+                refreshPalpSummary(findingId);
+              }
+            });
+            n++;
+          }
+        }
+      });
+    }
     // Diagnoses — check matching ICD codes
     if(f.dxCodes&&Array.isArray(f.dxCodes)){
       f.dxCodes.forEach(code=>{

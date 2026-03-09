@@ -1779,6 +1779,10 @@ function submitPatient(){
 // DOCTOR ENTRY
 // ════════════════════════════════════════════════════
 function enterDocSection(){
+  // Ensure arrays are always arrays before doc section renders
+  if(!Array.isArray(S.regions)) S.regions = S.regions ? String(S.regions).split(', ').filter(Boolean) : [];
+  if(!Array.isArray(S.symptoms)) S.symptoms = S.symptoms ? String(S.symptoms).split(', ').filter(Boolean) : [];
+  if(!Array.isArray(S.goals)) S.goals = S.goals ? String(S.goals).split(', ').filter(Boolean) : [];
   const name=S.ptName||'—';
   ['doc-ptname','doc-ptname2','doc-ptname3','doc-ptname4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=name;});
   document.getElementById('doc-provider-name').textContent=cfg.doctor||'Provider';
@@ -1810,6 +1814,9 @@ function buildDocPtView(){
   document.getElementById('doc-pt-view').innerHTML=html;
 }
 function generateSOAP_S(){
+  if(!Array.isArray(S.regions)) S.regions=S.regions?String(S.regions).split(', ').filter(Boolean):[];
+  if(!Array.isArray(S.symptoms)) S.symptoms=S.symptoms?String(S.symptoms).split(', ').filter(Boolean):[];
+  if(!Array.isArray(S.goals)) S.goals=S.goals?String(S.goals).split(', ').filter(Boolean):[];
   const regs=S.regions.length?S.regions.join(', ')+(S.otherReg?' ('+S.otherReg+')':''):'no specific region noted';
   const syms=S.symptoms.length&&!S.symptoms.includes('none')?S.symptoms.join(', '):'none';
   const rf=S.redFlags==='Yes'?'REPORTS new/worsening neurological symptoms — RED FLAG (urgent evaluation required).':'Denies new neurological symptoms, bowel/bladder changes.';

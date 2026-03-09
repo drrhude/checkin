@@ -1309,7 +1309,24 @@ function gisLoaded(){gisReady=true;}
 function initDriveAuth(){
   const clientId=document.getElementById('cfg-goog-id').value.trim()||cfg.goog_id;
   if(!clientId){alert('Please enter your Google OAuth Client ID first.');return;}
-  if(!gisReady){alert('Google Identity Services not yet loaded. Please wait and try again.');return;}
+  if(!gisReady){
+    const btn=document.getElementById('drive-connect-btn');
+    if(btn){btn.textContent='Loading Google auth...';btn.disabled=true;}
+    let waited=0;
+    const poll=setInterval(()=>{
+      waited+=500;
+      if(gisReady){
+        clearInterval(poll);
+        if(btn){btn.textContent='Connect Google Drive';btn.disabled=false;}
+        initDriveAuth();
+      } else if(waited>=8000){
+        clearInterval(poll);
+        if(btn){btn.textContent='Connect Google Drive';btn.disabled=false;}
+        alert('Google auth timed out. Please reload the page and try again.');
+      }
+    },500);
+    return;
+  }
   tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:DRIVE_SCOPE,callback:(resp)=>{if(resp.error){alert('Drive auth failed: '+resp.error);return;}driveToken=resp.access_token;gapi.client.setToken({access_token:driveToken});document.getElementById('drive-auth-status').innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Google Drive connected!</span>';document.getElementById('drive-indicator').style.display='flex';document.getElementById('drive-export-area').style.display='block';sheetsEnsureHeader().catch(e=>console.warn(e));}});
   tokenClient.requestAccessToken({prompt:'consent'});
 }
@@ -1855,12 +1872,42 @@ function buildReview(){
   const dx=getActiveDx();const ml=getModLines();
   const tech=Object.entries(S.techPrefs).map(([r,t])=>`${r}: ${t}`).join(', ')||'Not specified';
   document.getElementById('review-summary').innerHTML=`<div class="card sage" style="margin-bottom:13px;"><div class="clabel">Full Visit Summary</div><div style="font-size:.86rem;line-height:1.9;color:var(--ink-md);"><strong>${S.ptName}</strong> · ${S.ptDate} · Pain ${S.pain}/10 · ${S.overall}${S.redFlags==='Yes'?'<span class="badge badge-red" style="margin-left:6px;">⚠️ Red Flag</span>':''}<div style="color:var(--ink-sm);font-size:.82rem;line-height:1.9;margin-top:4px;">DX: ${dx.join('; ')||'—'} | Technique: ${tech}<br>Modalities: ${ml.join(' | ')||'None'} | Return: ${document.getElementById('dret').value||'—'}</div></div></div>`;
+  // Auto-fill last name from patient name if field is empty
+  const lastEl=document.getElementById('pt-lastname');
+  if(lastEl&&!lastEl.value&&S.ptName){
+    const parts=S.ptName.trim().split(' ');
+    lastEl.value=parts[parts.length-1];
+    S.ptLastName=lastEl.value;
+  }
   updateFilename();
 }
 
 // ════════════════════════════════════════════════════
 // FINAL NOTE
 // ════════════════════════════════════════════════════
+// rd() — reads a radio/select value by name or element id
+function rd(nameOrId){
+  // Try radio group first
+  const radios=document.querySelectorAll(`input[name="${nameOrId}"]:checked`);
+  if(radios.length) return radios[0].value||'—';
+  // Try select
+  const sel=document.getElementById(nameOrId);
+  if(sel&&sel.tagName==='SELECT') return sel.options[sel.selectedIndex]?.text||sel.value||'—';
+  // Try any input/textarea
+  if(sel) return sel.value||'—';
+  return '—';
+}
+
+function updateFilename(){
+  const last=(document.getElementById('pt-lastname')?.value||S.ptLastName||'').trim();
+  const date=(S.ptDate||document.getElementById('pt-date')?.value||'').replace(/-/g,'');
+  const name=last?last.replace(/\s+/g,'_'):'patient';
+  const fn=`${name}_${date||'date'}_SOAP.pdf`;
+  const el=document.getElementById('filename-preview');
+  if(el) el.textContent=fn;
+  return fn;
+}
+
 function getModLines(){
   const lines=[];
   document.querySelectorAll('.mod-row').forEach(row=>{

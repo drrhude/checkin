@@ -1312,20 +1312,67 @@ async function uploadToDrive(){
   if(!driveToken){alert('Please connect Google Drive first in Settings.');return;}
   if(!_noteHTMLForDrive){alert('Please generate the note first.');return;}
   const btn=document.getElementById('drive-upload-btn');const status=document.getElementById('drive-export-status');
-  btn.textContent='⏳ Uploading...';btn.disabled=true;
+  btn.textContent='⏳ Generating PDF...';btn.disabled=true;
   try{
-    const filename=document.getElementById('filename-preview').textContent||'progress-note.html';
+    // Open the note in a hidden iframe, print to PDF blob via Google Drive's import
+    // Strategy: upload as HTML then use Drive's built-in HTML→PDF conversion
+    const filename=document.getElementById('filename-preview').textContent||'progress-note';
+    const pdfName=filename.endsWith('.pdf')?filename:filename.replace(/\.[^.]+$/,'')+'.pdf';
     const folderId=cfg.folder_id||'';
-    const metadata={name:filename.replace('.pdf','.html'),mimeType:'text/html',...(folderId?{parents:[folderId]}:{})};
+
+    // Step 1: Upload as HTML with Google Docs MIME so Drive auto-converts to PDF
+    const metadata={
+      name:pdfName,
+      mimeType:'application/vnd.google-apps.document',
+      ...(folderId?{parents:[folderId]}:{})
+    };
     const form=new FormData();
     form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
     form.append('file',new Blob([_noteHTMLForDrive],{type:'text/html'}));
-    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:'Bearer '+driveToken},body:form});
+
+    btn.textContent='⏳ Uploading...';
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+driveToken},
+      body:form
+    });
     if(!res.ok)throw new Error('Upload failed: '+res.status);
-    const data=await res.json();
-    btn.textContent='✓ Saved to Drive!';
+    const doc=await res.json();
+
+    // Step 2: Export the Google Doc as PDF and save as a new file
+    btn.textContent='⏳ Converting to PDF...';
+    const pdfRes=await fetch(`https://www.googleapis.com/drive/v3/files/${doc.id}/export?mimeType=application/pdf`,{
+      headers:{Authorization:'Bearer '+driveToken}
+    });
+    if(!pdfRes.ok)throw new Error('PDF export failed: '+pdfRes.status);
+    const pdfBlob=await pdfRes.blob();
+
+    // Step 3: Upload the PDF blob
+    const pdfMeta={
+      name:pdfName,
+      mimeType:'application/pdf',
+      ...(folderId?{parents:[folderId]}:{})
+    };
+    const pdfForm=new FormData();
+    pdfForm.append('metadata',new Blob([JSON.stringify(pdfMeta)],{type:'application/json'}));
+    pdfForm.append('file',pdfBlob);
+    const pdfUpload=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+driveToken},
+      body:pdfForm
+    });
+    if(!pdfUpload.ok)throw new Error('PDF upload failed: '+pdfUpload.status);
+    const pdfData=await pdfUpload.json();
+
+    // Step 4: Delete the intermediate Google Doc
+    await fetch(`https://www.googleapis.com/drive/v3/files/${doc.id}`,{
+      method:'DELETE',
+      headers:{Authorization:'Bearer '+driveToken}
+    });
+
+    btn.textContent='✓ PDF Saved to Drive!';
     btn.style.background='var(--sage-dk)';
-    status.innerHTML=`<span style="color:var(--sage-dk);font-weight:600;">✓ Saved as "${metadata.name}"</span><br><a href="https://drive.google.com/file/d/${data.id}/view" target="_blank" style="color:var(--blue);font-size:.8rem;">Open in Google Drive →</a>`;
+    status.innerHTML=`<span style="color:var(--sage-dk);font-weight:600;">✓ Saved as "${pdfName}"</span><br><a href="https://drive.google.com/file/d/${pdfData.id}/view" target="_blank" style="color:var(--blue);font-size:.8rem;">Open PDF in Drive →</a>`;
   }catch(err){btn.textContent='📁 Retry Drive Upload';btn.disabled=false;status.innerHTML=`<span style="color:var(--red);">Upload failed: ${err.message}</span>`;}
 }
 async function tryAutoUpload(){

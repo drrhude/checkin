@@ -1862,6 +1862,7 @@ function buildReview(){
 // FINAL NOTE
 // ════════════════════════════════════════════════════
 function finalNote(){
+  try{
   if(!document.getElementById('doc-attest').checked){alert('Please check the clinician attestation box.');return;}
   if(sigEmpty('doc-sig')){alert('Please provide your clinician signature.');return;}
   // If sig was skipped at intake, enforce it now before generating note
@@ -1887,6 +1888,10 @@ function finalNote(){
   document.getElementById('print-tgt').innerHTML=_noteHTMLForDrive;
   document.getElementById('final-note-output').innerHTML=buildScreenNote({date,now,clinicName,doctor,dx,ml,adjCodes,palp,tech,spAdj});
   if(driveToken)setTimeout(tryAutoUpload,500);
+  }catch(err){
+    alert('Error generating note: '+err.message);
+    console.error('finalNote error:',err);
+  }
 }
 
 function buildScreenNote(d){

@@ -506,6 +506,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <h2 style="font-size:1.1rem;margin-bottom:12px;">🎙 AI Voice Dictation</h2>
     <p style="font-size:.82rem;color:var(--ink-sm);margin-bottom:12px;line-height:1.6;">Enter your Anthropic API key to enable AI voice fill. Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue);">console.anthropic.com</a></p>
     <div class="fg"><label class="fl">Anthropic API Key</label><input type="password" id="cfg-api-key" placeholder="sk-ant-..."></div>
+    <div class="fg"><label class="fl">Proxy URL <span style="font-weight:400;color:var(--ink-sm)">(required for Safari/iPad)</span></label><input type="text" id="cfg-proxy-url" placeholder="https://cvccheckin.dr-rudy.workers.dev"></div>
     <div class="divider"></div>
     <h2 style="font-size:1.1rem;margin-bottom:12px;">🔗 Google Drive Auto-Save</h2>
     <p style="font-size:.82rem;color:var(--ink-sm);margin-bottom:12px;line-height:1.6;">Auto-upload notes to Drive as PDFs.</p>
@@ -1261,6 +1262,7 @@ function openSettings(){
   f('cfg-clinic',cfg.clinic);f('cfg-doctor',cfg.doctor);f('cfg-address',cfg.address);f('cfg-phone',cfg.phone);
   f('cfg-npi',cfg.npi);f('cfg-ein',cfg.ein);f('cfg-goog-id',cfg.goog_id);f('cfg-folder-id',cfg.folder_id);f('cfg-sheet-id',cfg.sheet_id);
   f('cfg-api-key',cfg.api_key);
+  f('cfg-proxy-url',cfg.proxy_url);
   if(driveToken)document.getElementById('drive-auth-status').innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Drive connected</span>';
 }
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
@@ -1276,6 +1278,7 @@ function saveSettings(){
     folder_id:document.getElementById('cfg-folder-id').value.trim(),
     sheet_id:document.getElementById('cfg-sheet-id').value.trim(),
     api_key:document.getElementById('cfg-api-key').value.trim(),
+    proxy_url:document.getElementById('cfg-proxy-url').value.trim(),
   };
   localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
   if(cfg.clinic)document.getElementById('brand-name').innerHTML=cfg.clinic+' <em style="color:var(--sage);font-style:italic;">Check-In</em>';
@@ -2023,22 +2026,24 @@ Be flexible: "Diversified at L4-L5" → techPrefs.lumbar="Diversified", spinalLe
   const systemPrompt = vpContext === 'doctor' ? doctorSystem : patientSystem;
 
   // Use proxy URL if set, otherwise try direct (works on non-Safari browsers)
-  const proxyUrl = cfg.proxy_url || localStorage.getItem('vp_proxy_url') || '';
+  const proxyUrl = cfg.proxy_url || '';
   const apiEndpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
   const headers = {'Content-Type':'application/json'};
   if(!proxyUrl) headers['x-api-key'] = vpApiKey;
+
+  const bodyObj = {
+    model:'claude-sonnet-4-20250514',
+    max_tokens:1000,
+    system:systemPrompt,
+    messages:[{role:'user',content:`Extract form data from: "${text}"`}]
+  };
+  if(proxyUrl) bodyObj.api_key = vpApiKey;
 
   try{
     const response = await fetch(apiEndpoint,{
       method:'POST',
       headers,
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        ...(proxyUrl ? {api_key: vpApiKey} : {}),
-        system:systemPrompt,
-        messages:[{role:'user',content:`Extract form data from: "${text}"`}]
-      })
+      body:JSON.stringify(bodyObj)
     });
     if(!response.ok){const err=await response.json();throw new Error(err.error?.message||'API error '+response.status);}
     const data=await response.json();

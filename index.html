@@ -1311,69 +1311,89 @@ function initDriveAuth(){
 async function uploadToDrive(){
   if(!driveToken){alert('Please connect Google Drive first in Settings.');return;}
   if(!_noteHTMLForDrive){alert('Please generate the note first.');return;}
-  const btn=document.getElementById('drive-upload-btn');const status=document.getElementById('drive-export-status');
-  btn.textContent='⏳ Generating PDF...';btn.disabled=true;
+  const btn=document.getElementById('drive-upload-btn');
+  const status=document.getElementById('drive-export-status');
+  btn.textContent='⏳ Rendering PDF...';btn.disabled=true;
+
   try{
-    // Open the note in a hidden iframe, print to PDF blob via Google Drive's import
-    // Strategy: upload as HTML then use Drive's built-in HTML→PDF conversion
     const filename=document.getElementById('filename-preview').textContent||'progress-note';
     const pdfName=filename.endsWith('.pdf')?filename:filename.replace(/\.[^.]+$/,'')+'.pdf';
     const folderId=cfg.folder_id||'';
 
-    // Step 1: Upload as HTML with Google Docs MIME so Drive auto-converts to PDF
-    const metadata={
-      name:pdfName,
-      mimeType:'application/vnd.google-apps.document',
-      ...(folderId?{parents:[folderId]}:{})
-    };
-    const form=new FormData();
-    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
-    form.append('file',new Blob([_noteHTMLForDrive],{type:'text/html'}));
+    // Render HTML in hidden iframe, capture via html2canvas + jsPDF
+    const pdfBlob = await renderNoteToPDF(_noteHTMLForDrive);
 
-    btn.textContent='⏳ Uploading...';
+    btn.textContent='⏳ Uploading to Drive...';
+    const meta={name:pdfName,mimeType:'application/pdf',...(folderId?{parents:[folderId]}:{})};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',pdfBlob);
     const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+driveToken},
-      body:form
+      method:'POST',headers:{Authorization:'Bearer '+driveToken},body:form
     });
     if(!res.ok)throw new Error('Upload failed: '+res.status);
-    const doc=await res.json();
-
-    // Step 2: Export the Google Doc as PDF and save as a new file
-    btn.textContent='⏳ Converting to PDF...';
-    const pdfRes=await fetch(`https://www.googleapis.com/drive/v3/files/${doc.id}/export?mimeType=application/pdf`,{
-      headers:{Authorization:'Bearer '+driveToken}
-    });
-    if(!pdfRes.ok)throw new Error('PDF export failed: '+pdfRes.status);
-    const pdfBlob=await pdfRes.blob();
-
-    // Step 3: Upload the PDF blob
-    const pdfMeta={
-      name:pdfName,
-      mimeType:'application/pdf',
-      ...(folderId?{parents:[folderId]}:{})
-    };
-    const pdfForm=new FormData();
-    pdfForm.append('metadata',new Blob([JSON.stringify(pdfMeta)],{type:'application/json'}));
-    pdfForm.append('file',pdfBlob);
-    const pdfUpload=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+driveToken},
-      body:pdfForm
-    });
-    if(!pdfUpload.ok)throw new Error('PDF upload failed: '+pdfUpload.status);
-    const pdfData=await pdfUpload.json();
-
-    // Step 4: Delete the intermediate Google Doc
-    await fetch(`https://www.googleapis.com/drive/v3/files/${doc.id}`,{
-      method:'DELETE',
-      headers:{Authorization:'Bearer '+driveToken}
-    });
+    const data=await res.json();
 
     btn.textContent='✓ PDF Saved to Drive!';
     btn.style.background='var(--sage-dk)';
-    status.innerHTML=`<span style="color:var(--sage-dk);font-weight:600;">✓ Saved as "${pdfName}"</span><br><a href="https://drive.google.com/file/d/${pdfData.id}/view" target="_blank" style="color:var(--blue);font-size:.8rem;">Open PDF in Drive →</a>`;
-  }catch(err){btn.textContent='📁 Retry Drive Upload';btn.disabled=false;status.innerHTML=`<span style="color:var(--red);">Upload failed: ${err.message}</span>`;}
+    status.innerHTML=`<span style="color:var(--sage-dk);font-weight:600;">✓ Saved as "${pdfName}"</span><br><a href="https://drive.google.com/file/d/${data.id}/view" target="_blank" style="color:var(--blue);font-size:.8rem;">Open PDF in Drive →</a>`;
+  }catch(err){
+    console.error('Drive upload error:',err);
+    btn.textContent='📁 Retry Drive Upload';btn.disabled=false;
+    status.innerHTML=`<span style="color:var(--red);">Upload failed: ${err.message}</span>`;
+  }
+}
+
+function renderNoteToPDF(htmlContent){
+  return new Promise((resolve,reject)=>{
+    // Load html2canvas + jsPDF dynamically if not loaded
+    function doRender(){
+      const iframe=document.createElement('iframe');
+      iframe.style.cssText='position:fixed;top:-9999px;left:-9999px;width:816px;height:1056px;border:none;';
+      document.body.appendChild(iframe);
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(htmlContent);
+      iframe.contentDocument.close();
+      // Wait for fonts/images to load
+      setTimeout(()=>{
+        html2canvas(iframe.contentDocument.body,{
+          scale:2,useCORS:true,allowTaint:true,
+          width:816,windowWidth:816,
+          backgroundColor:'#ffffff'
+        }).then(canvas=>{
+          document.body.removeChild(iframe);
+          const imgData=canvas.toDataURL('image/jpeg',0.92);
+          const {jsPDF}=window.jspdf;
+          const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+          const pageW=pdf.internal.pageSize.getWidth();
+          const pageH=pdf.internal.pageSize.getHeight();
+          const canvasAspect=canvas.height/canvas.width;
+          const imgH=pageW*canvasAspect;
+          let y=0;
+          // Multi-page support
+          while(y<imgH){
+            if(y>0)pdf.addPage();
+            pdf.addImage(imgData,'JPEG',0,-(y),pageW,imgH);
+            y+=pageH;
+          }
+          resolve(pdf.output('blob'));
+        }).catch(err=>{document.body.removeChild(iframe);reject(err);});
+      },1200);
+    }
+    // Load libraries if needed
+    if(window.html2canvas&&window.jspdf){doRender();return;}
+    const s1=document.createElement('script');
+    s1.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s1.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s2.onload=doRender;
+      s2.onerror=()=>reject(new Error('Failed to load jsPDF'));
+      document.head.appendChild(s2);
+    };
+    s1.onerror=()=>reject(new Error('Failed to load html2canvas'));
+    document.head.appendChild(s1);
+  });
 }
 async function tryAutoUpload(){
   if(!driveToken||!_noteHTMLForDrive)return;
@@ -1406,7 +1426,8 @@ async function sheetsEnsureHeader(){
 
 // Write a visit row to the sheet
 async function sheetsWriteVisit(visitData){
-  if(!driveToken||!SHEET_ID){console.warn('Sheets: not configured');return;}
+  const sheetId = SHEET_ID || cfg.sheet_id || '';
+  if(!driveToken||!sheetId){console.warn('Sheets: not configured — driveToken:',!!driveToken,'sheetId:',sheetId);return;}
   await sheetsEnsureHeader();
   // Normalize field name aliases (S uses ptName, sheet expects patientName)
   const normalized={...visitData, patientName: visitData.patientName||visitData.ptName||''};
@@ -1427,6 +1448,7 @@ async function sheetsWriteVisit(visitData){
 
 // Read all visits from the sheet and return patient lookup map
 async function sheetsReadAllVisits(){
+  const SHEET_ID = cfg.sheet_id || '';
   if(!driveToken||!SHEET_ID)return null;
   try{
     const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:Z10000`,{headers:{Authorization:'Bearer '+driveToken}});
@@ -1470,13 +1492,21 @@ async function searchPtEnhanced(val){
     div.innerHTML='<p style="color:var(--ink-sm);font-size:.84rem;margin-top:8px;">No records found — continue as new patient below.</p>';
     rc.style.display='none';return;
   }
-  div.innerHTML=`<ul style="list-style:none;padding:0;margin-top:10px;">${matches.map(p=>{
+  // Store matches in a lookup map so onclick doesn't need inline JSON
+  window._ptSearchResults = {};
+  matches.forEach((p,i) => { window._ptSearchResults['pt_'+i] = p; });
+  const src = driveToken&&SHEET_ID ? '☁️ ' : '';
+  div.innerHTML=`<ul style="list-style:none;padding:0;margin-top:10px;">${matches.map((p,i)=>{
     const last=p.visits[0];
-    const src=driveToken&&SHEET_ID?'<span style="font-size:.7rem;color:var(--blue);margin-left:4px;">☁️</span>':'';
-    return`<li style="background:var(--cream);border:1.5px solid var(--border);border-radius:9px;padding:11px 15px;margin-bottom:7px;cursor:pointer;transition:border-color .2s;" onclick="loadPtFromData(${JSON.stringify(JSON.stringify(p))})" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'"><strong>${p.name}</strong>${src} <span style="color:var(--ink-sm);font-size:.81rem;"> — Last: ${last?last.ptDate||last.savedAt?.split('T')[0]:'—'} · Pain ${last?.pain||0}/10 · ${last?.overall||'—'}</span></li>`;
+    return`<li style="background:var(--cream);border:1.5px solid var(--border);border-radius:9px;padding:11px 15px;margin-bottom:7px;cursor:pointer;transition:border-color .2s;" onclick="loadPtFromMap('pt_${i}')" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'"><strong>${src}${p.name}</strong> <span style="color:var(--ink-sm);font-size:.81rem;"> — Last visit: ${last?last.ptDate||last.savedAt?.split('T')[0]:'—'} · Pain ${last?.pain||0}/10 · ${last?.overall||'—'}</span></li>`;
   }).join('')}</ul>`;
-  // Cache locally too
   if(db)sdb(db);
+}
+
+function loadPtFromMap(key){
+  const pt = window._ptSearchResults && window._ptSearchResults[key];
+  if(!pt) return;
+  loadPtFromData(JSON.stringify(pt));
 }
 
 function loadPtFromData(jsonStr){
@@ -1725,7 +1755,17 @@ function submitPatient(){
   }
   saveVisit(S.ptName,{...S});
   // Write to Google Sheets for cross-device access
-  if(driveToken&&SHEET_ID){sheetsWriteVisit({...S,savedAt:new Date().toISOString()}).catch(e=>console.warn(e));}
+  const sheetId = SHEET_ID || cfg.sheet_id || '';
+  if(driveToken && sheetId){
+    sheetsWriteVisit({...S, savedAt:new Date().toISOString()})
+      .then(()=>console.log('✓ Saved to Sheets'))
+      .catch(e=>{
+        console.warn('Sheets save failed:',e);
+        vpToast('⚠️ Visit saved locally but Sheets sync failed: '+e.message, true);
+      });
+  } else {
+    console.warn('Sheets skip — driveToken:', !!driveToken, 'sheetId:', sheetId);
+  }
   document.getElementById('wait-name').textContent=S.ptName.split(' ')[0];
   document.getElementById('sig-pending-badge').style.display=S.sigSkipped?'block':'none';
   document.getElementById('wait-pill').textContent=`${S.ptName} · ${S.ptDate} · Pain ${S.pain}/10 · ${S.overall}`;

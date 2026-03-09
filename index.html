@@ -1104,7 +1104,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
       <div id="final-note-output"></div>
       <div class="btn-row" style="margin-top:20px;">
-        <button class="btn btn-ghost" onclick="location.reload()">Start New Visit</button>
+        <button class="btn btn-ghost" onclick="startNewVisit()">Start New Visit</button>
       </div>
     </div>
   </div>
@@ -1268,7 +1268,7 @@ function openSettings(){
   f('cfg-npi',cfg.npi);f('cfg-ein',cfg.ein);f('cfg-goog-id',cfg.goog_id);f('cfg-folder-id',cfg.folder_id);f('cfg-sheet-id',cfg.sheet_id);
   f('cfg-api-key',cfg.api_key);
   f('cfg-proxy-url',cfg.proxy_url);
-  if(driveToken)document.getElementById('drive-auth-status').innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Drive connected</span>';
+  if(driveToken) setDriveConnectedUI();
 }
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function saveSettings(){
@@ -1304,6 +1304,87 @@ function maybeShowDriveIndicator(){
 // ════════════════════════════════════════════════════
 // GOOGLE DRIVE
 // ════════════════════════════════════════════════════
+// ── Drive persistence helpers ──
+function setDriveConnectedUI(){
+  const el=document.getElementById('drive-auth-status');
+  if(el) el.innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Google Drive connected</span>';
+  const ind=document.getElementById('drive-indicator');
+  if(ind) ind.style.display='flex';
+  const exp=document.getElementById('drive-export-area');
+  if(exp) exp.style.display='block';
+  const btn=document.getElementById('drive-connect-btn');
+  if(btn){btn.textContent='✓ Drive Connected';btn.style.background='var(--sage-dk)';btn.disabled=true;}
+}
+
+function silentRefreshDrive(){
+  if(!window._driveClientId||!gisReady) return;
+  const silent=google.accounts.oauth2.initTokenClient({
+    client_id:window._driveClientId,
+    scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+    callback:(resp)=>{
+      if(resp.error){console.warn('Silent Drive refresh failed:',resp.error);return;}
+      driveToken=resp.access_token;
+      gapi.client.setToken({access_token:driveToken});
+      clearTimeout(window._driveRefreshTimer);
+      window._driveRefreshTimer=setTimeout(silentRefreshDrive,55*60*1000);
+      console.log('✓ Drive token silently refreshed');
+    }
+  });
+  silent.requestAccessToken({prompt:''});
+}
+
+function startNewVisit(){
+  // Preserve driveToken and cfg — only reset patient/clinical state
+  const savedToken=driveToken;
+  const savedRefresh=window._driveRefreshTimer;
+  const savedClientId=window._driveClientId;
+
+  // Reset state
+  S={ptName:'',ptLastName:'',ptDate:new Date().toISOString().split('T')[0],ptAppt:'',overall:'',pain:0,
+    regions:[],otherReg:'',symptoms:[],funcImpact:'',rom:'',walk:'',adl:'',newInjury:'',injuryTxt:'',
+    redFlags:'',medChg:'',medTxt:'',newCond:'',condTxt:'',goals:[],ptNotes:'',ptSig:null,ptSigTime:'',
+    ptPostSig:null,ptPostSigTime:'',sigSkipped:false,isOneTap:false,loadedPt:null,techPrefs:{},modDetails:{}};
+  _noteHTMLForDrive='';
+
+  // Restore drive connection
+  driveToken=savedToken;
+  window._driveRefreshTimer=savedRefresh;
+  window._driveClientId=savedClientId;
+
+  // Reset UI — clear all inputs
+  document.querySelectorAll('input[type=text],input[type=date],textarea,select').forEach(el=>{
+    if(el.id==='pt-date'){el.value=S.ptDate;}
+    else if(!['cfg-goog-id','cfg-folder','cfg-sheet','cfg-api-key','cfg-proxy',
+              'cfg-clinic','cfg-doctor','cfg-address','cfg-phone','cfg-npi','cfg-ein'].includes(el.id)){
+      el.value='';
+    }
+  });
+  document.querySelectorAll('input[type=checkbox],input[type=radio]').forEach(el=>{el.checked=false;});
+  document.querySelectorAll('.chip').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sig-canvas').forEach(c=>{
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  });
+  document.getElementById('pain-val').textContent='0';
+  document.getElementById('pain-range').value='0';
+  document.getElementById('final-note-output').innerHTML='';
+  document.getElementById('print-tgt').innerHTML='';
+  document.getElementById('drive-export-status').innerHTML='';
+  document.getElementById('pt-search-results').innerHTML='';
+  document.getElementById('pt-search').value='';
+  document.getElementById('filename-preview').textContent='—';
+  document.getElementById('pt-lastname').value='';
+
+  // Restore drive UI if still connected
+  if(driveToken) setDriveConnectedUI();
+
+  // Go back to step 0
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-0').classList.add('active');
+  document.getElementById('pt-name').value='';
+  document.getElementById('pt-name').focus();
+  window.scrollTo(0,0);
+}
+
 function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({apiKey:'',discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});gapiReady=true;});}
 function gisLoaded(){gisReady=true;}
 function initDriveAuth(){
@@ -1327,7 +1408,17 @@ function initDriveAuth(){
     },500);
     return;
   }
-  tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:DRIVE_SCOPE,callback:(resp)=>{if(resp.error){alert('Drive auth failed: '+resp.error);return;}driveToken=resp.access_token;gapi.client.setToken({access_token:driveToken});document.getElementById('drive-auth-status').innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Google Drive connected!</span>';document.getElementById('drive-indicator').style.display='flex';document.getElementById('drive-export-area').style.display='block';sheetsEnsureHeader().catch(e=>console.warn(e));}});
+  window._driveClientId = clientId;
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:DRIVE_SCOPE,callback:(resp)=>{
+    if(resp.error){alert('Drive auth failed: '+resp.error);return;}
+    driveToken=resp.access_token;
+    gapi.client.setToken({access_token:driveToken});
+    // Schedule silent refresh 5 min before expiry (tokens last 1hr)
+    clearTimeout(window._driveRefreshTimer);
+    window._driveRefreshTimer=setTimeout(silentRefreshDrive, 55*60*1000);
+    setDriveConnectedUI();
+    sheetsEnsureHeader().catch(e=>console.warn(e));
+  }});
   tokenClient.requestAccessToken({prompt:'consent'});
 }
 async function uploadToDrive(){

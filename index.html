@@ -1779,6 +1779,7 @@ function submitPatient(){
 // DOCTOR ENTRY
 // ════════════════════════════════════════════════════
 function enterDocSection(){
+  try{
   // Ensure arrays are always arrays before doc section renders
   if(!Array.isArray(S.regions)) S.regions = S.regions ? String(S.regions).split(', ').filter(Boolean) : [];
   if(!Array.isArray(S.symptoms)) S.symptoms = S.symptoms ? String(S.symptoms).split(', ').filter(Boolean) : [];
@@ -1803,6 +1804,10 @@ function enterDocSection(){
   if(S.redFlags==='Yes')document.getElementById('rf-doc-alert').style.display='block';
   goStep(3);
   setTimeout(()=>setupSig('doc-sig','doc-sigh'),200);
+  }catch(err){
+    alert('Error entering doctor section: '+err.message+'\n\nPlease screenshot this and report it.');
+    console.error('enterDocSection error:',err);
+  }
 }
 function buildDocPtView(){
   const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});

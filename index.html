@@ -2022,13 +2022,20 @@ Be flexible: "Diversified at L4-L5" → techPrefs.lumbar="Diversified", spinalLe
 
   const systemPrompt = vpContext === 'doctor' ? doctorSystem : patientSystem;
 
+  // Use proxy URL if set, otherwise try direct (works on non-Safari browsers)
+  const proxyUrl = cfg.proxy_url || localStorage.getItem('vp_proxy_url') || '';
+  const apiEndpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
+  const headers = {'Content-Type':'application/json'};
+  if(!proxyUrl) headers['x-api-key'] = vpApiKey;
+
   try{
-    const response = await fetch('https://api.anthropic.com/v1/messages',{
+    const response = await fetch(apiEndpoint,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers,
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
+        ...(proxyUrl ? {api_key: vpApiKey} : {}),
         system:systemPrompt,
         messages:[{role:'user',content:`Extract form data from: "${text}"`}]
       })

@@ -1861,6 +1861,45 @@ function buildReview(){
 // ════════════════════════════════════════════════════
 // FINAL NOTE
 // ════════════════════════════════════════════════════
+function getModLines(){
+  const lines=[];
+  document.querySelectorAll('.mod-row').forEach(row=>{
+    const cb=row.querySelector('input[type=checkbox]');
+    if(!cb||!cb.checked)return;
+    const label=row.querySelector('.mod-label')?.textContent||'';
+    const cpt=row.querySelector('.mod-cpt')?.textContent||'';
+    const detail=row.querySelector('.mod-detail-input')?.value||'';
+    lines.push(label+(cpt?' ['+cpt+']':'')+(detail?' — '+detail:''));
+  });
+  return lines;
+}
+
+function getChk(ids){
+  return ids.filter(id=>{const el=document.getElementById(id);return el&&el.checked;})
+    .map(id=>{
+      const map={'adj-s00':'S00.01','adj-940':'98940 (1–2 regions)','adj-941':'98941 (3–4 regions)','adj-942':'98942 (5 regions)','adj-943':'98943 (Extraspinal)'};
+      return map[id]||id;
+    }).join(', ');
+}
+
+function getSpinalAdj(){
+  const levels=[];
+  document.querySelectorAll('.spinal-cb:checked').forEach(cb=>{
+    levels.push(cb.dataset.level+(cb.dataset.side?' ('+cb.dataset.side+')':''));
+  });
+  // Fallback: look for checked inputs with lv prefix
+  if(!levels.length){
+    document.querySelectorAll('[id^="lv"]:checked').forEach(cb=>{
+      const raw=cb.id.replace('lv','');
+      const side=raw.slice(-1);
+      const level=raw.slice(0,-1);
+      if(side==='L'||side==='R') levels.push(level+' ('+side+')');
+      else levels.push(raw);
+    });
+  }
+  return levels.join(', ')||'—';
+}
+
 function finalNote(){
   try{
   if(!document.getElementById('doc-attest').checked){alert('Please check the clinician attestation box.');return;}

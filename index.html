@@ -1536,8 +1536,18 @@ function loadPt(key){
 }
 function oneTap(){
   if(!S.loadedPt)return;const last=S.loadedPt.visits[0];
-  S={...S,...last,isOneTap:true,ptDate:new Date().toISOString().split('T')[0],ptSig:null,sigSkipped:false,ptPostSig:null,ptPostSigTime:''};
-  document.getElementById('pt-name').value=S.ptName||'';
+  const name=S.ptName||last.ptName||last.patientName||'';
+  S={...S,...last,
+    ptName:name,
+    isOneTap:true,
+    ptDate:new Date().toISOString().split('T')[0],
+    ptSig:null,sigSkipped:false,ptPostSig:null,ptPostSigTime:'',
+    regions:Array.isArray(last.regions)?last.regions:(last.regions?last.regions.split(', ').filter(Boolean):[]),
+    symptoms:Array.isArray(last.symptoms)?last.symptoms:(last.symptoms?last.symptoms.split(', ').filter(Boolean):[]),
+    goals:Array.isArray(last.goals)?last.goals:(last.goals?last.goals.split(', ').filter(Boolean):[]),
+    pain:parseInt(last.pain)||0,
+  };
+  document.getElementById('pt-name').value=name;
   document.getElementById('consent-ts').textContent=new Date().toLocaleString();
   goStep(2);setTimeout(()=>setupSig('pt-sig','pt-sigh'),100);
 }
@@ -1545,10 +1555,32 @@ function continueWithUpdates(){if(S.loadedPt)prefillFromLast(S.loadedPt.visits[0
 function startFresh(){S.loadedPt=null;S.isOneTap=false;S.sigSkipped=false;S.ptPostSig=null;S.ptPostSigTime='';goStep(1);}
 function prefillFromLast(last){
   if(!last)return;
-  setPain(last.pain||0);
-  if(last.regions)document.querySelectorAll('#step-1 [id^="r-"]').forEach(cb=>{cb.checked=last.regions.includes(cb.value);});
-  if(last.symptoms)document.querySelectorAll('#step-1 [id^="sy-"]').forEach(cb=>{cb.checked=last.symptoms.includes(cb.value);});
-  ['funci','rom','walk','adl','overall'].forEach(name=>{const field=name==='funci'?'funcImpact':name;if(last[field]){const el=document.querySelector(`input[name="${name}"][value="${last[field]}"]`);if(el)el.checked=true;}});
+  // Normalize field names — Sheets uses patientName, localStorage uses ptName etc.
+  const d={
+    pain:       parseInt(last.pain)||0,
+    overall:    last.overall||'',
+    regions:    Array.isArray(last.regions)?last.regions:(last.regions?last.regions.split(', ').filter(Boolean):[]),
+    symptoms:   Array.isArray(last.symptoms)?last.symptoms:(last.symptoms?last.symptoms.split(', ').filter(Boolean):[]),
+    funcImpact: last.funcImpact||last.funci||'',
+    rom:        last.rom||'',
+    walk:       last.walk||'',
+    adl:        last.adl||'',
+    ptNotes:    last.ptNotes||last.notes||'',
+    goals:      Array.isArray(last.goals)?last.goals:(last.goals?last.goals.split(', ').filter(Boolean):[]),
+  };
+  setPain(d.pain);
+  document.querySelectorAll('#step-1 [id^="r-"]').forEach(cb=>{cb.checked=d.regions.includes(cb.value);});
+  document.querySelectorAll('#step-1 [id^="sy-"]').forEach(cb=>{cb.checked=d.symptoms.includes(cb.value);});
+  ['overall','rom','walk','adl'].forEach(name=>{
+    const val=d[name];
+    if(val){const el=document.querySelector(`input[name="${name}"][value="${val}"]`);if(el)el.checked=true;}
+  });
+  if(d.funcImpact){const el=document.querySelector(`input[name="funci"][value="${d.funcImpact}"]`);if(el)el.checked=true;}
+  if(d.ptNotes){const el=document.getElementById('pt-notes');if(el)el.value=d.ptNotes;}
+  // Pre-check goal chips
+  if(d.goals.length){document.querySelectorAll('#step-1 [name="goals"]').forEach(cb=>{cb.checked=d.goals.includes(cb.value);});}
+  // Update other-region text if present
+  if(last.otherReg){const el=document.getElementById('other-reg');if(el){el.value=last.otherReg;document.getElementById('other-reg-area').style.display='block';const oc=document.getElementById('r-other');if(oc)oc.checked=true;}}
 }
 
 // ════════════════════════════════════════════════════

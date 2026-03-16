@@ -502,6 +502,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="fg"><label class="fl">Phone</label><input type="text" id="cfg-phone" placeholder="(817) 420-7696"></div>
     <div class="fg"><label class="fl">NPI Number</label><input type="text" id="cfg-npi" placeholder="1234567890"></div>
     <div class="fg"><label class="fl">Tax ID / EIN</label><input type="text" id="cfg-ein" placeholder="XX-XXXXXXX"></div>
+    <div class="fg"><label class="fl">Staff PIN <span style="font-size:.75rem;color:var(--ink-sm);font-weight:400;">(4 digits — protects waiting list)</span></label><input type="password" id="cfg-staff-pin" placeholder="1234" maxlength="4" inputmode="numeric"></div>
     <div class="divider"></div>
     <h2 style="font-size:1.1rem;margin-bottom:12px;">🎙 AI Voice Dictation</h2>
     <p style="font-size:.82rem;color:var(--ink-sm);margin-bottom:12px;line-height:1.6;">Enter your Anthropic API key to enable AI voice fill. Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue);">console.anthropic.com</a></p>
@@ -573,13 +574,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="btn-row" style="justify-content:flex-start;margin-top:8px;">
         <button class="btn btn-ghost" onclick="startFresh()">New Patient / Start Fresh →</button>
       </div>
-      <div id="waiting-patients-section" style="margin-top:16px;display:none;">
-        <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dk);margin-bottom:8px;">⏳ Patients Awaiting Provider</div>
-        <div id="waiting-patients-list"></div>
+      <!-- Staff-only waiting list — PIN protected -->
+      <div id="staff-waiting-wrap" style="margin-top:16px;display:none;">
+        <!-- Collapsed state: just a button -->
+        <div id="staff-waiting-collapsed">
+          <button onclick="showStaffPIN()" style="width:100%;background:var(--sage-xl);border:1.5px solid var(--sage-lt);color:var(--sage-dk);border-radius:var(--radius-sm);padding:12px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;">
+            🔒 Staff / Provider Access
+          </button>
+        </div>
+        <!-- PIN entry -->
+        <div id="staff-pin-entry" style="display:none;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:6px;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--ink-md);margin-bottom:10px;text-align:center;">Enter Staff PIN</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
+            <input type="password" id="pin-input" maxlength="4" inputmode="numeric" pattern="[0-9]*"
+              style="width:100px;text-align:center;font-size:1.4rem;letter-spacing:.3em;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;"
+              oninput="if(this.value.length===4)checkStaffPIN(this.value)">
+          </div>
+          <div id="pin-error" style="color:var(--red);font-size:.78rem;text-align:center;display:none;">Incorrect PIN</div>
+          <button onclick="hideStaffPIN()" style="width:100%;background:none;border:none;color:var(--ink-sm);font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px;">Cancel</button>
+        </div>
+        <!-- Unlocked waiting list -->
+        <div id="waiting-patients-section" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dk);">⏳ Patients Awaiting Provider</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button id="check-waiting-btn" onclick="checkWaitingPatients()" style="background:none;border:1px solid var(--sage-lt);color:var(--sage-dk);border-radius:6px;padding:4px 10px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">↻ Refresh</button>
+              <button onclick="lockStaffView()" style="background:none;border:none;color:var(--ink-sm);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;">🔒 Lock</button>
+            </div>
+          </div>
+          <div id="waiting-patients-list"></div>
+        </div>
       </div>
-      <button id="check-waiting-btn" onclick="checkWaitingPatients()" style="margin-top:14px;width:100%;background:var(--sage-xl);border:1.5px solid var(--sage-lt);color:var(--sage-dk);border-radius:var(--radius-sm);padding:12px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;display:none;">
-        🔍 Check for Waiting Patients
-      </button>
     </div>
   </div>
 
@@ -1272,14 +1297,13 @@ function openSettings(){
   document.getElementById('settings-modal').classList.add('open');
   const f=(id,v)=>{if(document.getElementById(id)&&v)document.getElementById(id).value=v;};
   f('cfg-clinic',cfg.clinic);f('cfg-doctor',cfg.doctor);f('cfg-address',cfg.address);f('cfg-phone',cfg.phone);
-  f('cfg-npi',cfg.npi);f('cfg-ein',cfg.ein);f('cfg-goog-id',cfg.goog_id);f('cfg-folder-id',cfg.folder_id);f('cfg-sheet-id',cfg.sheet_id);
+  f('cfg-npi',cfg.npi);f('cfg-ein',cfg.ein);f('cfg-staff-pin',cfg.staff_pin);f('cfg-goog-id',cfg.goog_id);f('cfg-folder-id',cfg.folder_id);f('cfg-sheet-id',cfg.sheet_id);
   f('cfg-api-key',cfg.api_key);
   f('cfg-proxy-url',cfg.proxy_url);
   if(driveToken){
     setDriveConnectedUI();
-    const wb=document.getElementById('check-waiting-btn');
-    if(wb) wb.style.display='block';
-    setTimeout(checkWaitingPatients,1000);
+    const wrap=document.getElementById('staff-waiting-wrap');
+    if(wrap) wrap.style.display='block';
   }
 }
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
@@ -1291,6 +1315,7 @@ function saveSettings(){
     phone:document.getElementById('cfg-phone').value.trim(),
     npi:document.getElementById('cfg-npi').value.trim(),
     ein:document.getElementById('cfg-ein').value.trim(),
+    staff_pin:document.getElementById('cfg-staff-pin').value.trim()||'1234',
     goog_id:document.getElementById('cfg-goog-id').value.trim(),
     folder_id:document.getElementById('cfg-folder-id').value.trim(),
     sheet_id:document.getElementById('cfg-sheet-id').value.trim(),
@@ -1370,7 +1395,7 @@ function startNewVisit(){
   document.querySelectorAll('input[type=text],input[type=date],textarea,select').forEach(el=>{
     if(el.id==='pt-date'){el.value=S.ptDate;}
     else if(!['cfg-goog-id','cfg-folder','cfg-sheet','cfg-api-key','cfg-proxy',
-              'cfg-clinic','cfg-doctor','cfg-address','cfg-phone','cfg-npi','cfg-ein'].includes(el.id)){
+              'cfg-clinic','cfg-doctor','cfg-address','cfg-phone','cfg-npi','cfg-ein','cfg-staff-pin'].includes(el.id)){
       el.value='';
     }
   });
@@ -1406,8 +1431,8 @@ function startNewVisit(){
   if(lookupName) lookupName.focus();
   window.scrollTo(0,0);
 
-  // Refresh waiting patients list
-  if(driveToken) setTimeout(checkWaitingPatients, 500);
+  // Lock staff view and keep wrap visible
+  lockStaffView();
 }
 
 function gapiLoaded(){
@@ -1434,10 +1459,9 @@ function tryRestoreDriveToken(){
     window._driveRefreshTimer=setTimeout(silentRefreshDrive,remaining);
     setDriveConnectedUI();
     sheetsEnsureHeader().catch(e=>console.warn(e));
-    // Show waiting patients button now that Drive is connected
-    const wb=document.getElementById('check-waiting-btn');
-    if(wb) wb.style.display='block';
-    checkWaitingPatients();
+    // Show staff access button now that Drive is connected
+    const wrap=document.getElementById('staff-waiting-wrap');
+    if(wrap) wrap.style.display='block';
     console.log('✓ Drive token restored from localStorage');
   } else if(clientId&&gisReady){
     // Token expired — silent refresh (no popup)
@@ -1757,7 +1781,7 @@ async function searchPtEnhanced(val){
 
 async function checkWaitingPatients(){
   const btn=document.getElementById('check-waiting-btn');
-  const section=document.getElementById('waiting-patients-section');
+  const section=document.getElementById('waiting-patients-section'); // inner unlocked div
   const list=document.getElementById('waiting-patients-list');
   if(!driveToken){return;}
   if(btn){btn.textContent='🔄 Checking...';btn.disabled=true;}
@@ -1785,7 +1809,8 @@ async function checkWaitingPatients(){
       if(obj.pain)obj.pain=parseInt(obj.pain)||0;
       const isToday=(obj.ptDate===today)||(obj.savedAt&&obj.savedAt.startsWith(today));
       const isComplete=obj.visitStatus==='complete'||obj.visitStatus==='Complete';
-      if(isToday&&!isComplete&&obj.patientName) drafts.push(obj);
+      const isDismissed=isRowDismissed(obj._rowIndex);
+      if(isToday&&!isComplete&&!isDismissed&&obj.patientName) drafts.push(obj);
     });
     if(drafts.length===0){
       list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No patients waiting right now.</div>';
@@ -1807,14 +1832,66 @@ async function checkWaitingPatients(){
         </div>`;
       }).join('');
     }
-    section.style.display='block';
+    if(window._staffUnlocked) section.style.display='block';
   }catch(e){
     list.innerHTML=`<div style="font-size:.84rem;color:var(--red);padding:8px 0;">Error: ${e.message}</div>`;
-    section.style.display='block';
+    if(window._staffUnlocked) section.style.display='block';
     console.error('checkWaitingPatients error:',e);
   }finally{
     if(btn){btn.textContent='🔍 Check for Waiting Patients';btn.disabled=false;}
   }
+}
+
+// ── Staff PIN & waiting list helpers ──
+function showStaffPIN(){
+  document.getElementById('staff-waiting-collapsed').style.display='none';
+  document.getElementById('staff-pin-entry').style.display='block';
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
+}
+function hideStaffPIN(){
+  document.getElementById('staff-pin-entry').style.display='none';
+  document.getElementById('staff-waiting-collapsed').style.display='block';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-error').style.display='none';
+}
+function checkStaffPIN(val){
+  const storedPIN=cfg.staff_pin||'1234';
+  if(val===storedPIN){
+    document.getElementById('pin-input').value='';
+    document.getElementById('pin-error').style.display='none';
+    document.getElementById('staff-pin-entry').style.display='none';
+    document.getElementById('staff-waiting-collapsed').style.display='none';
+    document.getElementById('waiting-patients-section').style.display='block';
+    window._staffUnlocked=true;
+    checkWaitingPatients();
+  } else {
+    document.getElementById('pin-error').style.display='block';
+    document.getElementById('pin-input').value='';
+  }
+}
+function lockStaffView(){
+  window._staffUnlocked=false;
+  const section=document.getElementById('waiting-patients-section');
+  if(section) section.style.display='none';
+  const collapsed=document.getElementById('staff-waiting-collapsed');
+  if(collapsed) collapsed.style.display='block';
+  const pinEntry=document.getElementById('staff-pin-entry');
+  if(pinEntry) pinEntry.style.display='none';
+}
+function getDismissedKeys(){
+  try{return JSON.parse(localStorage.getItem('dismissed_visits')||'[]');}catch{return[];}
+}
+function saveDismissedKey(rowIndex){
+  const dismissed=getDismissedKeys();
+  const key='row_'+rowIndex+'_'+new Date().toISOString().split('T')[0];
+  if(!dismissed.includes(key)) dismissed.push(key);
+  // Only keep last 50 to avoid bloat
+  localStorage.setItem('dismissed_visits', JSON.stringify(dismissed.slice(-50)));
+}
+function isRowDismissed(rowIndex){
+  const today=new Date().toISOString().split('T')[0];
+  const key='row_'+rowIndex+'_'+today;
+  return getDismissedKeys().includes(key);
 }
 
 async function dismissWaiting(key){
@@ -1827,7 +1904,11 @@ async function dismissWaiting(key){
   if(list&&!list.querySelector('[id^="wcard_"]')){
     list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No patients waiting right now.</div>';
   }
-  // Mark complete in Sheets so it won't reappear
+  // Save to localStorage so dismiss survives refresh
+  if(pt&&pt._resumeDraft&&pt._resumeDraft._rowIndex){
+    saveDismissedKey(pt._resumeDraft._rowIndex);
+  }
+  // Also mark complete in Sheets
   if(pt&&pt._resumeDraft&&pt._resumeDraft._rowIndex&&driveToken){
     const sheetId=SHEET_ID||cfg.sheet_id||'';
     if(sheetId){

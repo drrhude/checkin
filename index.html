@@ -573,6 +573,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="btn-row" style="justify-content:flex-start;margin-top:8px;">
         <button class="btn btn-ghost" onclick="startFresh()">New Patient / Start Fresh →</button>
       </div>
+      <div id="waiting-patients-section" style="margin-top:16px;display:none;">
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dk);margin-bottom:8px;">⏳ Patients Awaiting Provider</div>
+        <div id="waiting-patients-list"></div>
+      </div>
+      <button id="check-waiting-btn" onclick="checkWaitingPatients()" style="margin-top:14px;width:100%;background:var(--sage-xl);border:1.5px solid var(--sage-lt);color:var(--sage-dk);border-radius:var(--radius-sm);padding:12px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;display:none;">
+        🔍 Check for Waiting Patients
+      </button>
     </div>
   </div>
 
@@ -1268,7 +1275,12 @@ function openSettings(){
   f('cfg-npi',cfg.npi);f('cfg-ein',cfg.ein);f('cfg-goog-id',cfg.goog_id);f('cfg-folder-id',cfg.folder_id);f('cfg-sheet-id',cfg.sheet_id);
   f('cfg-api-key',cfg.api_key);
   f('cfg-proxy-url',cfg.proxy_url);
-  if(driveToken) setDriveConnectedUI();
+  if(driveToken){
+    setDriveConnectedUI();
+    const wb=document.getElementById('check-waiting-btn');
+    if(wb) wb.style.display='block';
+    setTimeout(checkWaitingPatients,1000);
+  }
 }
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function saveSettings(){
@@ -1372,7 +1384,7 @@ function startNewVisit(){
   document.getElementById('final-note-output').innerHTML='';
   document.getElementById('print-tgt').innerHTML='';
   document.getElementById('drive-export-status').innerHTML='';
-  document.getElementById('pt-search-results').innerHTML='';
+  document.getElementById('lookup-results').innerHTML='';
   document.getElementById('pt-search').value='';
   document.getElementById('filename-preview').textContent='—';
   document.getElementById('pt-lastname').value='';
@@ -1412,6 +1424,10 @@ function tryRestoreDriveToken(){
     window._driveRefreshTimer=setTimeout(silentRefreshDrive,remaining);
     setDriveConnectedUI();
     sheetsEnsureHeader().catch(e=>console.warn(e));
+    // Show waiting patients button now that Drive is connected
+    const wb=document.getElementById('check-waiting-btn');
+    if(wb) wb.style.display='block';
+    checkWaitingPatients();
     console.log('✓ Drive token restored from localStorage');
   } else if(clientId&&gisReady){
     // Token expired — silent refresh (no popup)
@@ -1729,6 +1745,72 @@ async function searchPtEnhanced(val){
   if(db)sdb(db);
 }
 
+async function checkWaitingPatients(){
+  const btn=document.getElementById('check-waiting-btn');
+  const section=document.getElementById('waiting-patients-section');
+  const list=document.getElementById('waiting-patients-list');
+  if(!driveToken){return;}
+  if(btn){btn.textContent='🔄 Checking...';btn.disabled=true;}
+  try{
+    const sheetId=SHEET_ID||cfg.sheet_id||'';
+    if(!sheetId) throw new Error('No Sheet ID configured');
+    const r=await fetch(`${SHEETS_API}/${sheetId}/values/Sheet1!A1:Z10000`,{
+      headers:{Authorization:'Bearer '+driveToken}
+    });
+    const d=await r.json();
+    if(!d.values||d.values.length<2){
+      list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No visits found in Sheet.</div>';
+      section.style.display='block';
+      return;
+    }
+    const headers=d.values[0];
+    const rows=d.values.slice(1);
+    const today=new Date().toISOString().split('T')[0];
+    const drafts=[];
+    rows.forEach((row,rowIdx)=>{
+      const obj={};
+      headers.forEach((h,i)=>{obj[h]=row[i]||'';});
+      obj._rowIndex=rowIdx+2;
+      ['regions','symptoms','goals'].forEach(k=>{if(obj[k])obj[k]=obj[k].split(', ').filter(Boolean);});
+      if(obj.pain)obj.pain=parseInt(obj.pain)||0;
+      const isToday=(obj.ptDate===today)||(obj.savedAt&&obj.savedAt.startsWith(today));
+      const isDraft=obj.visitStatus==='draft'||obj.visitStatus==='';
+      if(isToday&&isDraft&&obj.patientName) drafts.push(obj);
+    });
+    if(drafts.length===0){
+      list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No patients waiting right now.</div>';
+    } else {
+      window._waitingDrafts=window._waitingDrafts||{};
+      list.innerHTML=drafts.map((d,i)=>{
+        const key='waiting_'+i;
+        window._waitingDrafts[key]={name:d.patientName,visits:[d],_resumeDraft:d};
+        return`<div style="background:#fffbea;border:2px solid #e8c97a;border-radius:9px;overflow:hidden;margin-bottom:8px;">
+          <div style="background:#fdf3e3;padding:5px 15px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#6b4d18;text-transform:uppercase;">⏳ Intake complete — awaiting provider</div>
+          <div style="padding:11px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div><strong>${d.patientName}</strong> <span style="color:var(--ink-sm);font-size:.81rem;"> — Pain ${d.pain||0}/10 · ${d.overall||'—'}</span></div>
+            <button onclick="resumeWaiting('${key}')" style="background:var(--sage-dk);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Resume as Doctor →</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    section.style.display='block';
+  }catch(e){
+    list.innerHTML=`<div style="font-size:.84rem;color:var(--red);padding:8px 0;">Error: ${e.message}</div>`;
+    section.style.display='block';
+    console.error('checkWaitingPatients error:',e);
+  }finally{
+    if(btn){btn.textContent='🔍 Check for Waiting Patients';btn.disabled=false;}
+  }
+}
+
+function resumeWaiting(key){
+  const pt=window._waitingDrafts&&window._waitingDrafts[key];
+  if(!pt) return;
+  window._ptSearchResults=window._ptSearchResults||{};
+  window._ptSearchResults['_rw']=pt;
+  resumeDraft('_rw');
+}
+
 function resumeDraft(key){
   const pt = window._ptSearchResults && window._ptSearchResults[key];
   if(!pt||!pt._resumeDraft) return;
@@ -1770,7 +1852,7 @@ function resumeDraft(key){
   if(draft._rowIndex) window._lastDraftRow = draft._rowIndex;
 
   // Jump straight to doctor section
-  document.getElementById('pt-search-results').innerHTML='';
+  document.getElementById('lookup-results').innerHTML='';
   enterDocSection();
 }
 

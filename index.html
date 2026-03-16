@@ -1325,6 +1325,9 @@ function silentRefreshDrive(){
       if(resp.error){console.warn('Silent Drive refresh failed:',resp.error);return;}
       driveToken=resp.access_token;
       gapi.client.setToken({access_token:driveToken});
+      const expiry=Date.now()+(55*60*1000);
+      localStorage.setItem('drive_token',driveToken);
+      localStorage.setItem('drive_token_expiry',String(expiry));
       clearTimeout(window._driveRefreshTimer);
       window._driveRefreshTimer=setTimeout(silentRefreshDrive,55*60*1000);
       console.log('✓ Drive token silently refreshed');
@@ -1385,8 +1388,52 @@ function startNewVisit(){
   window.scrollTo(0,0);
 }
 
-function gapiLoaded(){gapi.load('client',async()=>{await gapi.client.init({apiKey:'',discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});gapiReady=true;});}
-function gisLoaded(){gisReady=true;}
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({apiKey:'',discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});
+    gapiReady=true;
+    // Restore token from localStorage if still valid
+    tryRestoreDriveToken();
+  });
+}
+
+function tryRestoreDriveToken(){
+  const saved=localStorage.getItem('drive_token');
+  const expiry=parseInt(localStorage.getItem('drive_token_expiry')||'0');
+  const clientId=localStorage.getItem('drive_client_id')||cfg.goog_id||'';
+  if(!saved||!clientId) return;
+  if(Date.now()<expiry){
+    // Token still valid — restore it
+    driveToken=saved;
+    window._driveClientId=clientId;
+    gapi.client.setToken({access_token:driveToken});
+    const remaining=expiry-Date.now();
+    clearTimeout(window._driveRefreshTimer);
+    window._driveRefreshTimer=setTimeout(silentRefreshDrive,remaining);
+    setDriveConnectedUI();
+    sheetsEnsureHeader().catch(e=>console.warn(e));
+    console.log('✓ Drive token restored from localStorage');
+  } else if(clientId&&gisReady){
+    // Token expired — silent refresh (no popup)
+    window._driveClientId=clientId;
+    silentRefreshDrive();
+  } else if(clientId){
+    // GIS not ready yet — wait then try silent refresh
+    const poll=setInterval(()=>{
+      if(gisReady){
+        clearInterval(poll);
+        window._driveClientId=clientId;
+        silentRefreshDrive();
+      }
+    },300);
+    setTimeout(()=>clearInterval(poll),8000);
+  }
+}
+function gisLoaded(){
+  gisReady=true;
+  // If gapi is already ready, try restore now
+  if(gapiReady) tryRestoreDriveToken();
+}
 function initDriveAuth(){
   const clientId=document.getElementById('cfg-goog-id').value.trim()||cfg.goog_id;
   if(!clientId){alert('Please enter your Google OAuth Client ID first.');return;}
@@ -1413,7 +1460,11 @@ function initDriveAuth(){
     if(resp.error){alert('Drive auth failed: '+resp.error);return;}
     driveToken=resp.access_token;
     gapi.client.setToken({access_token:driveToken});
-    // Schedule silent refresh 5 min before expiry (tokens last 1hr)
+    // Persist token to localStorage with expiry (tokens last 1hr)
+    const expiry=Date.now()+(55*60*1000);
+    localStorage.setItem('drive_token',driveToken);
+    localStorage.setItem('drive_token_expiry',String(expiry));
+    localStorage.setItem('drive_client_id',clientId);
     clearTimeout(window._driveRefreshTimer);
     window._driveRefreshTimer=setTimeout(silentRefreshDrive, 55*60*1000);
     setDriveConnectedUI();

@@ -1794,8 +1794,12 @@ async function checkWaitingPatients(){
       list.innerHTML=drafts.map((d,i)=>{
         const key='waiting_'+i;
         window._waitingDrafts[key]={name:d.patientName,visits:[d],_resumeDraft:d};
-        return`<div style="background:#fffbea;border:2px solid #e8c97a;border-radius:9px;overflow:hidden;margin-bottom:8px;">
-          <div style="background:#fdf3e3;padding:5px 15px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#6b4d18;text-transform:uppercase;">⏳ Intake complete — awaiting provider</div>
+        window._waitingDrafts[key]._rowIndex = d._rowIndex;
+        return`<div id="wcard_${key}" style="background:#fffbea;border:2px solid #e8c97a;border-radius:9px;overflow:hidden;margin-bottom:8px;">
+          <div style="background:#fdf3e3;padding:5px 15px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#6b4d18;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;">
+            <span>⏳ Intake complete — awaiting provider</span>
+            <button onclick="dismissWaiting('${key}')" style="background:none;border:none;color:#6b4d18;font-size:.75rem;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;opacity:.7;text-decoration:underline;">✕ Dismiss</button>
+          </div>
           <div style="padding:11px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
             <div><strong>${d.patientName}</strong> <span style="color:var(--ink-sm);font-size:.81rem;"> — Pain ${d.pain||0}/10 · ${d.overall||'—'}</span></div>
             <button onclick="resumeWaiting('${key}')" style="background:var(--sage-dk);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Resume as Doctor →</button>
@@ -1810,6 +1814,33 @@ async function checkWaitingPatients(){
     console.error('checkWaitingPatients error:',e);
   }finally{
     if(btn){btn.textContent='🔍 Check for Waiting Patients';btn.disabled=false;}
+  }
+}
+
+async function dismissWaiting(key){
+  const pt=window._waitingDrafts&&window._waitingDrafts[key];
+  // Remove card from UI immediately
+  const card=document.getElementById('wcard_'+key);
+  if(card) card.remove();
+  // Check if list is now empty
+  const list=document.getElementById('waiting-patients-list');
+  if(list&&!list.querySelector('[id^="wcard_"]')){
+    list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No patients waiting right now.</div>';
+  }
+  // Mark complete in Sheets so it won't reappear
+  if(pt&&pt._resumeDraft&&pt._resumeDraft._rowIndex&&driveToken){
+    const sheetId=SHEET_ID||cfg.sheet_id||'';
+    if(sheetId){
+      const statusCol=SHEET_HEADERS.indexOf('visitStatus');
+      if(statusCol>=0){
+        const colLetter=String.fromCharCode(65+statusCol);
+        const range=`Sheet1!${colLetter}${pt._resumeDraft._rowIndex}`;
+        fetch(`${SHEETS_API}/${sheetId}/values/${range}?valueInputOption=RAW`,{
+          method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+          body:JSON.stringify({values:[['complete']]})
+        }).catch(e=>console.warn('Dismiss sheet update failed:',e));
+      }
+    }
   }
 }
 

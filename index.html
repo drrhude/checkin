@@ -1571,7 +1571,7 @@ async function tryAutoUpload(){
 // ════════════════════════════════════════════════════
 
 // Header row definition (must match sheet columns)
-const SHEET_HEADERS = ['savedAt','patientName','ptDate','ptAppt','overall','pain','regions','symptoms','funcImpact','rom','walk','adl','newInjury','injuryTxt','redFlags','medChg','medTxt','newCond','condTxt','goals','ptNotes'];
+const SHEET_HEADERS = ['savedAt','patientName','ptDate','ptAppt','overall','pain','regions','symptoms','funcImpact','rom','walk','adl','newInjury','injuryTxt','redFlags','medChg','medTxt','newCond','condTxt','goals','ptNotes','visitStatus','rowIndex'];
 
 // Ensure the sheet has a header row; create it if the sheet is empty
 async function sheetsEnsureHeader(){
@@ -1610,6 +1610,53 @@ async function sheetsWriteVisit(visitData){
   }catch(e){console.warn('sheetsWriteVisit error:',e);}
 }
 
+// Write a DRAFT row when patient submits (before doctor completes note)
+async function sheetsDraftVisit(visitData){
+  const sheetId = SHEET_ID || cfg.sheet_id || '';
+  if(!driveToken||!sheetId){console.warn('Sheets draft: not configured');return;}
+  await sheetsEnsureHeader();
+  const normalized={...visitData, patientName: visitData.patientName||visitData.ptName||'', visitStatus:'draft'};
+  const row=SHEET_HEADERS.map(k=>{
+    if(k==='rowIndex') return ''; // filled in after we know row number
+    const v=normalized[k];
+    if(Array.isArray(v)) return v.join(', ');
+    return v!==undefined&&v!==null?String(v):'';
+  });
+  try{
+    const r=await fetch(`${SHEETS_API}/${sheetId}/values/Sheet1!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS&includeValuesInResponse=true`,{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+      body:JSON.stringify({values:[row]})
+    });
+    if(!r.ok)throw new Error('Draft write failed: '+r.status);
+    const data=await r.json();
+    // Store the row number so we can update it later
+    const updatedRange=data.updates?.updatedRange||'';
+    const rowMatch=updatedRange.match(/(\d+)$/);
+    if(rowMatch){
+      window._lastDraftRow=parseInt(rowMatch[1]);
+      console.log('✓ Draft saved to Sheet row',window._lastDraftRow);
+    }
+  }catch(e){console.warn('sheetsDraftVisit error:',e);}
+}
+
+// Mark the draft row as complete when doctor finishes the note
+async function sheetsMarkComplete(){
+  const sheetId = SHEET_ID || cfg.sheet_id || '';
+  if(!driveToken||!sheetId||!window._lastDraftRow) return;
+  try{
+    // Find the visitStatus column index
+    const statusCol = SHEET_HEADERS.indexOf('visitStatus');
+    if(statusCol<0) return;
+    const colLetter = String.fromCharCode(65+statusCol);
+    const range = `Sheet1!${colLetter}${window._lastDraftRow}`;
+    await fetch(`${SHEETS_API}/${sheetId}/values/${range}?valueInputOption=RAW`,{
+      method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+      body:JSON.stringify({values:[['complete']]})
+    });
+    console.log('✓ Visit marked complete in Sheet');
+  }catch(e){console.warn('sheetsMarkComplete error:',e);}
+}
+
 // Read all visits from the sheet and return patient lookup map
 async function sheetsReadAllVisits(){
   const SHEET_ID = cfg.sheet_id || '';
@@ -1621,9 +1668,11 @@ async function sheetsReadAllVisits(){
     const headers=d.values[0];
     const rows=d.values.slice(1);
     const db={};
-    rows.forEach(row=>{
+    rows.forEach((row,rowIdx)=>{
       const obj={};
       headers.forEach((h,i)=>{obj[h]=row[i]||'';});
+      // Store actual sheet row number (1-based, +2 for header row)
+      obj._rowIndex = rowIdx + 2;
       // Parse comma-separated arrays back
       ['regions','symptoms','goals'].forEach(k=>{if(obj[k])obj[k]=obj[k].split(', ').filter(Boolean);});
       if(obj.pain)obj.pain=parseInt(obj.pain)||0;
@@ -1660,11 +1709,69 @@ async function searchPtEnhanced(val){
   window._ptSearchResults = {};
   matches.forEach((p,i) => { window._ptSearchResults['pt_'+i] = p; });
   const src = driveToken&&SHEET_ID ? '☁️ ' : '';
+  const today = new Date().toISOString().split('T')[0];
   div.innerHTML=`<ul style="list-style:none;padding:0;margin-top:10px;">${matches.map((p,i)=>{
     const last=p.visits[0];
+    // Check if there's a same-day draft waiting for doctor
+    const draft=p.visits.find(v=>v.visitStatus==='draft' && (v.ptDate===today||v.savedAt?.startsWith(today)));
+    if(draft){
+      window._ptSearchResults['draft_'+i] = {...p, _resumeDraft: draft};
+      return`<li style="background:#fffbea;border:2px solid #e8c97a;border-radius:9px;padding:0;margin-bottom:7px;overflow:hidden;">
+        <div style="background:#fdf3e3;padding:5px 15px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#6b4d18;text-transform:uppercase;">⏳ Patient intake complete — awaiting provider</div>
+        <div style="padding:11px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div><strong>${src}${p.name}</strong> <span style="color:var(--ink-sm);font-size:.81rem;"> — Today · Pain ${draft?.pain||0}/10 · ${draft?.overall||'—'}</span></div>
+          <button onclick="resumeDraft('draft_${i}')" style="background:var(--sage-dk);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Resume as Doctor →</button>
+        </div>
+      </li>`;
+    }
     return`<li style="background:var(--cream);border:1.5px solid var(--border);border-radius:9px;padding:11px 15px;margin-bottom:7px;cursor:pointer;transition:border-color .2s;" onclick="loadPtFromMap('pt_${i}')" onmouseover="this.style.borderColor='var(--sage)'" onmouseout="this.style.borderColor='var(--border)'"><strong>${src}${p.name}</strong> <span style="color:var(--ink-sm);font-size:.81rem;"> — Last visit: ${last?last.ptDate||last.savedAt?.split('T')[0]:'—'} · Pain ${last?.pain||0}/10 · ${last?.overall||'—'}</span></li>`;
   }).join('')}</ul>`;
   if(db)sdb(db);
+}
+
+function resumeDraft(key){
+  const pt = window._ptSearchResults && window._ptSearchResults[key];
+  if(!pt||!pt._resumeDraft) return;
+  const draft = pt._resumeDraft;
+
+  // Load all patient intake data into S
+  if(!Array.isArray(draft.regions)) draft.regions = draft.regions ? String(draft.regions).split(', ').filter(Boolean) : [];
+  if(!Array.isArray(draft.symptoms)) draft.symptoms = draft.symptoms ? String(draft.symptoms).split(', ').filter(Boolean) : [];
+  if(!Array.isArray(draft.goals)) draft.goals = draft.goals ? String(draft.goals).split(', ').filter(Boolean) : [];
+
+  S.ptName = draft.patientName||draft.ptName||pt.name||'';
+  S.ptDate = draft.ptDate||new Date().toISOString().split('T')[0];
+  S.ptAppt = draft.ptAppt||'';
+  S.overall = draft.overall||'';
+  S.pain = parseInt(draft.pain)||0;
+  S.regions = draft.regions;
+  S.otherReg = draft.otherReg||'';
+  S.symptoms = draft.symptoms;
+  S.funcImpact = draft.funcImpact||'';
+  S.rom = draft.rom||'';
+  S.walk = draft.walk||'';
+  S.adl = draft.adl||'';
+  S.newInjury = draft.newInjury||'';
+  S.injuryTxt = draft.injuryTxt||'';
+  S.redFlags = draft.redFlags||'';
+  S.medChg = draft.medChg||'';
+  S.medTxt = draft.medTxt||'';
+  S.newCond = draft.newCond||'';
+  S.condTxt = draft.condTxt||'';
+  S.goals = draft.goals;
+  S.ptNotes = draft.ptNotes||'';
+  S.ptSig = draft.ptSig||null;
+  S.ptSigTime = draft.ptSigTime||'';
+  S.sigSkipped = draft.sigSkipped||false;
+  S.isOneTap = draft.isOneTap||false;
+  S.loadedPt = pt.name;
+
+  // Store draft row for marking complete later
+  if(draft._rowIndex) window._lastDraftRow = draft._rowIndex;
+
+  // Jump straight to doctor section
+  document.getElementById('pt-search-results').innerHTML='';
+  enterDocSection();
 }
 
 function loadPtFromMap(key){
@@ -1918,15 +2025,12 @@ function submitPatient(){
     S.ptSig=null; S.ptSigTime='';
   }
   saveVisit(S.ptName,{...S});
-  // Write to Google Sheets for cross-device access
+  // Write DRAFT to Google Sheets for cross-device doctor resumption
   const sheetId = SHEET_ID || cfg.sheet_id || '';
   if(driveToken && sheetId){
-    sheetsWriteVisit({...S, savedAt:new Date().toISOString()})
-      .then(()=>console.log('✓ Saved to Sheets'))
-      .catch(e=>{
-        console.warn('Sheets save failed:',e);
-        vpToast('⚠️ Visit saved locally but Sheets sync failed: '+e.message, true);
-      });
+    sheetsDraftVisit({...S, savedAt:new Date().toISOString()})
+      .then(()=>console.log('✓ Draft saved to Sheets'))
+      .catch(e=>console.warn('Sheets draft failed:',e));
   } else {
     console.warn('Sheets skip — driveToken:', !!driveToken, 'sheetId:', sheetId);
   }
@@ -2115,6 +2219,14 @@ function finalNote(){
   _noteHTMLForDrive=buildPrintHTML({date,now,clinicName,doctor,dx,ml,adjCodes,palp,tech,spAdj});
   document.getElementById('print-tgt').innerHTML=_noteHTMLForDrive;
   document.getElementById('final-note-output').innerHTML=buildScreenNote({date,now,clinicName,doctor,dx,ml,adjCodes,palp,tech,spAdj});
+  // Mark the sheet draft row as complete
+  sheetsMarkComplete().catch(e=>console.warn(e));
+  // Also write full visit record now that it's complete
+  const sheetId2 = SHEET_ID || cfg.sheet_id || '';
+  if(driveToken && sheetId2){
+    sheetsWriteVisit({...S, savedAt:new Date().toISOString(), visitStatus:'complete'})
+      .catch(e=>console.warn('Final sheet write error:',e));
+  }
   if(driveToken)setTimeout(tryAutoUpload,500);
   }catch(err){
     alert('Error generating note: '+err.message);

@@ -1384,10 +1384,16 @@ function startNewVisit(){
   document.getElementById('final-note-output').innerHTML='';
   document.getElementById('print-tgt').innerHTML='';
   document.getElementById('drive-export-status').innerHTML='';
-  document.getElementById('lookup-results').innerHTML='';
-  document.getElementById('pt-search').value='';
-  document.getElementById('filename-preview').textContent='—';
-  document.getElementById('pt-lastname').value='';
+  const lookupRes=document.getElementById('lookup-results');
+  if(lookupRes) lookupRes.innerHTML='';
+  const lookupName=document.getElementById('lookup-name');
+  if(lookupName) lookupName.value='';
+  const filenameEl=document.getElementById('filename-preview');
+  if(filenameEl) filenameEl.textContent='—';
+  const lastEl=document.getElementById('pt-lastname');
+  if(lastEl) lastEl.value='';
+  const returningCard=document.getElementById('returning-card');
+  if(returningCard) returningCard.style.display='none';
 
   // Restore drive UI if still connected
   if(driveToken) setDriveConnectedUI();
@@ -1395,9 +1401,13 @@ function startNewVisit(){
   // Go back to step 0
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('step-0').classList.add('active');
-  document.getElementById('pt-name').value='';
-  document.getElementById('pt-name').focus();
+  const ptNameEl=document.getElementById('pt-name');
+  if(ptNameEl){ptNameEl.value='';}
+  if(lookupName) lookupName.focus();
   window.scrollTo(0,0);
+
+  // Refresh waiting patients list
+  if(driveToken) setTimeout(checkWaitingPatients, 500);
 }
 
 function gapiLoaded(){
@@ -1729,7 +1739,7 @@ async function searchPtEnhanced(val){
   div.innerHTML=`<ul style="list-style:none;padding:0;margin-top:10px;">${matches.map((p,i)=>{
     const last=p.visits[0];
     // Check if there's a same-day draft waiting for doctor
-    const draft=p.visits.find(v=>v.visitStatus==='draft' && (v.ptDate===today||v.savedAt?.startsWith(today)));
+    const draft=p.visits.find(v=>(!v.visitStatus||v.visitStatus==='draft') && (v.ptDate===today||v.savedAt?.startsWith(today)));
     if(draft){
       window._ptSearchResults['draft_'+i] = {...p, _resumeDraft: draft};
       return`<li style="background:#fffbea;border:2px solid #e8c97a;border-radius:9px;padding:0;margin-bottom:7px;overflow:hidden;">
@@ -1774,8 +1784,8 @@ async function checkWaitingPatients(){
       ['regions','symptoms','goals'].forEach(k=>{if(obj[k])obj[k]=obj[k].split(', ').filter(Boolean);});
       if(obj.pain)obj.pain=parseInt(obj.pain)||0;
       const isToday=(obj.ptDate===today)||(obj.savedAt&&obj.savedAt.startsWith(today));
-      const isDraft=obj.visitStatus==='draft'||obj.visitStatus==='';
-      if(isToday&&isDraft&&obj.patientName) drafts.push(obj);
+      const isComplete=obj.visitStatus==='complete'||obj.visitStatus==='Complete';
+      if(isToday&&!isComplete&&obj.patientName) drafts.push(obj);
     });
     if(drafts.length===0){
       list.innerHTML='<div style="font-size:.84rem;color:var(--ink-sm);padding:8px 0;">No patients waiting right now.</div>';

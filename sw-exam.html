@@ -536,7 +536,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 
 <!-- ═══ PHASE 3: CANDIDACY ═══ -->
 <div class="phase" id="phase3">
-  <div class="phase-hdr"><div class="phase-lbl">Staff — Candidacy Review</div><div class="phase-title">Contraindication Screening</div><div class="phase-desc">Review all contraindications before proceeding to provider exam.</div></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+    <div class="phase-hdr" style="margin:0;"><div class="phase-lbl">Staff — Candidacy Review</div><div class="phase-title">Contraindication Screening</div><div class="phase-desc">Review all contraindications before proceeding to provider exam.</div></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <button class="btn btn-o btn-sm" onclick="checkPending();openLookup();" style="white-space:nowrap;">🔍 Search / Resume Patient</button>
+      <div id="lookupNoConnMsg" style="display:none;font-size:12px;color:var(--amber);text-align:right;">Connect Drive in Settings<br>to search pending patients</div>
+    </div>
+  </div>
   <div class="alert danger" id="absAlert"><span>⛔</span><div><strong>Absolute contraindication flagged.</strong> Patient is NOT a candidate. Do not proceed — consult provider immediately.</div></div>
   <div class="alert warning" id="relAlert"><span>⚠️</span><div><strong>Relative contraindication(s) noted.</strong> Provider must review before treatment.</div></div>
   <div class="alert success" id="clearAlert"><span>✅</span><div>No contraindications identified. Patient appears cleared for evaluation.</div></div>
@@ -859,6 +865,7 @@ function connectDrive(){
         setDriveStatus(true);
         clearTimeout(tokenRefreshTimer);
         tokenRefreshTimer=setTimeout(()=>_tokenClient&&_tokenClient.requestAccessToken({prompt:''}),55*60*1000);
+        setTimeout(checkPending,800);
       }
     });
     _tokenClient.requestAccessToken();
@@ -1811,6 +1818,26 @@ async function saveAll(){
 }
 function startNew(){if(!confirm('Start a new patient? All current data will be cleared.'))return;location.reload();}
 
+// ══ CHECK PENDING (cross-device pickup) ══
+async function checkPending(){
+  if(!driveToken||!cfg.sheetId){
+    // Not connected — show manual lookup button state
+    document.getElementById('lookupNoConnMsg').style.display='block';
+    return;
+  }
+  document.getElementById('lookupNoConnMsg').style.display='none';
+  try{
+    const resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!A:F`,{headers:{'Authorization':'Bearer '+driveToken}});
+    const data=await resp.json();
+    const rows=(data.values||[]).slice(1).filter(r=>r[4]==='pending');
+    if(rows.length>0){
+      const r=rows[rows.length-1];
+      document.getElementById('resumeName').textContent=`${r[2]} ${r[1]}`;
+      document.getElementById('resumeBanner').classList.add('show');
+    }
+  }catch(e){console.warn('checkPending error:',e);}
+}
+
 // ══ INIT ══
 loadCfg();
 const today=new Date().toISOString().split('T')[0];
@@ -1818,17 +1845,51 @@ document.getElementById('ptSigDate').value=today;
 document.getElementById('provDate').value=today;
 if(cfg.providerName)document.getElementById('provName').value=cfg.providerName;
 setTimeout(()=>{initSig('ptSig');initSig('provSig');},400);
-// Check for recent pending patients on load (for cross-device resume)
-async function checkPending(){
-  if(!driveToken||!cfg.sheetId)return;
-  try{
-    const resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!A:F`,{headers:{'Authorization':'Bearer '+driveToken}});
-    const data=await resp.json();const rows=(data.values||[]).filter(r=>r[4]==='pending');
-    if(rows.length>0){const r=rows[rows.length-1];document.getElementById('resumeName').textContent=`${r[2]} ${r[1]}`;document.getElementById('resumeBanner').classList.add('show');}
-  }catch(e){}
+
+// ══ SILENT TOKEN RESTORE ON PAGE LOAD ══
+// If OAuth Client ID is configured, load GIS and silently re-request token.
+// Google will issue a new token without prompting if the user already authorized
+// this app in this browser. This survives page refresh and Start New.
+function silentTokenRestore(){
+  if(!cfg.oauthClientId){return;}
+  const gisReady=()=>{
+    try{
+      const tc=google.accounts.oauth2.initTokenClient({
+        client_id:cfg.oauthClientId,
+        scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+        prompt:'', // empty string = no popup, silently uses existing session
+        callback:r=>{
+          if(r.error||!r.access_token){
+            // Silent restore failed — user will need to click Connect Drive
+            setDriveStatus(false);
+            return;
+          }
+          driveToken=r.access_token;
+          setDriveStatus(true);
+          _tokenClient=tc; // store so refresh timer can use it
+          clearTimeout(tokenRefreshTimer);
+          tokenRefreshTimer=setTimeout(()=>tc.requestAccessToken({prompt:''}),55*60*1000);
+          setTimeout(checkPending,800);
+        }
+      });
+      tc.requestAccessToken({prompt:''});
+    }catch(e){
+      // GIS not ready yet, retry
+      setTimeout(gisReady,500);
+    }
+  };
+  // Load GIS script then attempt silent restore
+  if(!document.getElementById('_gis')){
+    const s=document.createElement('script');
+    s.id='_gis';
+    s.src='https://accounts.google.com/gsi/client';
+    s.onload=()=>setTimeout(gisReady,200);
+    document.head.appendChild(s);
+  } else {
+    setTimeout(gisReady,200);
+  }
 }
-// Auto-connect if tokens were previously established (silent refresh on page load)
-setTimeout(()=>{if(cfg.oauthClientId&&!driveToken){loadGIS();}},1000);
+silentTokenRestore();
 </script>
 </body>
 </html>

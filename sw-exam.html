@@ -1219,9 +1219,23 @@ function updVC(){
   calcDuration();
   const n=S.visitCount;
   let note=`<strong>Provider decides which region(s) to treat each visit (max 3 per session).</strong> `;
-  if(n>=10)note+=`At ${S.visitCount} sessions, the Package of 10 ($990) is the best value — saves $${(n*149)-990} vs per-session pricing.`;
-  else if(n>=5)note+=`At ${S.visitCount} sessions, the Package of 5 ($550) provides good value. Package of 10 available if more sessions anticipated.`;
-  else note+=`Single sessions at $149 each. Package pricing available if treatment extends.`;
+  if(n>=10){
+    const fullPkgs=Math.floor(n/10);const rem=n%10;
+    const fullPkg5s=Math.floor(rem/5);const singles=rem%5;
+    const parts=[];
+    if(fullPkgs>0)parts.push(`${fullPkgs}× Package of 10 ($990)`);
+    if(fullPkg5s>0)parts.push(`${fullPkg5s}× Package of 5 ($550)`);
+    if(singles>0)parts.push(`${singles} additional session${singles>1?'s':''} at $110`);
+    note+=`<strong>${n} sessions:</strong> ${parts.join(' + ')}. Sessions 10+ are priced at the Package of 10 rate ($99/session).`;
+  } else if(n>=5){
+    const fullPkgs=Math.floor(n/5);const rem=n%5;
+    const parts=[];
+    if(fullPkgs>0)parts.push(`${fullPkgs}× Package of 5 ($550)`);
+    if(rem>0)parts.push(`${rem} additional session${rem>1?'s':''} at $110`);
+    note+=`<strong>${n} sessions:</strong> ${parts.join(' + ')}. Sessions 5–9 are priced at the Package of 5 rate ($110/session).`;
+  } else {
+    note+=`<strong>${n} session${n>1?'s':''}:</strong> Per-session rate at $149 each. Est. total $${n*149}.`;
+  }
   document.getElementById('vcNote').innerHTML=note;
 }
 function calcDuration(){
@@ -1683,19 +1697,78 @@ function buildROF(){
   const clinicAddr=cfg.clinicAddr||'1001 Glade Rd Suite 120, Colleyville TX 76034';
   const clinicPhone=cfg.clinicPhone||'';
 
-  // Financial calculations
-  const perSession=149;const pkg5=550;const pkg10=990;
-  const alaCarteTotal=sessions*perSession;
-  const pkg5Total=Math.round(pkg5*0.95); // 5% pay-in-full discount
-  const pkg10Total=Math.round(pkg10*0.90); // 10% pay-in-full discount
-  const pkg5Save=alaCarteTotal-pkg5; // savings vs per-session (if doing 5)
-  const pkg10Save=alaCarteTotal-pkg10; // savings vs per-session (if doing all)
+  // ── Financial calculations ──
+  // Pricing tiers:
+  //   1–4 sessions  → $149/session (per-session rate)
+  //   5–9 sessions  → $110/session (Package of 5 rate: $550/5)
+  //   10+ sessions  → $99/session  (Package of 10 rate: $990/10)
+  // Pay-in-full discounts: 5% on pkg5, 10% on pkg10 (max discount = 10%)
+  const RATE_SINGLE = 149;
+  const PKG5_PRICE  = 550;   // covers 5 sessions
+  const PKG10_PRICE = 990;   // covers 10 sessions
+  const RATE_PKG5   = 110;   // $550 / 5
+  const RATE_PKG10  = 99;    // $990 / 10
 
-  // Determine best value callout
-  let bestPkg='';
-  if(sessions>=10)bestPkg='pkg10';
-  else if(sessions>=5)bestPkg='pkg5';
-  else bestPkg='persession';
+  // Effective rate based on visit count
+  let effectiveRate, pricingTier;
+  if(sessions <= 4){
+    effectiveRate = RATE_SINGLE;
+    pricingTier   = 'single';
+  } else if(sessions <= 9){
+    effectiveRate = RATE_PKG5;
+    pricingTier   = 'pkg5';
+  } else {
+    effectiveRate = RATE_PKG10;
+    pricingTier   = 'pkg10';
+  }
+
+  // Estimated total at effective rate (before pay-in-full discount)
+  const estimatedTotal = sessions * effectiveRate;
+
+  // Pay-in-full totals (discount applied to the package price, not per-session)
+  const pkg5PIF  = Math.round(PKG5_PRICE  * 0.95); // 5% off → $522
+  const pkg10PIF = Math.round(PKG10_PRICE * 0.90); // 10% off → $891
+
+  // How many packages needed for this visit count
+  const pkg10Count = Math.floor(sessions / 10);
+  const pkg5Count  = Math.floor((sessions % 10) / 5);
+  const singles    = sessions % 5;
+
+  // Build cost breakdown string for recommendation box
+  let costBreakdown = '';
+  let recommendedTotal = 0;
+  let recommendedPIF = 0;
+  if(pricingTier === 'single'){
+    recommendedTotal = sessions * RATE_SINGLE;
+    recommendedPIF   = recommendedTotal; // no package discount on 1-4 sessions
+    costBreakdown = `${sessions} session${sessions>1?'s':''} × $${RATE_SINGLE} = $${recommendedTotal}`;
+  } else if(pricingTier === 'pkg5'){
+    // All sessions at pkg5 rate — could be 1 or 2 packages of 5 with remaining singles
+    const fullPkg5s = Math.floor(sessions / 5);
+    const rem       = sessions % 5;
+    recommendedTotal = (fullPkg5s * PKG5_PRICE) + (rem * RATE_PKG5);
+    recommendedPIF   = (fullPkg5s * pkg5PIF)    + (rem * RATE_PKG5);
+    const parts = [];
+    if(fullPkg5s > 0) parts.push(`${fullPkg5s} × Package of 5 ($${PKG5_PRICE} each)`);
+    if(rem > 0)       parts.push(`${rem} additional session${rem>1?'s':''} × $${RATE_PKG5}`);
+    costBreakdown = parts.join(' + ');
+  } else {
+    // pkg10 tier — full pkg10s + any remainder at pkg5/single rates
+    const fullPkg10s = Math.floor(sessions / 10);
+    const rem10      = sessions % 10;
+    const fullPkg5s  = Math.floor(rem10 / 5);
+    const remSingles = rem10 % 5;
+    recommendedTotal = (fullPkg10s * PKG10_PRICE) + (fullPkg5s * PKG5_PRICE) + (remSingles * RATE_PKG5);
+    recommendedPIF   = (fullPkg10s * pkg10PIF)    + (fullPkg5s * pkg5PIF)    + (remSingles * RATE_PKG5);
+    const parts = [];
+    if(fullPkg10s > 0) parts.push(`${fullPkg10s} × Package of 10 ($${PKG10_PRICE} each)`);
+    if(fullPkg5s > 0)  parts.push(`${fullPkg5s} × Package of 5 ($${PKG5_PRICE} each)`);
+    if(remSingles > 0) parts.push(`${remSingles} additional session${remSingles>1?'s':''} × $${RATE_PKG5}`);
+    costBreakdown = parts.join(' + ');
+  }
+
+  const pifSavings = recommendedTotal - recommendedPIF;
+  const bestPkg = pricingTier;
 
   // Dx descriptions
   const dxDesc={
@@ -1760,36 +1833,47 @@ function buildROF(){
   // Financial section
   const finHTML=`
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-    <div style="border:1.5px solid #d4e2d8;border-radius:8px;padding:16px;text-align:center;background:#f6faf7;">
+
+    <div style="border:1.5px solid ${bestPkg==='single'?'#c9a84c':'#d4e2d8'};border-radius:8px;padding:16px;text-align:center;background:${bestPkg==='single'?'#fdfaf0':'#f6faf7'};position:relative;">
+      ${bestPkg==='single'?'<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:2px 10px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;">RECOMMENDED</div>':''}
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:6px;">Per Session</div>
       <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#2f5c43;">$149</div>
-      <div style="font-size:11px;color:#6b7f70;margin-top:4px;">Pay as you go</div>
-      <div style="font-size:11px;color:#6b7f70;margin-top:2px;">Est. total: <strong>$${alaCarteTotal.toLocaleString()}</strong></div>
+      <div style="font-size:11px;color:#6b7f70;margin-top:4px;">Best for 1–4 sessions</div>
+      <div style="font-size:11px;color:#6b7f70;margin-top:2px;">No package required</div>
     </div>
+
     <div style="border:1.5px solid ${bestPkg==='pkg5'?'#c9a84c':'#d4e2d8'};border-radius:8px;padding:16px;text-align:center;background:${bestPkg==='pkg5'?'#fdfaf0':'#f6faf7'};position:relative;">
-      ${bestPkg==='pkg5'?'<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:2px 10px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;">BEST VALUE</div>':''}
+      ${bestPkg==='pkg5'?'<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:2px 10px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;">RECOMMENDED</div>':''}
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:6px;">Package of 5</div>
       <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#2f5c43;">$550</div>
-      <div style="font-size:11px;color:#2a7f7f;font-weight:600;margin-top:4px;">Save $195 vs per-session</div>
-      <div style="font-size:11px;color:#c97b2a;margin-top:2px;">Pay in full: <strong>$${pkg5Total}</strong> (5% off)</div>
+      <div style="font-size:11px;color:#2a7f7f;font-weight:600;margin-top:4px;">$110/session — save $195 vs single</div>
+      <div style="font-size:11px;color:#c97b2a;margin-top:2px;">Pay in full: <strong>$${pkg5PIF}</strong> (5% off)</div>
+      <div style="font-size:11px;color:#6b7f70;margin-top:2px;">Best for 5–9 sessions</div>
     </div>
+
     <div style="border:1.5px solid ${bestPkg==='pkg10'?'#c9a84c':'#d4e2d8'};border-radius:8px;padding:16px;text-align:center;background:${bestPkg==='pkg10'?'#fdfaf0':'#f6faf7'};position:relative;">
-      ${bestPkg==='pkg10'?'<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:2px 10px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;">BEST VALUE</div>':''}
+      ${bestPkg==='pkg10'?'<div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:2px 10px;border-radius:8px;letter-spacing:.08em;white-space:nowrap;">RECOMMENDED</div>':''}
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:6px;">Package of 10</div>
       <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#2f5c43;">$990</div>
-      <div style="font-size:11px;color:#2a7f7f;font-weight:600;margin-top:4px;">Save $500 vs per-session</div>
-      <div style="font-size:11px;color:#c97b2a;margin-top:2px;">Pay in full: <strong>$${pkg10Total}</strong> (10% off)</div>
+      <div style="font-size:11px;color:#2a7f7f;font-weight:600;margin-top:4px;">$99/session — save $500 vs single</div>
+      <div style="font-size:11px;color:#c97b2a;margin-top:2px;">Pay in full: <strong>$${pkg10PIF}</strong> (10% off)</div>
+      <div style="font-size:11px;color:#6b7f70;margin-top:2px;">Best for 10+ sessions</div>
+    </div>
+
+  </div>
+
+  <div style="background:#eef7f0;border:1.5px solid #5a8f6e;border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:12px;">
+    <strong style="color:#2f5c43;">Your ${sessions}-session plan — estimated investment</strong><br>
+    <div style="margin-top:8px;font-size:12px;color:#3d5445;line-height:1.8;">
+      <strong>Breakdown:</strong> ${costBreakdown}<br>
+      <strong>Estimated total:</strong> $${recommendedTotal.toLocaleString()}
+      ${pifSavings>0?`<br><strong style="color:#c97b2a;">Pay in full:</strong> $${recommendedPIF.toLocaleString()} — save an additional $${pifSavings.toLocaleString()} (max 10% discount)`:''}
     </div>
   </div>
-  <div style="background:#eef7f0;border:1.5px solid #5a8f6e;border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:12px;">
-    <strong style="color:#2f5c43;">Based on your recommended ${sessions}-session plan</strong><br>
-    ${bestPkg==='pkg10'?`The <strong>Package of 10 ($990)</strong> covers your full recommended plan. Pay in full for $${pkg10Total} and save $${alaCarteTotal-pkg10Total} vs per-session pricing.`:
-      bestPkg==='pkg5'?`The <strong>Package of 5 ($550)</strong> is a great starting point. Pay in full for $${pkg5Total} and save vs per-session. Additional sessions or a Package of 10 available if your plan extends.`:
-      `Per-session pricing ($149/visit) is recommended for your ${sessions}-session plan. Total estimate: $${alaCarteTotal}.`}
-  </div>
+
   <div style="font-size:12px;color:#6b7f70;padding:10px 14px;background:#f6faf7;border-radius:6px;">
-    💳 <strong>Payment plans available.</strong> Ask our front desk about financing options. Maximum pay-in-full discount is 10%. Packages are non-refundable but transferable to a family member with provider approval.
-  </div>`;
+    💳 <strong>Payment plans available.</strong> Ask our front desk about financing options. Pay-in-full discount is applied to the package price (5% on Package of 5, 10% on Package of 10). Maximum discount is 10%. Packages are non-refundable but transferable to a family member with provider approval.
+  </div>`
 
   const rofHTML=`<div id="rofDoc" style="font-family:'DM Sans',sans-serif;color:#182820;">
     <div style="background:#2f5c43;padding:26px 32px;color:white;">

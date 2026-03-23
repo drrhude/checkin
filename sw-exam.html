@@ -334,6 +334,39 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   .rom-grid{grid-template-columns:1fr 1fr;}
   .proto-grid,.vc-grid,.fin-grid,.rof-fin-grid{grid-template-columns:1fr 1fr;}
 }
+
+/* LANDING PAGE */
+.landing{display:none;position:fixed;inset:0;z-index:50;background:var(--sage-dk);
+  align-items:center;justify-content:center;flex-direction:column;padding:40px;text-align:center;}
+.landing.show{display:flex;}
+.landing-logo{font-family:'DM Serif Display',serif;font-size:32px;color:white;margin-bottom:6px;}
+.landing-sub{font-size:13px;color:rgba(255,255,255,.65);letter-spacing:.08em;text-transform:uppercase;margin-bottom:48px;}
+.landing-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;width:100%;max-width:480px;}
+.landing-btn{flex:1;min-width:180px;padding:28px 20px;border-radius:var(--radius);border:2px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);color:white;cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all .2s;text-align:center;}
+.landing-btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.5);}
+.landing-btn-icon{font-size:40px;margin-bottom:12px;}
+.landing-btn-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
+.landing-btn-desc{font-size:12px;opacity:.75;line-height:1.5;}
+/* WAITING ROOM */
+.waitroom{display:none;animation:fi .3s ease;}
+.waitroom.active{display:block;}
+.wait-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;align-items:center;
+  justify-content:space-between;gap:12px;cursor:pointer;transition:all .2s;}
+.wait-card:hover{border-color:var(--sage);box-shadow:var(--shadow-lg);}
+.wait-card-name{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);}
+.wait-card-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.wait-card-regions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.wait-tag{background:var(--cream-dk);color:var(--sage-dk);font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:10px;}
+.wait-card-time{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right;}
+.wait-empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.wait-empty-icon{font-size:48px;margin-bottom:12px;}
+.wait-empty-msg{font-size:15px;font-weight:500;color:var(--ink-lt);margin-bottom:6px;}
+.wait-empty-sub{font-size:13px;}
+
 </style>
 </head>
 <body>
@@ -362,6 +395,50 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 
 <div class="main">
 
+<!-- LANDING PAGE -->
+<div class="landing show" id="landingPage">
+  <div class="landing-logo">Colleyville Chiropractic</div>
+  <div class="landing-sub">Shockwave New Patient Exam · CVC Spine &amp; Sport</div>
+  <div class="landing-btns">
+    <div class="landing-btn" onclick="enterAsPatient()">
+      <div class="landing-btn-icon">🧑</div>
+      <div class="landing-btn-title">I'm a Patient</div>
+      <div class="landing-btn-desc">Start or continue your intake paperwork</div>
+    </div>
+    <div class="landing-btn" onclick="enterAsStaff()">
+      <div class="landing-btn-icon">🩺</div>
+      <div class="landing-btn-title">Staff / Provider</div>
+      <div class="landing-btn-desc">View waiting patients and resume exams</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- WAITING ROOM (Staff entry point) -->
+<div class="waitroom" id="waitroom">
+  <div class="phase-hdr">
+    <div class="phase-lbl">Staff — Patient Queue</div>
+    <div class="phase-title">Waiting Room</div>
+    <div class="phase-desc">Patients who have completed their intake. Tap a patient to resume their exam.</div>
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;gap:10px;align-items:center;">
+      <input id="waitSearch" placeholder="Search by patient name..." 
+        style="flex:1;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+        font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);outline:none;"
+        oninput="renderWaitRoom()" onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='var(--border)'">
+      <button class="btn btn-o btn-sm" onclick="loadWaitRoom()">↻ Refresh</button>
+      <button class="btn btn-o btn-sm" onclick="showLanding()">← Back</button>
+    </div>
+  </div>
+  <div id="waitList"></div>
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn btn-p" onclick="enterAsStaffExam()">+ Start New Exam (Walk-in)</button>
+  </div>
+</div>
+
+
+
 <!-- RESUME BANNER -->
 <div class="resume-banner" id="resumeBanner">
   <div class="resume-banner-info">
@@ -375,7 +452,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 </div>
 
 <!-- ═══ PHASE 0: DEMOGRAPHICS ═══ -->
-<div class="phase active" id="phase0">
+<div class="phase" id="phase0">
   <div class="phase-hdr"><div class="phase-lbl">Patient Self-Service — Page 1 of 2</div><div class="phase-title">Personal Information</div><div class="phase-desc" data-en="Please complete all fields. Your information is kept strictly confidential." data-es="Por favor complete todos los campos. Su información se mantiene estrictamente confidencial.">Please complete all fields. Your information is kept strictly confidential.</div></div>
   <div class="card">
     <div class="card-title" data-en="Patient Information" data-es="Información del Paciente">Patient Information</div>
@@ -1186,6 +1263,24 @@ function toggleSvc(id){
 }
 
 // ══ HANDOFF / PIN / CROSS-DEVICE ══
+async function sheetsEnsureTab(tabName){
+  // Create tab if it doesn't exist — same approach as check-in app
+  if(!driveToken||!cfg.sheetId) return;
+  try{
+    const resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}`,
+      {headers:{'Authorization':'Bearer '+driveToken}});
+    const meta=await resp.json();
+    const exists=(meta.sheets||[]).some(s=>s.properties.title===tabName);
+    if(!exists){
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}:batchUpdate`,{
+        method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},
+        body:JSON.stringify({requests:[{addSheet:{properties:{title:tabName}}}]})
+      });
+      console.log('✅ Created sheet tab:', tabName);
+    }
+  }catch(e){console.warn('sheetsEnsureTab error:',e);}
+}
+
 async function submitPatient(){
   // save patient data to Sheets so it can be picked up on another device
   const ptFirst=document.getElementById('ptFirst').value.trim();
@@ -1195,6 +1290,8 @@ async function submitPatient(){
   S.pendingPatientKey=key;
   if(driveToken&&cfg.sheetId){
     try{
+      // Ensure SW_Pending tab exists before writing
+      await sheetsEnsureTab('SW_Pending');
       // Save full patient intake to a "pending" tab in Sheets
       const payload=JSON.stringify({
         key,status:'pending',
@@ -1857,6 +1954,7 @@ async function saveAll(){
   const fileName=`SW_Exam_${ptLast}_${ptFirst}_${vDate}.txt`;
   if(driveToken&&cfg.sheetId){
     try{
+      await sheetsEnsureTab('Sheet1');
       const row=[vDate,`${ptFirst} ${ptLast}`,document.getElementById('ptDOB').value,document.getElementById('ptPhone').value,
         S.regions.map(r=>(EXAM[r]||EXAM.other).label).join(', '),getChips('dxChips').join(', '),
         S.icdCodes.join(', '),getChip('candChips'),S.visitCount,S.freq,document.getElementById('provName').value||cfg.providerName||''];
@@ -1886,11 +1984,7 @@ async function saveAll(){
 }
 function startNew(){
   if(!confirm('Start a new patient? All current data will be cleared.'))return;
-  // Preserve Drive token across reload — same as check-in app
-  const savedToken=driveToken;
-  const savedClientId=window._driveClientId;
-  location.reload();
-  // Note: localStorage persists through reload so token auto-restores via gapiLoaded
+  location.reload(); // localStorage token persists, auto-restores via gapiLoaded
 }
 
 // ══ CHECK PENDING (cross-device pickup) ══
@@ -1923,6 +2017,116 @@ setTimeout(()=>{initSig('ptSig');initSig('provSig');},400);
 // Drive token restore happens automatically via gapiLoaded() callback
 
 // Drive persistence handled by gapiLoaded/gisLoaded/tryRestoreDriveToken above
+
+// ══ LANDING PAGE ══
+function showLanding(){
+  document.getElementById('landingPage').classList.add('show');
+  document.getElementById('waitroom').classList.remove('active');
+  // hide all phases
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  document.getElementById('resumeBanner').classList.remove('show');
+}
+function enterAsPatient(){
+  document.getElementById('landingPage').classList.remove('show');
+  // Go to phase 0 (demographics)
+  currentPhase=0;
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  document.getElementById('phase0').classList.add('active');
+  document.querySelectorAll('.step-tab').forEach(t=>{t.classList.remove('active','done');});
+  document.getElementById('tab0').classList.add('active');
+}
+function enterAsStaff(){
+  document.getElementById('landingPage').classList.remove('show');
+  document.getElementById('waitroom').classList.add('active');
+  loadWaitRoom();
+}
+function enterAsStaffExam(){
+  // Staff wants to start a fresh exam without patient pre-filling
+  document.getElementById('waitroom').classList.remove('active');
+  currentPhase=3; // jump straight to candidacy
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  document.getElementById('phase3').classList.add('active');
+  document.querySelectorAll('.step-tab').forEach(t=>{t.classList.remove('active','done');});
+  document.getElementById('tab3').classList.add('active');
+}
+
+// ══ WAITING ROOM ══
+let waitData=[];
+async function loadWaitRoom(){
+  const listEl=document.getElementById('waitList');
+  if(!driveToken||!cfg.sheetId){
+    listEl.innerHTML=`<div class="wait-empty">
+      <div class="wait-empty-icon">🔗</div>
+      <div class="wait-empty-msg">Drive not connected</div>
+      <div class="wait-empty-sub">Connect Google Drive in Settings to see waiting patients.</div>
+      <button class="btn btn-o btn-sm" style="margin-top:16px;" onclick="openSettings()">Open Settings</button>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:14px;">Loading patients...</div>';
+  try{
+    await sheetsEnsureTab('SW_Pending');
+    const resp=await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!A:G`,
+      {headers:{'Authorization':'Bearer '+driveToken}}
+    );
+    const data=await resp.json();
+    const rows=(data.values||[]).filter(r=>r[4]==='pending'&&r[0]);
+    waitData=rows;
+    renderWaitRoom();
+  }catch(e){
+    listEl.innerHTML=`<div class="wait-empty">
+      <div class="wait-empty-icon">⚠️</div>
+      <div class="wait-empty-msg">Could not load patients</div>
+      <div class="wait-empty-sub">${e.message||'Check Drive connection and try again.'}</div>
+    </div>`;
+  }
+}
+function renderWaitRoom(){
+  const listEl=document.getElementById('waitList');
+  const q=(document.getElementById('waitSearch')?.value||'').toLowerCase();
+  const filtered=waitData.filter(r=>!q||(r[1]||'').toLowerCase().includes(q)||(r[2]||'').toLowerCase().includes(q));
+  if(!filtered.length){
+    listEl.innerHTML=`<div class="wait-empty">
+      <div class="wait-empty-icon">✅</div>
+      <div class="wait-empty-msg">${q?'No patients found':'No patients waiting'}</div>
+      <div class="wait-empty-sub">${q?'Try a different name.':'Patients appear here after completing their intake on the other device.'}</div>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML=filtered.map((r,i)=>{
+    const name=`${r[2]||''} ${r[1]||''}`.trim();
+    const savedAt=r[3]||'';
+    // Parse time ago
+    let timeAgo='';
+    try{const d=new Date(r[3]);const mins=Math.round((Date.now()-d)/60000);timeAgo=mins<60?`${mins}m ago`:`${Math.round(mins/60)}h ago`;}catch(e){}
+    // Parse regions from payload
+    let regions=[];let phone='';
+    try{const p=JSON.parse(r[5]||'{}');regions=p.regions||[];phone=p.phone||'';}catch(e){}
+    const regionLabels={plantar:'Plantar Fasciitis',achilles:'Achilles',shoulder:'Shoulder',knee:'Knee',elbow:'Elbow',hip:'Hip',lumbar:'Lumbar/SI',other:'Other'};
+    const regionTags=regions.map(reg=>`<span class="wait-tag">${regionLabels[reg]||reg}</span>`).join('');
+    return `<div class="wait-card" onclick="pickupPatient(${i})">
+      <div>
+        <div class="wait-card-name">${name}</div>
+        <div class="wait-card-meta">${phone}${phone&&savedAt?' · ':''}</div>
+        <div class="wait-card-regions">${regionTags}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="wait-card-time">${timeAgo}</div>
+        <div style="color:var(--sage);font-weight:600;font-size:13px;margin-top:8px;">Resume →</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function pickupPatient(idx){
+  const r=waitData[idx];
+  if(!r)return;
+  try{
+    loadPatient(r[0],r[5]||'{}');
+    document.getElementById('waitroom').classList.remove('active');
+  }catch(e){alert('Error loading patient: '+e.message);}
+}
+
 </script>
 </body>
 </html>

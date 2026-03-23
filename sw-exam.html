@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shockwave New Patient Exam — Colleyville Chiropractic</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
 <style>
 :root{
   --sage-dk:#2f5c43;--sage:#5a8f6e;--sage-lt:#8ab89a;
@@ -849,11 +851,94 @@ function openSettings(){
 }
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
 
-// ══ DRIVE / GOOGLE ══
-function loadGIS(){if(document.getElementById('_gis'))return;const s=document.createElement('script');s.id='_gis';s.src='https://accounts.google.com/gsi/client';document.head.appendChild(s);}
-loadGIS();
-let _tokenClient=null;
-// connectDrive defined below in token persistence section
+// ══ DRIVE / GOOGLE — exact pattern from check-in app ══
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+let gapiReady=false,gisReady=false,tokenClient=null;
+
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({apiKey:'',discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});
+    gapiReady=true;
+    tryRestoreDriveToken();
+  });
+}
+function gisLoaded(){
+  gisReady=true;
+  if(gapiReady) tryRestoreDriveToken();
+}
+function tryRestoreDriveToken(){
+  const saved=localStorage.getItem('sw_drive_token');
+  const expiry=parseInt(localStorage.getItem('sw_drive_token_expiry')||'0');
+  const clientId=localStorage.getItem('sw_drive_client_id')||cfg.oauthClientId||'';
+  if(!saved||!clientId) return;
+  if(Date.now()<expiry){
+    driveToken=saved;
+    window._driveClientId=clientId;
+    gapi.client.setToken({access_token:driveToken});
+    const remaining=expiry-Date.now();
+    clearTimeout(tokenRefreshTimer);
+    tokenRefreshTimer=setTimeout(silentRefreshDrive,remaining);
+    setDriveStatus(true);
+    setTimeout(checkPending,800);
+  } else if(clientId&&gisReady){
+    window._driveClientId=clientId;
+    silentRefreshDrive();
+  } else if(clientId){
+    const poll=setInterval(()=>{
+      if(gisReady){clearInterval(poll);window._driveClientId=clientId;silentRefreshDrive();}
+    },300);
+    setTimeout(()=>clearInterval(poll),8000);
+  }
+}
+function silentRefreshDrive(){
+  if(!window._driveClientId||!gisReady) return;
+  const silent=google.accounts.oauth2.initTokenClient({
+    client_id:window._driveClientId,scope:DRIVE_SCOPE,
+    callback:resp=>{
+      if(resp.error){console.warn('Silent Drive refresh failed:',resp.error);return;}
+      driveToken=resp.access_token;
+      gapi.client.setToken({access_token:driveToken});
+      const expiry=Date.now()+(55*60*1000);
+      localStorage.setItem('sw_drive_token',driveToken);
+      localStorage.setItem('sw_drive_token_expiry',String(expiry));
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer=setTimeout(silentRefreshDrive,55*60*1000);
+      setDriveStatus(true);
+    }
+  });
+  silent.requestAccessToken({prompt:''});
+}
+function connectDrive(){
+  const clientId=cfg.oauthClientId;
+  if(!clientId){alert('Enter OAuth Client ID in Settings first.');return;}
+  if(!gisReady){
+    const btn=document.getElementById('driveConnBtn');
+    if(btn){btn.textContent='Loading...';btn.disabled=true;}
+    const poll=setInterval(()=>{
+      if(gisReady){clearInterval(poll);if(btn){btn.textContent='Connect Drive';btn.disabled=false;}connectDrive();}
+    },500);
+    setTimeout(()=>clearInterval(poll),8000);
+    return;
+  }
+  window._driveClientId=clientId;
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:clientId,scope:DRIVE_SCOPE,
+    callback:resp=>{
+      if(resp.error){alert('Drive auth failed: '+resp.error);return;}
+      driveToken=resp.access_token;
+      gapi.client.setToken({access_token:driveToken});
+      const expiry=Date.now()+(55*60*1000);
+      localStorage.setItem('sw_drive_token',driveToken);
+      localStorage.setItem('sw_drive_token_expiry',String(expiry));
+      localStorage.setItem('sw_drive_client_id',clientId);
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer=setTimeout(silentRefreshDrive,55*60*1000);
+      setDriveStatus(true);
+      setTimeout(checkPending,800);
+    }
+  });
+  tokenClient.requestAccessToken({prompt:'consent'});
+}
 function setDriveStatus(connected){
   const ind=document.getElementById('driveInd');
   const lbl=document.getElementById('driveLabel');
@@ -1799,7 +1884,14 @@ async function saveAll(){
   }
   if(!driveToken){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(note);a.download=fileName;a.click();el.textContent='📥 Downloaded (connect Drive to auto-save to cloud).';}
 }
-function startNew(){if(!confirm('Start a new patient? All current data will be cleared.'))return;location.reload();}
+function startNew(){
+  if(!confirm('Start a new patient? All current data will be cleared.'))return;
+  // Preserve Drive token across reload — same as check-in app
+  const savedToken=driveToken;
+  const savedClientId=window._driveClientId;
+  location.reload();
+  // Note: localStorage persists through reload so token auto-restores via gapiLoaded
+}
 
 // ══ CHECK PENDING (cross-device pickup) ══
 async function checkPending(){
@@ -1828,104 +1920,9 @@ document.getElementById('ptSigDate').value=today;
 document.getElementById('provDate').value=today;
 if(cfg.providerName)document.getElementById('provName').value=cfg.providerName;
 setTimeout(()=>{initSig('ptSig');initSig('provSig');},400);
-// Restore Drive token from localStorage — survives refresh and Start New
-restoreTokenFromStorage();
+// Drive token restore happens automatically via gapiLoaded() callback
 
-// ══ TOKEN PERSISTENCE + AUTO-RESTORE ══
-// Stores token + expiry in localStorage so refresh/reload/Start New
-// don't require re-authentication. On load, checks if stored token is
-// still valid. If expiring soon, silently fetches a new one via GIS.
-
-const TOKEN_KEY='cvc_sw4_gtoken';
-const TOKEN_EXP_KEY='cvc_sw4_gtoken_exp';
-
-function storeToken(token){
-  driveToken=token;
-  const exp=Date.now()+(55*60*1000); // store 55 min expiry
-  try{
-    localStorage.setItem(TOKEN_KEY,token);
-    localStorage.setItem(TOKEN_EXP_KEY,String(exp));
-  }catch(e){}
-  setDriveStatus(true);
-  clearTimeout(tokenRefreshTimer);
-  tokenRefreshTimer=setTimeout(silentRefresh,55*60*1000);
-  setTimeout(checkPending,800);
-}
-
-function silentRefresh(){
-  if(!cfg.oauthClientId)return;
-  const doRefresh=()=>{
-    try{
-      const tc=google.accounts.oauth2.initTokenClient({
-        client_id:cfg.oauthClientId,
-        scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
-        prompt:'',
-        callback:r=>{
-          if(!r.error&&r.access_token){storeToken(r.access_token);}
-          else{setDriveStatus(false);localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_EXP_KEY);}
-        }
-      });
-      tc.requestAccessToken({prompt:''});
-    }catch(e){setTimeout(doRefresh,1000);}
-  };
-  if(typeof google==='undefined'){
-    const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';
-    s.onload=()=>setTimeout(doRefresh,300);document.head.appendChild(s);
-  }else{doRefresh();}
-}
-
-function restoreTokenFromStorage(){
-  try{
-    const stored=localStorage.getItem(TOKEN_KEY);
-    const exp=parseInt(localStorage.getItem(TOKEN_EXP_KEY)||'0');
-    if(stored&&exp>Date.now()){
-      // Token still valid — use it immediately
-      driveToken=stored;
-      setDriveStatus(true);
-      clearTimeout(tokenRefreshTimer);
-      // Schedule refresh for when it expires
-      const msLeft=exp-Date.now();
-      tokenRefreshTimer=setTimeout(silentRefresh,Math.max(0,msLeft-2*60*1000));
-      setTimeout(checkPending,800);
-      return true;
-    }else if(stored){
-      // Token expired — clear and silently get a new one
-      localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_EXP_KEY);
-      silentRefresh();
-      return false;
-    }
-  }catch(e){}
-  return false;
-}
-
-// Patch connectDrive to use storeToken
-function connectDrive(){
-  if(!cfg.oauthClientId){alert('Enter OAuth Client ID in Settings first.');return;}
-  const doConnect=()=>{
-    try{
-      _tokenClient=google.accounts.oauth2.initTokenClient({
-        client_id:cfg.oauthClientId,
-        scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
-        callback:r=>{
-          if(r.error){setDriveStatus(false);return;}
-          storeToken(r.access_token);
-          _tokenClient=google.accounts.oauth2.initTokenClient({
-            client_id:cfg.oauthClientId,
-            scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
-            prompt:'',
-            callback:r2=>{if(!r2.error&&r2.access_token)storeToken(r2.access_token);}
-          });
-        }
-      });
-      _tokenClient.requestAccessToken();
-    }catch(e){
-      // GIS not loaded yet
-      const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';
-      s.onload=()=>setTimeout(doConnect,300);document.head.appendChild(s);
-    }
-  };
-  doConnect();
-}
+// Drive persistence handled by gapiLoaded/gisLoaded/tryRestoreDriveToken above
 </script>
 </body>
 </html>

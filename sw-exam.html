@@ -1207,13 +1207,13 @@ function calcVisits(){
   });
   // multi-complaint buffer
   const buf=S.regions.length===2?1:S.regions.length>=3?2:0;
-  let total=Math.min(maxVisits+buf,12);
+  let total=Math.min(maxVisits+buf,20);
   S.visitCount=total;
   const basisText=basisParts.join(' | ')+(buf>0?` + ${buf} multi-complaint buffer`:'');
   document.getElementById('vcBasis').textContent=basisText;
   updVC();
 }
-function adjVisits(delta){S.visitCount=Math.max(1,Math.min(12,S.visitCount+delta));updVC();}
+function adjVisits(delta){S.visitCount=Math.max(1,Math.min(20,S.visitCount+delta));updVC();}
 function updVC(){
   document.getElementById('vcVisits').textContent=S.visitCount;
   calcDuration();
@@ -2200,54 +2200,144 @@ async function uploadFileToDrive(blob, fileName, mimeType){
   return res.json();
 }
 
-// ── renderNoteToPDF — exact pattern from check-in app ──
+// ── renderNoteToPDF — page-break-aware version ──
+// Renders content into an iframe, then slices canvas at natural page boundaries
+// by scanning for element positions and avoiding cuts mid-element.
 function renderNoteToPDF(htmlContent){
   return new Promise((resolve,reject)=>{
     function doRender(){
+      // Render in a wide hidden iframe — letter width at 96dpi = 816px
+      const SCALE = 2;
+      const PAGE_W_PX = 816;  // letter width in px at 96dpi
+      const PAGE_H_PX = 1056; // letter height in px at 96dpi
+      const MARGIN_PX = 48;   // top/bottom margin in px
+
       const iframe=document.createElement('iframe');
-      iframe.style.cssText='position:fixed;top:-9999px;left:-9999px;width:816px;height:1056px;border:none;visibility:hidden;';
+      iframe.style.cssText=`position:fixed;top:-9999px;left:-9999px;
+        width:${PAGE_W_PX}px;height:auto;min-height:${PAGE_H_PX}px;
+        border:none;visibility:hidden;`;
       document.body.appendChild(iframe);
+
       iframe.contentDocument.open();
       iframe.contentDocument.write(htmlContent);
       iframe.contentDocument.close();
+
+      // Wait for fonts + images
       setTimeout(()=>{
-        html2canvas(iframe.contentDocument.body,{
-          scale:2,useCORS:true,allowTaint:true,
-          width:816,windowWidth:816,
-          backgroundColor:'#ffffff'
-        }).then(canvas=>{
-          document.body.removeChild(iframe);
-          const imgData=canvas.toDataURL('image/jpeg',0.92);
-          const {jsPDF}=window.jspdf;
-          const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
-          const pageW=pdf.internal.pageSize.getWidth();
-          const pageH=pdf.internal.pageSize.getHeight();
-          const canvasAspect=canvas.height/canvas.width;
-          const imgH=pageW*canvasAspect;
-          let y=0;
-          while(y<imgH){
-            if(y>0)pdf.addPage();
-            pdf.addImage(imgData,'JPEG',0,-y,pageW,imgH);
-            y+=pageH;
+        const body = iframe.contentDocument.body;
+        const totalH = body.scrollHeight;
+
+        // Inject CSS to help page-break hints
+        const style = iframe.contentDocument.createElement('style');
+        style.textContent = `
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          div, p, pre, table { page-break-inside: avoid; }
+        `;
+        iframe.contentDocument.head.appendChild(style);
+
+        html2canvas(body, {
+          scale: SCALE,
+          useCORS: true,
+          allowTaint: true,
+          width: PAGE_W_PX,
+          windowWidth: PAGE_W_PX,
+          height: totalH,
+          windowHeight: totalH,
+          backgroundColor: '#ffffff',
+          scrollY: 0
+        }).then(canvas => {
+          if(document.body.contains(iframe)) document.body.removeChild(iframe);
+
+          const {jsPDF} = window.jspdf;
+          const pdf = new jsPDF({orientation:'portrait', unit:'pt', format:'letter'});
+          const pdfPageW = pdf.internal.pageSize.getWidth();   // 612pt
+          const pdfPageH = pdf.internal.pageSize.getHeight();  // 792pt
+          const margin = 28; // pt margin top/bottom
+
+          // Canvas dimensions
+          const cW = canvas.width;   // PAGE_W_PX * SCALE
+          const cH = canvas.height;  // totalH * SCALE
+
+          // How many canvas pixels correspond to one PDF page of content
+          const pxPerPdfPt = cW / pdfPageW;
+          const contentPtPerPage = pdfPageH - (margin * 2);
+          const pxPerPage = contentPtPerPage * pxPerPdfPt;
+
+          // Scan for natural break points — avoid cutting in the middle of blocks
+          // Strategy: slice at multiples of pxPerPage, but walk back to find whitespace
+          let sliceY = 0; // current position in canvas pixels (top of current slice)
+          let pageNum = 0;
+
+          while(sliceY < cH) {
+            if(pageNum > 0) pdf.addPage();
+            pageNum++;
+
+            // Ideal end of this slice
+            let sliceEnd = sliceY + pxPerPage;
+            if(sliceEnd >= cH) {
+              sliceEnd = cH; // last page
+            } else {
+              // Walk back up to 80px to find a lighter row (natural break)
+              const lookback = Math.min(80 * SCALE, pxPerPage * 0.1);
+              const tmpCanvas = document.createElement('canvas');
+              tmpCanvas.width = cW;
+              tmpCanvas.height = 1;
+              const tmpCtx = tmpCanvas.getContext('2d');
+              let bestBreak = sliceEnd;
+              let bestScore = -1;
+
+              for(let scanY = sliceEnd; scanY > sliceEnd - lookback; scanY -= SCALE) {
+                // Sample brightness of this row
+                tmpCtx.clearRect(0,0,cW,1);
+                tmpCtx.drawImage(canvas, 0, Math.floor(scanY), cW, 1, 0, 0, cW, 1);
+                const px = tmpCtx.getImageData(0,0,cW,1).data;
+                let brightness = 0;
+                for(let i=0; i<px.length; i+=4) brightness += (px[i]+px[i+1]+px[i+2]);
+                brightness /= (cW * 3);
+                // Higher brightness = lighter = better break point
+                if(brightness > bestScore) { bestScore = brightness; bestBreak = scanY; }
+              }
+              sliceEnd = bestBreak;
+            }
+
+            // Create a page-sized canvas slice
+            const sliceH = sliceEnd - sliceY;
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = cW;
+            pageCanvas.height = Math.ceil(sliceH);
+            const pageCtx = pageCanvas.getContext('2d');
+            pageCtx.fillStyle = '#ffffff';
+            pageCtx.fillRect(0, 0, cW, pageCanvas.height);
+            pageCtx.drawImage(canvas, 0, sliceY, cW, sliceH, 0, 0, cW, sliceH);
+
+            const imgData = pageCanvas.toDataURL('image/jpeg', 0.93);
+            // Scale slice to fit within page margins
+            const slicePtH = sliceH / pxPerPdfPt;
+            pdf.addImage(imgData, 'JPEG', 0, margin, pdfPageW, slicePtH);
+
+            sliceY = sliceEnd;
           }
+
           resolve(pdf.output('blob'));
-        }).catch(err=>{
-          if(document.body.contains(iframe))document.body.removeChild(iframe);
+        }).catch(err => {
+          if(document.body.contains(iframe)) document.body.removeChild(iframe);
           reject(err);
         });
-      },1500);
+      }, 1800); // slightly longer wait for fonts
     }
-    if(window.html2canvas&&window.jspdf){doRender();return;}
-    const s1=document.createElement('script');
-    s1.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    s1.onload=()=>{
-      const s2=document.createElement('script');
-      s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      s2.onload=doRender;
-      s2.onerror=()=>reject(new Error('Failed to load jsPDF'));
+
+    // Load libraries if not already loaded
+    if(window.html2canvas && window.jspdf){ doRender(); return; }
+    const s1 = document.createElement('script');
+    s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s1.onload = () => {
+      const s2 = document.createElement('script');
+      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s2.onload = doRender;
+      s2.onerror = () => reject(new Error('Failed to load jsPDF'));
       document.head.appendChild(s2);
     };
-    s1.onerror=()=>reject(new Error('Failed to load html2canvas'));
+    s1.onerror = () => reject(new Error('Failed to load html2canvas'));
     document.head.appendChild(s1);
   });
 }

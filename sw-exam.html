@@ -847,7 +847,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   <div class="btn-row">
     <button class="btn btn-o" onclick="goTo(6)">← Back</button>
     <button class="btn btn-p" onclick="saveAll()">💾 Save to Drive &amp; Sheets</button>
-    <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 Export PDF</button>
+    <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 Print / Preview PDF</button>
     <button class="btn btn-gold" onclick="buildROF();goTo(8)">★ Generate Report of Findings</button>
     <button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button>
   </div>
@@ -1948,40 +1948,226 @@ function exportPDF(){
 
 // ══ SAVE ALL ══
 async function saveAll(){
-  const el=document.getElementById('saveMsg');el.textContent='⏳ Saving...';
-  const ptFirst=document.getElementById('ptFirst').value;const ptLast=document.getElementById('ptLast').value;
-  const vDate=new Date().toISOString().split('T')[0];const note=document.getElementById('clinNote').value;
-  const fileName=`SW_Exam_${ptLast}_${ptFirst}_${vDate}.txt`;
+  const el=document.getElementById('saveMsg');
+  const ptFirst=document.getElementById('ptFirst').value||'Patient';
+  const ptLast=document.getElementById('ptLast').value||'';
+  const vDate=new Date().toISOString().split('T')[0];
+  const note=document.getElementById('clinNote').value;
+  const baseName=`SW_${ptLast}_${ptFirst}_${vDate}`.replace(/\s+/g,'_');
+
+  el.textContent='⏳ Saving...';
+
+  // ── 1. Log row to Sheets ──
   if(driveToken&&cfg.sheetId){
     try{
       await sheetsEnsureTab('Sheet1');
-      const row=[vDate,`${ptFirst} ${ptLast}`,document.getElementById('ptDOB').value,document.getElementById('ptPhone').value,
-        S.regions.map(r=>(EXAM[r]||EXAM.other).label).join(', '),getChips('dxChips').join(', '),
-        S.icdCodes.join(', '),getChip('candChips'),S.visitCount,S.freq,document.getElementById('provName').value||cfg.providerName||''];
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/Sheet1!A1:append?valueInputOption=USER_ENTERED`,
-        {method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({values:[row]})});
+      const row=[vDate,`${ptFirst} ${ptLast}`,
+        document.getElementById('ptDOB').value,
+        document.getElementById('ptPhone').value,
+        S.regions.map(r=>(EXAM[r]||EXAM.other).label).join(', '),
+        getChips('dxChips').join(', '),
+        S.icdCodes.join(', '),
+        getChip('candChips'),S.visitCount,S.freq,
+        document.getElementById('provName').value||cfg.providerName||''];
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/Sheet1!A1:append?valueInputOption=USER_ENTERED`,
+        {method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},
+         body:JSON.stringify({values:[row]})}
+      );
       el.textContent='✅ Logged to Sheets. ';
-    }catch(e){el.textContent='⚠ Sheets error. ';}
-    // Mark pending row as complete
+    }catch(e){el.textContent='⚠ Sheets error. ';console.error(e);}
+
+    // Mark pending row complete
     if(S.pendingPatientKey){
       try{
-        const resp=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!A:A`,{headers:{'Authorization':'Bearer '+driveToken}});
+        const resp=await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!A:A`,
+          {headers:{'Authorization':'Bearer '+driveToken}}
+        );
         const d=await resp.json();const rows=d.values||[];
         const rowIdx=rows.findIndex(r=>r[0]===S.pendingPatientKey);
-        if(rowIdx>-1){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!E${rowIdx+1}?valueInputOption=USER_ENTERED`,{method:'PUT',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({values:[['complete']]})});}
-      }catch(e){}
+        if(rowIdx>-1){
+          await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/SW_Pending!E${rowIdx+1}?valueInputOption=USER_ENTERED`,
+            {method:'PUT',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},
+             body:JSON.stringify({values:[['complete']]})}
+          );
+        }
+      }catch(e){console.warn('Mark complete error:',e);}
     }
   }
+
+  // ── 2. Build PDF HTML strings ──
+  const ptSig=document.getElementById('ptSig').toDataURL('image/png');
+  const provSig=document.getElementById('provSig').toDataURL('image/png');
+  const clinic=cfg.clinicName||'Colleyville Chiropractic';
+  const clinicAddr=cfg.clinicAddr||'1001 Glade Rd Suite 120, Colleyville TX 76034';
+  const clinicPhone=cfg.clinicPhone||'';
+  const provName=document.getElementById('provName').value||cfg.providerName||'';
+  const provDate=document.getElementById('provDate').value;
+  const ptPrintName=document.getElementById('ptPrintName').value||`${ptFirst} ${ptLast}`;
+  const ptSigDate=document.getElementById('ptSigDate').value;
+
+  const examPDFHtml=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:white;color:#182820;padding:0;}
+    .lh{background:#2f5c43;color:white;padding:22px 28px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .lh-name{font-family:'DM Serif Display',serif;font-size:22px;}
+    .lh-sub{font-size:10px;opacity:.7;margin-top:2px;letter-spacing:.05em;text-transform:uppercase;}
+    .lh-addr{font-size:10px;opacity:.6;margin-top:4px;}
+    .body{padding:24px 28px;}
+    .doc-title{font-family:'DM Serif Display',serif;font-size:20px;color:#2f5c43;margin-bottom:4px;}
+    .doc-meta{font-size:12px;color:#6b7f70;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #eaf2ec;}
+    pre{white-space:pre-wrap;font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.6;
+      background:#f6faf7;padding:16px;border-radius:6px;border:1px solid #d4e2d8;}
+    .sig-row{display:flex;gap:32px;margin-top:20px;padding-top:16px;border-top:2px solid #eaf2ec;}
+    .sig-block{flex:1;}
+    .sig-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:6px;}
+    .sig-img{max-width:100%;height:60px;border-bottom:1.5px solid #2f5c43;display:block;}
+    .sig-name{font-size:10px;color:#6b7f70;margin-top:3px;}
+    .footer{margin-top:20px;padding-top:10px;border-top:1px solid #eaf2ec;font-size:9px;color:#aaa;text-align:center;}
+  </style></head><body>
+  <div class="lh">
+    <div class="lh-name">${clinic}</div>
+    <div class="lh-sub">CVC Spine &amp; Sport · Shockwave New Patient Exam</div>
+    <div class="lh-addr">${clinicAddr}${clinicPhone?' · '+clinicPhone:''}</div>
+  </div>
+  <div class="body">
+    <div class="doc-title">New Patient Examination Record</div>
+    <div class="doc-meta">Generated: ${new Date().toLocaleString()} · Provider: ${provName}</div>
+    <pre>${note.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+    <div class="sig-row">
+      <div class="sig-block">
+        <div class="sig-lbl">Patient Signature</div>
+        <img class="sig-img" src="${ptSig}" alt="Patient Signature">
+        <div class="sig-name">${ptPrintName} — ${ptSigDate}</div>
+      </div>
+      <div class="sig-block">
+        <div class="sig-lbl">Provider Signature</div>
+        <img class="sig-img" src="${provSig}" alt="Provider Signature">
+        <div class="sig-name">${provName} — ${provDate}</div>
+      </div>
+    </div>
+    <div class="footer">${clinic} — CVC Spine &amp; Sport · ${clinicAddr} · Confidential Medical Record</div>
+  </div>
+  </body></html>`;
+
+  // Build ROF HTML for PDF — ensure it's generated if not already
+  if(!document.getElementById('rofDoc')){buildROF();}
+  const rofContent=document.getElementById('rofDoc')?.innerHTML||'';
+  const rofPDFHtml=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:white;color:#182820;padding:0;}
+    div[style*="background:#2f5c43"],div[style*="background: #2f5c43"]{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  </style>
+  </head><body><div style="padding:0;">${rofContent}</div></body></html>`;
+
+  // ── 3. Upload both PDFs to Drive ──
   if(driveToken&&cfg.driveFolderId){
+    el.textContent+='⏳ Generating PDFs...';
     try{
-      const blob=new Blob([note],{type:'text/plain'});const meta=JSON.stringify({name:fileName,parents:[cfg.driveFolderId]});
-      const form=new FormData();form.append('metadata',new Blob([meta],{type:'application/json'}));form.append('file',blob);
-      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+driveToken},body:form});
-      el.textContent+='✅ Saved to Drive.';
-    }catch(e){el.textContent+=' ⚠ Drive error.';}
+      // Upload Exam PDF
+      el.textContent='⏳ Saving Exam PDF...';
+      const examBlob=await renderNoteToPDF(examPDFHtml);
+      await uploadFileToDrive(examBlob,`${baseName}_Exam.pdf`,'application/pdf');
+      el.textContent='✅ Exam PDF saved. ';
+
+      // Upload ROF PDF
+      el.textContent+='⏳ Saving ROF PDF...';
+      const rofBlob=await renderNoteToPDF(rofPDFHtml);
+      await uploadFileToDrive(rofBlob,`${baseName}_ROF.pdf`,'application/pdf');
+      el.textContent='✅ Exam PDF + ROF PDF saved to Drive. ';
+
+      // Add Drive links if available
+      el.innerHTML+=' <span style="color:var(--sage);font-size:13px;">Both files are in your Drive folder.</span>';
+    }catch(e){
+      el.textContent+=' ⚠ PDF error: '+e.message;
+      console.error('PDF save error:',e);
+      // Fallback: download locally
+      downloadFallback(note, baseName);
+    }
+  }else if(!driveToken){
+    downloadFallback(note, baseName);
   }
-  if(!driveToken){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(note);a.download=fileName;a.click();el.textContent='📥 Downloaded (connect Drive to auto-save to cloud).';}
 }
+
+function downloadFallback(note, baseName){
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(note);
+  a.download=baseName+'_Exam.txt';
+  a.click();
+  document.getElementById('saveMsg').textContent='📥 Downloaded locally (connect Drive to auto-save PDFs).';
+}
+
+async function uploadFileToDrive(blob, fileName, mimeType){
+  const meta=JSON.stringify({name:fileName,mimeType,parents:[cfg.driveFolderId]});
+  const form=new FormData();
+  form.append('metadata',new Blob([meta],{type:'application/json'}));
+  form.append('file',blob);
+  const res=await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+    {method:'POST',headers:{'Authorization':'Bearer '+driveToken},body:form}
+  );
+  if(!res.ok)throw new Error(`Drive upload failed: ${res.status}`);
+  return res.json();
+}
+
+// ── renderNoteToPDF — exact pattern from check-in app ──
+function renderNoteToPDF(htmlContent){
+  return new Promise((resolve,reject)=>{
+    function doRender(){
+      const iframe=document.createElement('iframe');
+      iframe.style.cssText='position:fixed;top:-9999px;left:-9999px;width:816px;height:1056px;border:none;visibility:hidden;';
+      document.body.appendChild(iframe);
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(htmlContent);
+      iframe.contentDocument.close();
+      setTimeout(()=>{
+        html2canvas(iframe.contentDocument.body,{
+          scale:2,useCORS:true,allowTaint:true,
+          width:816,windowWidth:816,
+          backgroundColor:'#ffffff'
+        }).then(canvas=>{
+          document.body.removeChild(iframe);
+          const imgData=canvas.toDataURL('image/jpeg',0.92);
+          const {jsPDF}=window.jspdf;
+          const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+          const pageW=pdf.internal.pageSize.getWidth();
+          const pageH=pdf.internal.pageSize.getHeight();
+          const canvasAspect=canvas.height/canvas.width;
+          const imgH=pageW*canvasAspect;
+          let y=0;
+          while(y<imgH){
+            if(y>0)pdf.addPage();
+            pdf.addImage(imgData,'JPEG',0,-y,pageW,imgH);
+            y+=pageH;
+          }
+          resolve(pdf.output('blob'));
+        }).catch(err=>{
+          if(document.body.contains(iframe))document.body.removeChild(iframe);
+          reject(err);
+        });
+      },1500);
+    }
+    if(window.html2canvas&&window.jspdf){doRender();return;}
+    const s1=document.createElement('script');
+    s1.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s1.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s2.onload=doRender;
+      s2.onerror=()=>reject(new Error('Failed to load jsPDF'));
+      document.head.appendChild(s2);
+    };
+    s1.onerror=()=>reject(new Error('Failed to load html2canvas'));
+    document.head.appendChild(s1);
+  });
+}
+
 function startNew(){
   if(!confirm('Start a new patient? All current data will be cleared.'))return;
   location.reload(); // localStorage token persists, auto-restores via gapiLoaded

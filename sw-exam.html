@@ -853,24 +853,7 @@ function closeSettings(){document.getElementById('settingsModal').classList.remo
 function loadGIS(){if(document.getElementById('_gis'))return;const s=document.createElement('script');s.id='_gis';s.src='https://accounts.google.com/gsi/client';document.head.appendChild(s);}
 loadGIS();
 let _tokenClient=null;
-function connectDrive(){
-  if(!cfg.oauthClientId){alert('Enter OAuth Client ID in Settings first.');return;}
-  try{
-    _tokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:cfg.oauthClientId,
-      scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
-      callback:r=>{
-        if(r.error){setDriveStatus(false);return;}
-        driveToken=r.access_token;
-        setDriveStatus(true);
-        clearTimeout(tokenRefreshTimer);
-        tokenRefreshTimer=setTimeout(()=>_tokenClient&&_tokenClient.requestAccessToken({prompt:''}),55*60*1000);
-        setTimeout(checkPending,800);
-      }
-    });
-    _tokenClient.requestAccessToken();
-  }catch(e){alert('Google Identity Services not loaded yet. Try again in a moment.');}
-}
+// connectDrive defined below in token persistence section
 function setDriveStatus(connected){
   const ind=document.getElementById('driveInd');
   const lbl=document.getElementById('driveLabel');
@@ -1845,51 +1828,104 @@ document.getElementById('ptSigDate').value=today;
 document.getElementById('provDate').value=today;
 if(cfg.providerName)document.getElementById('provName').value=cfg.providerName;
 setTimeout(()=>{initSig('ptSig');initSig('provSig');},400);
+// Restore Drive token from localStorage — survives refresh and Start New
+restoreTokenFromStorage();
 
-// ══ SILENT TOKEN RESTORE ON PAGE LOAD ══
-// If OAuth Client ID is configured, load GIS and silently re-request token.
-// Google will issue a new token without prompting if the user already authorized
-// this app in this browser. This survives page refresh and Start New.
-function silentTokenRestore(){
-  if(!cfg.oauthClientId){return;}
-  const gisReady=()=>{
+// ══ TOKEN PERSISTENCE + AUTO-RESTORE ══
+// Stores token + expiry in localStorage so refresh/reload/Start New
+// don't require re-authentication. On load, checks if stored token is
+// still valid. If expiring soon, silently fetches a new one via GIS.
+
+const TOKEN_KEY='cvc_sw4_gtoken';
+const TOKEN_EXP_KEY='cvc_sw4_gtoken_exp';
+
+function storeToken(token){
+  driveToken=token;
+  const exp=Date.now()+(55*60*1000); // store 55 min expiry
+  try{
+    localStorage.setItem(TOKEN_KEY,token);
+    localStorage.setItem(TOKEN_EXP_KEY,String(exp));
+  }catch(e){}
+  setDriveStatus(true);
+  clearTimeout(tokenRefreshTimer);
+  tokenRefreshTimer=setTimeout(silentRefresh,55*60*1000);
+  setTimeout(checkPending,800);
+}
+
+function silentRefresh(){
+  if(!cfg.oauthClientId)return;
+  const doRefresh=()=>{
     try{
       const tc=google.accounts.oauth2.initTokenClient({
         client_id:cfg.oauthClientId,
         scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
-        prompt:'', // empty string = no popup, silently uses existing session
+        prompt:'',
         callback:r=>{
-          if(r.error||!r.access_token){
-            // Silent restore failed — user will need to click Connect Drive
-            setDriveStatus(false);
-            return;
-          }
-          driveToken=r.access_token;
-          setDriveStatus(true);
-          _tokenClient=tc; // store so refresh timer can use it
-          clearTimeout(tokenRefreshTimer);
-          tokenRefreshTimer=setTimeout(()=>tc.requestAccessToken({prompt:''}),55*60*1000);
-          setTimeout(checkPending,800);
+          if(!r.error&&r.access_token){storeToken(r.access_token);}
+          else{setDriveStatus(false);localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_EXP_KEY);}
         }
       });
       tc.requestAccessToken({prompt:''});
+    }catch(e){setTimeout(doRefresh,1000);}
+  };
+  if(typeof google==='undefined'){
+    const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';
+    s.onload=()=>setTimeout(doRefresh,300);document.head.appendChild(s);
+  }else{doRefresh();}
+}
+
+function restoreTokenFromStorage(){
+  try{
+    const stored=localStorage.getItem(TOKEN_KEY);
+    const exp=parseInt(localStorage.getItem(TOKEN_EXP_KEY)||'0');
+    if(stored&&exp>Date.now()){
+      // Token still valid — use it immediately
+      driveToken=stored;
+      setDriveStatus(true);
+      clearTimeout(tokenRefreshTimer);
+      // Schedule refresh for when it expires
+      const msLeft=exp-Date.now();
+      tokenRefreshTimer=setTimeout(silentRefresh,Math.max(0,msLeft-2*60*1000));
+      setTimeout(checkPending,800);
+      return true;
+    }else if(stored){
+      // Token expired — clear and silently get a new one
+      localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_EXP_KEY);
+      silentRefresh();
+      return false;
+    }
+  }catch(e){}
+  return false;
+}
+
+// Patch connectDrive to use storeToken
+function connectDrive(){
+  if(!cfg.oauthClientId){alert('Enter OAuth Client ID in Settings first.');return;}
+  const doConnect=()=>{
+    try{
+      _tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:cfg.oauthClientId,
+        scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+        callback:r=>{
+          if(r.error){setDriveStatus(false);return;}
+          storeToken(r.access_token);
+          _tokenClient=google.accounts.oauth2.initTokenClient({
+            client_id:cfg.oauthClientId,
+            scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+            prompt:'',
+            callback:r2=>{if(!r2.error&&r2.access_token)storeToken(r2.access_token);}
+          });
+        }
+      });
+      _tokenClient.requestAccessToken();
     }catch(e){
-      // GIS not ready yet, retry
-      setTimeout(gisReady,500);
+      // GIS not loaded yet
+      const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';
+      s.onload=()=>setTimeout(doConnect,300);document.head.appendChild(s);
     }
   };
-  // Load GIS script then attempt silent restore
-  if(!document.getElementById('_gis')){
-    const s=document.createElement('script');
-    s.id='_gis';
-    s.src='https://accounts.google.com/gsi/client';
-    s.onload=()=>setTimeout(gisReady,200);
-    document.head.appendChild(s);
-  } else {
-    setTimeout(gisReady,200);
-  }
+  doConnect();
 }
-silentTokenRestore();
 </script>
 </body>
 </html>

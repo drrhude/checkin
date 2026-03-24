@@ -2140,7 +2140,7 @@ function printROF(){
   <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;background:white;color:#182820;}
   div[style*="background:#2f5c43"]{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   @media print{body{padding:0;}@page{margin:0.5in;}}</style>
-  </head><body>${content}<script>window.onload=()=>window.print();<\/script></body></html>`);
+  </head><body>${content}<"+"script>window.onload=()=>window.print();<\/script></body></html>`);
   win.document.close();
 }
 
@@ -2184,7 +2184,7 @@ function exportPDF(){
     </div>
     <div class="footer">${clinic} — CVC Spine &amp; Sport · ${cfg.clinicAddr||'1001 Glade Rd Suite 120, Colleyville TX 76034'} · Confidential Medical Record</div>
   </div>
-  <script>window.onload=()=>window.print();<\/script></body></html>`);
+  <"+"script>window.onload=()=>window.print();<\/script></body></html>`);
   win.document.close();
 }
 

@@ -1888,45 +1888,96 @@ function buildROF(){
   const clinicAddr=cfg.clinicAddr||'1001 Glade Rd Suite 120, Colleyville TX 76034';
   const clinicPhone=cfg.clinicPhone||'';
 
-  // ── PRICING TIERS ──
-  const RATE_SW_SINGLE=150, RATE_ADJ_SINGLE=95, RATE_PT_SINGLE=85;
-  const RATE_SW_5=110, RATE_ADJ_5=50, RATE_PT_5=38;
-  const RATE_SW_10=99,  RATE_ADJ_10=45, RATE_PT_10=35;
+  // ── PRICING — pulled live from Phase 6 builder ──
+  const px = PX.state;
+  const pxSwOn  = px.sw.on,  pxPtOn  = px.pt.on,  pxAdjOn = px.adj.on, pxExtOn = px.ext.on;
+  const pxSwV   = px.sw.v,   pxPtV   = px.pt.v,   pxAdjV  = px.adj.v,  pxExtV  = px.ext.v;
+  const pxSwR   = px.sw.r,   pxPtR   = px.pt.r,   pxAdjR  = px.adj.r,  pxExtR  = px.ext.r;
+  const pxPtU   = px.pt.u||2;
+  const pxPayMethod = px.pay||'full';
+  const pxInsType   = px.ins;
 
-  // Tier based on session count
-  const tier = sessions<=4?'single':sessions<=9?'pkg5':'pkg10';
-  const swR  = tier==='single'?RATE_SW_SINGLE :tier==='pkg5'?RATE_SW_5 :RATE_SW_10;
-  const adjR = tier==='single'?RATE_ADJ_SINGLE:tier==='pkg5'?RATE_ADJ_5:RATE_ADJ_10;
-  const ptR  = tier==='single'?RATE_PT_SINGLE :tier==='pkg5'?RATE_PT_5 :RATE_PT_10;
+  // Per-visit and total costs
+  const pxSwPerVisit  = pxSwOn  ? pxSwR            : 0;
+  const pxPtPerVisit  = pxPtOn  ? pxPtR * pxPtU    : 0;
+  const pxAdjPerVisit = pxAdjOn ? pxAdjR            : 0;
+  const pxExtPerVisit = pxExtOn ? pxExtR            : 0;
+  const pxSwSub   = pxSwOn  ? pxSwV  * pxSwR            : 0;
+  const pxPtSub   = pxPtOn  ? pxPtV  * pxPtR * pxPtU   : 0;
+  const pxAdjSub  = pxAdjOn ? pxAdjV * pxAdjR           : 0;
+  const pxExtSub  = pxExtOn ? pxExtV * pxExtR           : 0;
+  const pxCashTotal = pxSwSub + pxPtSub + pxAdjSub + pxExtSub;
 
-  // Standard single-session totals (for page 1)
-  const stdEssential = RATE_SW_SINGLE;
-  const stdEnhanced  = RATE_SW_SINGLE + RATE_ADJ_SINGLE;
-  const stdComplete  = RATE_SW_SINGLE + RATE_ADJ_SINGLE + RATE_PT_SINGLE;
+  // Payment method display
+  const payLabels = {
+    full:  es?'Pago Completo (10% desc.)':'Pay in Full (10% off)',
+    '2pay':es?'2 Pagos':'2-Pay In-House',
+    cc:    'CareCredit',
+    hsa:   'HSA / FSA',
+    ins:   es?'Seguro (BCBS)':'Insurance (BCBS)'
+  };
+  const pxPayLabel = payLabels[pxPayMethod]||pxPayMethod;
 
-  // Package totals
-  function calcPkgTotal(swRate, adjRate, ptRate, n, includeAdj, includePT){
-    const perSess = swRate + (includeAdj?adjRate:0) + (includePT?ptRate:0);
-    const total = perSess * n;
-    const disc = n>=10?0.10:n>=5?0.05:0;
-    const pif = Math.round(total * (1-disc));
-    return {perSess, total, pif, disc:Math.round(disc*100)};
+  // Patient total after payment method applied
+  let pxPatientTotal = pxCashTotal;
+  let pxPayNote = '';
+  let pxInsPatientCoveredAmt = 0;
+
+  if(pxPayMethod==='full'){
+    pxPatientTotal = Math.round(pxCashTotal * 0.90);
+    pxPayNote = es?`Pago único hoy. Ahorro: $${pxCashTotal-pxPatientTotal}.`
+                  :`Single payment today. You save: $${pxCashTotal-pxPatientTotal}.`;
+  } else if(pxPayMethod==='2pay'){
+    const half = Math.round(pxCashTotal/2);
+    pxPayNote = es?`Pago 1: $${half} hoy · Pago 2: $${half} en 30 días. Sin interés.`
+                  :`Payment 1: $${half} today · Payment 2: $${half} in 30 days. No interest.`;
+  } else if(pxPayMethod==='cc'){
+    pxPayNote = es?'Financiamiento CareCredit. Pregunte a recepción por términos disponibles.'
+                  :'CareCredit financing. Ask our front desk about available promotional terms.';
+  } else if(pxPayMethod==='hsa'){
+    pxPayNote = es?'Todos los servicios califican para HSA/FSA. Pague con su tarjeta en recepción.'
+                  :'All services qualify for HSA/FSA. Pay with your card at the front desk.';
+  } else if(pxPayMethod==='ins'){
+    // Insurance calc — covered services only (PT + Adj)
+    const coveredSubs = pxPtSub + pxAdjSub + pxExtSub;
+    if(pxInsType==='copay'){
+      const copay   = parseFloat(document.getElementById('p-cop-copay')?.value)||0;
+      const covV    = parseInt(document.getElementById('p-cop-visits')?.value)||0;
+      const oop     = parseFloat(document.getElementById('p-cop-oop')?.value)||0;
+      const oopMet  = parseFloat(document.getElementById('p-cop-oop-met')?.value)||0;
+      const oopLeft = Math.max(0,oop-oopMet);
+      pxInsPatientCoveredAmt = oopLeft<=0 ? 0 : Math.min(copay*covV, oopLeft);
+      pxPatientTotal = pxSwSub + pxInsPatientCoveredAmt;
+      pxPayNote = es?`Seguro BCBS (plan de copago). SW siempre cash. Porción del paciente en servicios cubiertos: $${pxInsPatientCoveredAmt.toFixed(0)}.`
+                    :`BCBS Insurance (copay plan). Shockwave always cash. Patient portion on covered services: $${pxInsPatientCoveredAmt.toFixed(0)}.`;
+    } else if(pxInsType==='coins'){
+      const ded     = parseFloat(document.getElementById('p-co-ded')?.value)||0;
+      const dedMet  = parseFloat(document.getElementById('p-co-ded-met')?.value)||0;
+      const coinsP  = parseFloat(document.getElementById('p-co-coins')?.value)||20;
+      const oop     = parseFloat(document.getElementById('p-co-oop')?.value)||0;
+      const oopMet  = parseFloat(document.getElementById('p-co-oop-met')?.value)||0;
+      const dedLeft = Math.max(0,ded-dedMet);
+      const oopLeft = Math.max(0,oop-oopMet);
+      const ptAl  = pxPtOn  ? pxPtV  * pxPtU * 16.40 : 0;
+      const adjAl = pxAdjOn ? pxAdjV * 22.00          : 0;
+      const extAl = pxExtOn ? pxExtV * 14.54          : 0;
+      const totAl = ptAl + adjAl + extAl;
+      const toDed = Math.min(dedLeft, totAl);
+      const afterDed = totAl - toDed;
+      const coinsAmt = afterDed * (coinsP/100);
+      let patCov = toDed + coinsAmt;
+      if(oopLeft>0 && patCov>=oopLeft) patCov=oopLeft;
+      else if(oopLeft<=0) patCov=0;
+      pxInsPatientCoveredAmt = patCov;
+      pxPatientTotal = pxSwSub + patCov;
+      pxPayNote = es?`Seguro BCBS (coaseguro). SW siempre cash. Porción del paciente en servicios cubiertos: $${patCov.toFixed(0)}.`
+                    :`BCBS Insurance (coinsurance plan). Shockwave always cash. Patient portion on covered services: $${patCov.toFixed(0)}.`;
+    }
   }
 
-  // Tier breakdown for recommendation box
-  function buildCostBreakdown(includeAdj, includePT){
-    const swR2=swR, adjR2=includeAdj?adjR:0, ptR2=includePT?ptR:0;
-    const perSess=swR2+adjR2+ptR2;
-    const total=perSess*sessions;
-    const disc=sessions>=10?0.10:sessions>=5?0.05:0;
-    const pif=Math.round(total*(1-disc));
-    const save=total-pif;
-    return {perSess,total,pif,save,disc:Math.round(disc*100)};
-  }
-
-  const essData = buildCostBreakdown(false,false);
-  const enhData = buildCostBreakdown(true,false);
-  const cmpData = buildCostBreakdown(true,true);
+  // Volume discount note
+  const pxVolDisc = pxSwOn && pxSwV>=5 ? (pxSwV>=10?`${es?'Tarifa 10+ visitas ($99/visita)':'10+ visit rate ($99/visit)'}`:
+    `${es?'Tarifa 5+ visitas ($110/visita)':'5+ visit rate ($110/visit)'}`) : null;
 
   // ── TRANSLATIONS ──
   const T = {
@@ -2122,28 +2173,6 @@ function buildROF(){
   };
   const progText=(prognosisMap[prognosis]||{en:prognosis,es:prognosis})[rofLang];
 
-  // ── TIER CARD BUILDER ──
-  function tierCard(name,desc,perSess,total,pif,disc,isBest,includeAdj,includePT){
-    const saveAmt=total-pif;
-    return `<div style="border:1.5px solid ${isBest?'#c9a84c':'#d4e2d8'};border-radius:10px;padding:18px 16px;
-      background:${isBest?'#fdfaf0':'#f6faf7'};position:relative;text-align:center;">
-      ${isBest?`<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);
-        background:#c9a84c;color:white;font-size:9px;font-weight:700;padding:3px 10px;
-        border-radius:8px;letter-spacing:.08em;white-space:nowrap;">${T.bestValueLabel}</div>`:''}
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7f70;margin-bottom:4px;">${name}</div>
-      <div style="font-size:12px;color:#3d5445;margin-bottom:10px;">${desc}</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#2f5c43;margin-bottom:2px;">$${perSess}</div>
-      <div style="font-size:11px;color:#6b7f70;margin-bottom:8px;">${T.perSessLabel}</div>
-      <div style="font-size:12px;padding:8px;background:white;border-radius:6px;border:1px solid #d4e2d8;">
-        <div style="color:#182820;font-weight:600;">${T.totalLabel}: $${total.toLocaleString()}</div>
-        ${disc>0?`<div style="color:#c97b2a;font-size:11px;margin-top:3px;">${T.payFullLabel}: $${pif.toLocaleString()} (${disc}% ${T.discLabel})</div>`:''}
-        ${disc>0?`<div style="color:#2a7f7f;font-size:11px;font-weight:600;">${T.saveLabel} $${saveAmt.toLocaleString()}</div>`:''}
-      </div>
-    </div>`;
-  }
-
-  const bestTier = sessions>=10?'complete':sessions>=5?'enhanced':'essential';
-
   // ── BUILD ROF HTML ──
   const rofHTML=`<div id="rofDoc" style="font-family:'DM Sans',sans-serif;color:#182820;">
 
@@ -2240,47 +2269,119 @@ function buildROF(){
         </div>
       </div>
 
-      <!-- ═══════════════ PAGE 1: STANDARD RATES ═══════════════ -->
+      <!-- ═══════════════ TREATMENT PROGRAM & PRICING ═══════════════ -->
       <div style="margin-bottom:22px;page-break-before:always;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5a8f6e;border-bottom:1px solid #eaf2ec;padding-bottom:6px;margin-bottom:12px;">${T.stdRatesTitle}</div>
-        <p style="font-size:13px;color:#6b7f70;line-height:1.6;margin-bottom:16px;">${T.stdRatesIntro}</p>
-        <div style="border:1.5px solid #d4e2d8;border-radius:10px;overflow:hidden;">
-          <div style="display:grid;grid-template-columns:1fr auto;gap:0;">
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:600;">${T.swLabel}</div>
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:700;color:#2f5c43;text-align:right;">$${RATE_SW_SINGLE}${T.perSession}</div>
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:600;">${T.adjLabel}</div>
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:700;color:#2f5c43;text-align:right;">$${RATE_ADJ_SINGLE}${T.perSession}</div>
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:600;">${T.ptLabel}</div>
-            <div style="padding:14px 16px;border-bottom:1px solid #eaf2ec;font-size:14px;font-weight:700;color:#2f5c43;text-align:right;">$${RATE_PT_SINGLE}${T.perSession}</div>
-            <div style="padding:14px 16px;background:#f6faf7;font-size:14px;font-weight:700;">${T.completeVisit}</div>
-            <div style="padding:14px 16px;background:#f6faf7;font-size:18px;font-weight:700;color:#2f5c43;text-align:right;font-family:'DM Serif Display',serif;">$${stdComplete}${T.perSession}</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5a8f6e;border-bottom:1px solid #eaf2ec;padding-bottom:6px;margin-bottom:16px;">
+          ${es?'Su Programa de Tratamiento y Costo':'Your Treatment Program &amp; Cost'}
+        </div>
+
+        <!-- PROGRAM SUMMARY BOX -->
+        <div style="background:#2f5c43;color:white;border-radius:10px;padding:20px 22px;margin-bottom:16px;">
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.2);">
+            ${es?'Resumen del Programa':'Program Summary'}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-family:'DM Serif Display',serif;font-size:26px;">${sessions}</div>
+              <div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">${T.sessions}</div>
+            </div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-family:'DM Serif Display',serif;font-size:18px;">${freq}</div>
+              <div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">${T.frequency}</div>
+            </div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-family:'DM Serif Display',serif;font-size:16px;">${reeval}</div>
+              <div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">${T.reeval}</div>
+            </div>
+          </div>
+          <!-- SERVICE LINES -->
+          <div style="font-size:12px;margin-bottom:12px;">
+            ${pxSwOn?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12);">
+              <span style="opacity:.85;">${es?'Terapia de Ondas de Choque (RPWT)':'Shockwave Therapy (RPWT)'} × ${pxSwV} ${es?'visitas':'visits'}</span>
+              <span style="font-weight:700;">$${pxSwSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxPtOn?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12);">
+              <span style="opacity:.85;">${es?'Ejercicio Terapéutico (97110)':'Physical Therapy / Therapeutic Exercise (97110)'} × ${pxPtV} ${es?'visitas':'visits'} × ${pxPtU} ${es?'unidades':'units'}</span>
+              <span style="font-weight:700;">$${pxPtSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxAdjOn?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12);">
+              <span style="opacity:.85;">${es?'Ajuste Quiropráctico (98941)':'Chiropractic Adjustment (98941)'} × ${pxAdjV} ${es?'visitas':'visits'}</span>
+              <span style="font-weight:700;">$${pxAdjSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxExtOn?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.12);">
+              <span style="opacity:.85;">${es?'Ajuste Extrem. (98943)':'Ext. Adjustment (98943)'} × ${pxExtV} ${es?'visitas':'visits'}</span>
+              <span style="font-weight:700;">$${pxExtSub.toFixed(0)}</span>
+            </div>`:''}
+          </div>
+          <!-- TOTAL -->
+          ${pxVolDisc?`<div style="font-size:11px;background:rgba(255,255,255,.12);border-radius:6px;padding:7px 10px;margin-bottom:10px;opacity:.9;">
+            ✓ ${es?'Precio por volumen aplicado':'Volume pricing applied'}: ${pxVolDisc}
+          </div>`:''}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(255,255,255,.25);">
+            <div>
+              <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.05em;">${es?'Total del Programa':'Program Total'}</div>
+              <div style="font-size:11px;opacity:.6;margin-top:2px;">${pxPayLabel}</div>
+            </div>
+            <div style="font-family:'DM Serif Display',serif;font-size:32px;color:#c9a84c;">$${pxPatientTotal.toFixed(0)}</div>
           </div>
         </div>
-        <div style="font-size:11px;color:#9ab0a8;margin-top:8px;">${T.standardNote}</div>
-      </div>
 
-      <!-- ═══════════════ PAGE 2: VALUE PROGRAM ═══════════════ -->
-      <div style="margin-bottom:22px;page-break-before:always;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5a8f6e;border-bottom:1px solid #eaf2ec;padding-bottom:6px;margin-bottom:12px;">${T.valueTitle}</div>
-        <p style="font-size:13px;color:#6b7f70;line-height:1.6;margin-bottom:16px;">${T.valueIntro}</p>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-          ${tierCard(T.essentialName,T.essentialDesc,essData.perSess,essData.total,essData.pif,essData.disc,bestTier==='essential',false,false)}
-          ${tierCard(T.enhancedName, T.enhancedDesc, enhData.perSess,enhData.total,enhData.pif,enhData.disc,bestTier==='enhanced',true,false)}
-          ${tierCard(T.completeName, T.completeDesc, cmpData.perSess,cmpData.total,cmpData.pif,cmpData.disc,bestTier==='complete',true,true)}
-        </div>
-
-        <div style="background:#eef7f0;border:1.5px solid #5a8f6e;border-radius:8px;padding:14px 16px;font-size:13px;margin-bottom:12px;">
-          <strong style="color:#2f5c43;">${T.basedOnPlan}</strong>
-          <div style="margin-top:8px;font-size:12px;color:#3d5445;line-height:1.8;">
-            ${T.essentialName}: $${essData.perSess}${T.perSession} × ${sessions} = $${essData.total.toLocaleString()}${essData.disc>0?` → ${T.payFullLabel} $${essData.pif.toLocaleString()} (${essData.disc}% ${T.discLabel})`:''}
-            <br>${T.enhancedName}: $${enhData.perSess}${T.perSession} × ${sessions} = $${enhData.total.toLocaleString()}${enhData.disc>0?` → ${T.payFullLabel} $${enhData.pif.toLocaleString()} (${enhData.disc}% ${T.discLabel})`:''}
-            <br>${T.completeName}: $${cmpData.perSess}${T.perSession} × ${sessions} = $${cmpData.total.toLocaleString()}${cmpData.disc>0?` → ${T.payFullLabel} $${cmpData.pif.toLocaleString()} (${cmpData.disc}% ${T.discLabel})`:''}
+        <!-- COST BREAKDOWN TABLE -->
+        <div style="border:1.5px solid #d4e2d8;border-radius:10px;overflow:hidden;margin-bottom:14px;">
+          <div style="background:#f6faf7;padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5a8f6e;border-bottom:1px solid #eaf2ec;">
+            ${es?'Desglose de Costos':'Cost Breakdown'}
+          </div>
+          <div style="padding:0 16px;">
+            ${pxSwOn?`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f5f1;font-size:13px;">
+              <span>${es?'Terapia de Ondas de Choque':'Shockwave Therapy'}</span>
+              <span style="color:#6b7f70;">$${pxSwR}${T.perSession} × ${pxSwV}</span>
+              <span style="font-weight:700;text-align:right;">$${pxSwSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxPtOn?`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f5f1;font-size:13px;">
+              <span>${es?'Ejercicio Terapéutico':'Physical Therapy'} (97110)</span>
+              <span style="color:#6b7f70;">${pxPtU} ${es?'un.':'units'} × $${pxPtR} × ${pxPtV} ${es?'vis.':'visits'}</span>
+              <span style="font-weight:700;text-align:right;">$${pxPtSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxAdjOn?`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f5f1;font-size:13px;">
+              <span>${es?'Ajuste Quiropráctico':'Chiropractic Adjustment'} (98941)</span>
+              <span style="color:#6b7f70;">$${pxAdjR}${T.perSession} × ${pxAdjV}</span>
+              <span style="font-weight:700;text-align:right;">$${pxAdjSub.toFixed(0)}</span>
+            </div>`:''}
+            ${pxExtOn?`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 0;border-bottom:1px solid #f0f5f1;font-size:13px;">
+              <span>${es?'Ajuste Extremidad':'Ext. Adjustment'} (98943)</span>
+              <span style="color:#6b7f70;">$${pxExtR}${T.perSession} × ${pxExtV}</span>
+              <span style="font-weight:700;text-align:right;">$${pxExtSub.toFixed(0)}</span>
+            </div>`:''}
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 0;border-top:2px solid #d4e2d8;font-size:14px;">
+              <span style="font-weight:600;">${es?'Total del Programa':'Program Subtotal'}</span>
+              <span style="font-weight:700;">$${pxCashTotal.toFixed(0)}</span>
+            </div>
+            ${pxPayMethod==='full'?`<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 0 10px;font-size:13px;color:#2a7f7f;">
+              <span style="font-weight:600;">✓ ${es?'Descuento pago completo (−10%)':'Pay-in-Full Discount (−10%)'}</span>
+              <span style="font-weight:700;">−$${(pxCashTotal-pxPatientTotal).toFixed(0)}</span>
+            </div>`:''}
+            ${pxPayMethod==='ins'?`<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 0 10px;font-size:13px;color:#5a8f6e;">
+              <span style="font-weight:600;">🩺 ${es?'Servicios cubiertos — porción del paciente':'Covered services — patient portion'}</span>
+              <span style="font-weight:700;">$${pxInsPatientCoveredAmt.toFixed(0)}</span>
+            </div>`:''}
+          </div>
+          <div style="background:#2f5c43;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="color:white;font-size:13px;font-weight:600;">${es?'Total Estimado del Paciente':'Estimated Patient Total'} · ${pxPayLabel}</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:26px;color:#c9a84c;">$${pxPatientTotal.toFixed(0)}</div>
           </div>
         </div>
 
-        <div style="font-size:12px;color:#6b7f70;padding:10px 14px;background:#f6faf7;border-radius:6px;">
-          ${T.finNote}
+        <!-- PAYMENT NOTE -->
+        <div style="background:#eef7f0;border:1.5px solid #8ab89a;border-radius:8px;padding:13px 16px;font-size:12px;color:#3d5445;line-height:1.6;margin-bottom:10px;">
+          <strong>${es?'Método de Pago':'Payment Method'}:</strong> ${pxPayLabel}<br>${pxPayNote}
+        </div>
+        ${pxPayMethod==='ins'?`<div style="background:#fdf8ec;border:1.5px solid #c9a84c;border-radius:8px;padding:12px 16px;font-size:11px;color:#7a5a18;line-height:1.6;">
+          ⚠️ ${es?'La Terapia de Ondas de Choque (RPWT) NO está cubierta por el seguro — siempre cash. Los estimados de seguro son aproximados — verifique los beneficios con BCBS antes del tratamiento.'
+                  :'Shockwave Therapy (RPWT) is NOT covered by insurance — always cash-pay. Insurance estimates are approximate — verify benefits with BCBS before treatment begins.'}
+        </div>`:''}
+        <div style="font-size:11px;color:#9ab0a8;margin-top:8px;">
+          💳 ${es?'Planes de pago disponibles. Los paquetes no son reembolsables pero son transferibles a un familiar con aprobación del proveedor.'
+                  :'Payment plans available. Packages are non-refundable but transferable to a family member with provider approval.'}
         </div>
       </div>
 

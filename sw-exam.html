@@ -388,9 +388,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   <div class="step-tab" id="tab3"><span class="n">4</span>Candidacy</div>
   <div class="step-tab" id="tab4"><span class="n">5</span>Exam</div>
   <div class="step-tab" id="tab5"><span class="n">6</span>Protocol</div>
-  <div class="step-tab" id="tab6"><span class="n">7</span>Pricing</div>
-  <div class="step-tab" id="tab7"><span class="n">8</span>Treatment</div>
-  <div class="step-tab" id="tab8"><span class="n">9</span>Summary</div>
+  <div class="step-tab" id="tab6"><span class="n">7</span>Treatment</div>
+  <div class="step-tab" id="tab7"><span class="n">8</span>Summary</div>
+  <div class="step-tab" id="tab8"><span class="n">9</span>Pricing</div>
   <div class="step-tab" id="tab9"><span class="n">★</span>ROF</div>
 </div>
 
@@ -769,11 +769,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 <div class="phase" id="phase5">
   <div class="phase-hdr"><div class="phase-lbl">Provider — Protocol</div><div class="phase-title">Recommended Treatment Protocol</div><div class="phase-desc">PINZHIMED PZ-3201M — adjusted per region, chronicity, and pain level.</div></div>
   <div id="protoContent"></div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(4)">← Back</button><button class="btn btn-p" onclick="initPricing();goTo(6)">Continue to Pricing →</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(4)">← Back</button><button class="btn btn-p" onclick="goTo(6)">Continue to Treatment Today →</button></div>
 </div>
 
-<!-- ═══ PHASE 6: PRICING BUILDER ═══ -->
-<div class="phase" id="phase6">
+<!-- ═══ PHASE 8: PRICING BUILDER ═══ -->
+<div class="phase" id="phase8">
   <div class="phase-hdr">
     <div class="phase-lbl">Provider — Treatment Package</div>
     <div class="phase-title">Treatment Pricing Builder</div>
@@ -942,11 +942,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     <button onclick="window.print()" style="display:block;width:100%;margin-top:14px;padding:10px;background:var(--gold);color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.03em;text-transform:uppercase;">🖨 Print / Save Pricing Summary</button>
   </div>
 
-  <div class="btn-row" style="margin-top:18px;"><button class="btn btn-o" onclick="goTo(5)">← Back to Protocol</button><button class="btn btn-p" onclick="goTo(7)">Continue to Treatment Today →</button></div>
+  <div class="btn-row" style="margin-top:18px;"><button class="btn btn-o" onclick="goTo(7)">← Back to Summary</button><button class="btn btn-p" onclick="buildROF();goTo(9)">Generate Report of Findings →</button></div>
 </div>
 
-<!-- ═══ PHASE 7: TREATMENT TODAY ═══ -->
-<div class="phase" id="phase7">
+<!-- ═══ PHASE 6: TREATMENT TODAY ═══ -->
+<div class="phase" id="phase6">
   <div class="phase-hdr"><div class="phase-lbl">Provider — Visit Notes</div><div class="phase-title">Treatment Received Today</div><div class="phase-desc">Document all services rendered this visit. Max 3 shockwave regions per session.</div></div>
   <div class="card">
     <div class="card-title">Services Rendered <span class="sub">Check all performed today</span></div>
@@ -1010,19 +1010,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     </div>
     <div class="row r1"><div class="field"><label>Next Appointment / Follow-up</label><input id="nextAppt" placeholder="e.g. Return in 5–7 days for session 2, ROF scheduled Thursday"></div></div>
   </div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(6)">← Back</button><button class="btn btn-p" onclick="buildSummary();goTo(8)">Generate Summary &amp; PDF →</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(5)">← Back</button><button class="btn btn-p" onclick="buildSummary();goTo(7)">Generate Summary &amp; PDF →</button></div>
 </div>
 
-<!-- ═══ PHASE 8: SUMMARY ═══ -->
-<div class="phase" id="phase8">
+<!-- ═══ PHASE 7: SUMMARY ═══ -->
+<div class="phase" id="phase7">
   <div class="phase-hdr"><div class="phase-lbl">Final — Summary &amp; Export</div><div class="phase-title">Clinical Summary</div><div class="phase-desc">Review, edit the note, then save and export.</div></div>
   <div class="card"><div class="card-title">Visit Summary</div><div id="summaryContent"></div></div>
   <div class="card"><div class="card-title">Clinical Note <span class="sub">Edit before saving</span></div><textarea class="note-ta" id="clinNote"></textarea></div>
   <div class="btn-row">
-    <button class="btn btn-o" onclick="goTo(7)">← Back</button>
+    <button class="btn btn-o" onclick="goTo(6)">← Back</button>
     <button class="btn btn-p" onclick="saveAll()">💾 Save to Drive &amp; Sheets</button>
     <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 Print / Preview PDF</button>
-    <button class="btn btn-gold" onclick="buildROF();goTo(9)">★ Generate Report of Findings</button>
+    <button class="btn btn-gold" onclick="initPricing();pCalc();goTo(8)">★ Continue to Pricing &amp; ROF</button>
     <button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button>
   </div>
   <div id="saveMsg" style="margin-top:10px;font-size:14px;color:var(--sage-dk);"></div>
@@ -1044,7 +1044,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     </div>
     <div style="padding:0;" id="rofPreview"></div>
   </div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(8)">← Back to Summary</button><button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(8)">← Back to Pricing</button><button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button></div>
 </div>
 
 </div><!-- /main -->
@@ -1212,7 +1212,7 @@ function goTo(n){
   document.getElementById('tab'+n).classList.remove('done');
   if(n===4){buildExam();calcVisits();}
   if(n===5)buildProtocol();
-  if(n===6){initPricing();pCalc();}
+  if(n===8){initPricing();pCalc();}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -2269,8 +2269,22 @@ function buildROF(){
         </div>
       </div>
 
+      <!-- SIGNATURES -->
+      <div style="display:flex;gap:40px;margin-top:28px;padding-top:18px;border-top:2px solid #eaf2ec;">
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:8px;">${T.patientAck}</div>
+          <div style="border-bottom:1.5px solid #182820;height:46px;margin-bottom:4px;"></div>
+          <div style="font-size:12px;color:#6b7f70;">${ptName} &nbsp;&nbsp; ${es?'Fecha':'Date'}: _______________</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:8px;">${T.providerLbl}</div>
+          <div style="border-bottom:1.5px solid #182820;height:46px;margin-bottom:4px;"></div>
+          <div style="font-size:12px;color:#6b7f70;">${provName} &nbsp;&nbsp; ${provDate}</div>
+        </div>
+      </div>
+
       <!-- ═══════════════ TREATMENT PROGRAM & PRICING ═══════════════ -->
-      <div style="margin-bottom:22px;page-break-before:always;">
+      <div style="margin-bottom:22px;margin-top:28px;page-break-before:always;">
         <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5a8f6e;border-bottom:1px solid #eaf2ec;padding-bottom:6px;margin-bottom:16px;">
           ${es?'Su Programa de Tratamiento y Costo':'Your Treatment Program &amp; Cost'}
         </div>
@@ -2382,20 +2396,6 @@ function buildROF(){
         <div style="font-size:11px;color:#9ab0a8;margin-top:8px;">
           💳 ${es?'Planes de pago disponibles. Los paquetes no son reembolsables pero son transferibles a un familiar con aprobación del proveedor.'
                   :'Payment plans available. Packages are non-refundable but transferable to a family member with provider approval.'}
-        </div>
-      </div>
-
-      <!-- SIGNATURES -->
-      <div style="display:flex;gap:40px;margin-top:28px;padding-top:18px;border-top:2px solid #eaf2ec;">
-        <div style="flex:1;">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:8px;">${T.patientAck}</div>
-          <div style="border-bottom:1.5px solid #182820;height:46px;margin-bottom:4px;"></div>
-          <div style="font-size:12px;color:#6b7f70;">${ptName} &nbsp;&nbsp; ${es?'Fecha':'Date'}: _______________</div>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7f70;margin-bottom:8px;">${T.providerLbl}</div>
-          <div style="border-bottom:1.5px solid #182820;height:46px;margin-bottom:4px;"></div>
-          <div style="font-size:12px;color:#6b7f70;">${provName} &nbsp;&nbsp; ${provDate}</div>
         </div>
       </div>
 

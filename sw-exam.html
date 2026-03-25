@@ -388,9 +388,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   <div class="step-tab" id="tab3"><span class="n">4</span>Candidacy</div>
   <div class="step-tab" id="tab4"><span class="n">5</span>Exam</div>
   <div class="step-tab" id="tab5"><span class="n">6</span>Protocol</div>
-  <div class="step-tab" id="tab6"><span class="n">7</span>Treatment</div>
-  <div class="step-tab" id="tab7"><span class="n">8</span>Summary</div>
-  <div class="step-tab" id="tab8"><span class="n">★</span>ROF</div>
+  <div class="step-tab" id="tab6"><span class="n">7</span>Pricing</div>
+  <div class="step-tab" id="tab7"><span class="n">8</span>Treatment</div>
+  <div class="step-tab" id="tab8"><span class="n">9</span>Summary</div>
+  <div class="step-tab" id="tab9"><span class="n">★</span>ROF</div>
 </div>
 
 <div class="main">
@@ -761,18 +762,191 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     <div class="slbl">Provider Signature</div>
     <div class="sig-wrap"><div class="sig-bar"><span>Provider Signature</span><button class="sig-clear" onclick="clearSig('provSig')">Clear</button></div><canvas class="sig-canvas" id="provSig" width="800" height="130"></canvas></div>
   </div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(3)">← Back</button><button class="btn btn-p" onclick="buildProtocol();goTo(5)">Generate Protocol →</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(4)">← Back</button><button class="btn btn-p" onclick="buildProtocol();goTo(5)">Generate Protocol →</button></div>
 </div>
 
 <!-- ═══ PHASE 5: PROTOCOL ═══ -->
 <div class="phase" id="phase5">
   <div class="phase-hdr"><div class="phase-lbl">Provider — Protocol</div><div class="phase-title">Recommended Treatment Protocol</div><div class="phase-desc">PINZHIMED PZ-3201M — adjusted per region, chronicity, and pain level.</div></div>
   <div id="protoContent"></div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(4)">← Back</button><button class="btn btn-p" onclick="goTo(6)">Continue to Treatment Today →</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(4)">← Back</button><button class="btn btn-p" onclick="initPricing();goTo(6)">Continue to Pricing →</button></div>
 </div>
 
-<!-- ═══ PHASE 6: TREATMENT TODAY ═══ -->
+<!-- ═══ PHASE 6: PRICING BUILDER ═══ -->
 <div class="phase" id="phase6">
+  <div class="phase-hdr">
+    <div class="phase-lbl">Provider — Treatment Package</div>
+    <div class="phase-title">Treatment Pricing Builder</div>
+    <div class="phase-desc">Build the patient's treatment package, select payment method, and calculate their cost.</div>
+  </div>
+
+  <!-- TIER -->
+  <div class="card">
+    <div class="card-title">Treatment Tier <span class="sub">Select a starting point — customize services below</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px;" id="priceTierGrid">
+      <div class="price-tier-tile" id="ptier-good" onclick="setPriceTier('good')" style="border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;position:relative;transition:all .17s;">
+        <div style="display:inline-block;background:var(--border);color:#fff;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin-bottom:7px;" class="ptier-badge">Good</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;display:block;margin-bottom:3px;">Essential</div>
+        <div style="font-size:.73rem;color:var(--muted);line-height:1.4;">Shockwave only</div>
+        <span style="position:absolute;top:7px;right:9px;display:none;font-size:.95rem;color:var(--sage-dk);" class="ptier-chk">✓</span>
+      </div>
+      <div class="price-tier-tile" id="ptier-better" onclick="setPriceTier('better')" style="border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;position:relative;transition:all .17s;">
+        <div style="display:inline-block;background:var(--border);color:#fff;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin-bottom:7px;" class="ptier-badge">Better</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;display:block;margin-bottom:3px;">Enhanced</div>
+        <div style="font-size:.73rem;color:var(--muted);line-height:1.4;">Shockwave + PT</div>
+        <span style="position:absolute;top:7px;right:9px;display:none;font-size:.95rem;color:var(--sage-dk);" class="ptier-chk">✓</span>
+      </div>
+      <div class="price-tier-tile" id="ptier-best" onclick="setPriceTier('best')" style="border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:center;position:relative;transition:all .17s;border-color:var(--gold);">
+        <div style="display:inline-block;background:var(--gold);color:#fff;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin-bottom:7px;" class="ptier-badge">Best</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;display:block;margin-bottom:3px;">Complete</div>
+        <div style="font-size:.73rem;color:var(--muted);line-height:1.4;">Shockwave + PT + Adjustment</div>
+        <span style="position:absolute;top:7px;right:9px;display:none;font-size:.95rem;color:var(--gold);" class="ptier-chk">✓</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICE BUILDER -->
+  <div class="card">
+    <div class="card-title">Service Builder <span class="sub">Rates auto-floor to minimums · SW auto-prices at volume</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <span style="background:#eaf2ec;border:1px solid var(--sage);border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:600;color:var(--sage-dk);">SW Standard $149</span>
+      <span style="background:#eaf2ec;border:1px solid var(--sage);border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:600;color:var(--sage-dk);">SW 5+ visits $110</span>
+      <span style="background:#eaf2ec;border:1px solid var(--sage);border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:600;color:var(--sage-dk);">SW 10+ visits $99</span>
+      <span style="background:#eaf2ec;border:1px solid var(--sage);border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:600;color:var(--sage-dk);">Adj floor $38</span>
+      <span style="background:#eaf2ec;border:1px solid var(--sage);border-radius:5px;padding:4px 10px;font-size:.73rem;font-weight:600;color:var(--sage-dk);">PT unit floor $17</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 80px;gap:9px;margin-bottom:4px;">
+      <div></div>
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;">Units/Visit</div>
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;">Visits</div>
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;">Rate ($)</div>
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;">Subtotal</div>
+    </div>
+    <!-- SW ROW -->
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 80px;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream-dk);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="price-tog on" id="ptog-sw" onclick="pToggle('sw')" style="width:34px;height:19px;background:var(--sage);border-radius:19px;position:relative;cursor:pointer;flex-shrink:0;transition:background .18s;"><div style="position:absolute;width:13px;height:13px;background:white;border-radius:50%;top:3px;left:18px;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div></div>
+        <div><div style="font-size:.83rem;font-weight:500;">Shockwave (RPWT)</div><div style="font-size:.7rem;color:var(--muted);">Cash only · auto-prices by volume</div></div>
+      </div>
+      <div style="text-align:center;font-size:.72rem;color:var(--muted);">—</div>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-sw-visits" min="1" max="30" value="6" oninput="pCalc()">
+      <input style="width:100%;border:1.5px solid var(--sage-lt);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:#eaf2ec;color:var(--sage-dk);font-weight:700;outline:none;" type="text" id="p-sw-rate" value="$110" readonly>
+      <div style="text-align:center;font-size:.84rem;font-weight:600;" id="p-sw-sub">—</div>
+    </div>
+    <!-- PT ROW -->
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 80px;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream-dk);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="price-tog" id="ptog-pt" onclick="pToggle('pt')" style="width:34px;height:19px;background:var(--border);border-radius:19px;position:relative;cursor:pointer;flex-shrink:0;transition:background .18s;"><div style="position:absolute;width:13px;height:13px;background:white;border-radius:50%;top:3px;left:3px;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div></div>
+        <div><div style="font-size:.83rem;font-weight:500;">Physical Therapy / Therapeutic Exercise (97110)</div><div style="font-size:.7rem;color:var(--muted);">BCBS allowable $16.40/unit · floor $17/unit · standard $22/unit</div></div>
+      </div>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-pt-units" min="1" max="8" value="2" oninput="pCalc()" disabled>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-pt-visits" min="1" max="30" value="6" oninput="pCalc()" disabled>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-pt-rate" min="17" max="22" step="0.5" value="22" oninput="pCalc()" disabled>
+      <div style="text-align:center;font-size:.84rem;font-weight:600;" id="p-pt-sub">—</div>
+    </div>
+    <!-- ADJ ROW -->
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 80px;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream-dk);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="price-tog" id="ptog-adj" onclick="pToggle('adj')" style="width:34px;height:19px;background:var(--border);border-radius:19px;position:relative;cursor:pointer;flex-shrink:0;transition:background .18s;"><div style="position:absolute;width:13px;height:13px;background:white;border-radius:50%;top:3px;left:3px;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div></div>
+        <div><div style="font-size:.83rem;font-weight:500;">Adjustment 98941 (3-4 regions)</div><div style="font-size:.7rem;color:var(--muted);">BCBS allowable $22.00 · cash floor $38 · standard $60</div></div>
+      </div>
+      <div style="text-align:center;font-size:.72rem;color:var(--muted);">—</div>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-adj-visits" min="1" max="30" value="6" oninput="pCalc()" disabled>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-adj-rate" min="38" max="60" step="1" value="60" oninput="pCalc()" disabled>
+      <div style="text-align:center;font-size:.84rem;font-weight:600;" id="p-adj-sub">—</div>
+    </div>
+    <!-- EXT ADJ ROW -->
+    <div style="display:grid;grid-template-columns:1fr 70px 70px 80px 80px;gap:9px;align-items:center;padding:9px 0;">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="price-tog" id="ptog-ext" onclick="pToggle('ext')" style="width:34px;height:19px;background:var(--border);border-radius:19px;position:relative;cursor:pointer;flex-shrink:0;transition:background .18s;"><div style="position:absolute;width:13px;height:13px;background:white;border-radius:50%;top:3px;left:3px;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div></div>
+        <div><div style="font-size:.83rem;font-weight:500;">Ext. Adjustment 98943</div><div style="font-size:.7rem;color:var(--muted);">BCBS allowable $14.54 · cash floor $38 · standard $60</div></div>
+      </div>
+      <div style="text-align:center;font-size:.72rem;color:var(--muted);">—</div>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-ext-visits" min="1" max="30" value="6" oninput="pCalc()" disabled>
+      <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 7px;font-family:'DM Sans',sans-serif;font-size:.83rem;text-align:center;background:var(--cream);outline:none;" type="number" id="p-ext-rate" min="38" max="60" step="1" value="60" oninput="pCalc()" disabled>
+      <div style="text-align:center;font-size:.84rem;font-weight:600;" id="p-ext-sub">—</div>
+    </div>
+    <div id="p-sw-disc" style="display:none;margin-top:12px;background:#e4f2f1;border:1px solid var(--teal);color:var(--teal);border-radius:7px;padding:9px 13px;font-size:.78rem;line-height:1.45;"></div>
+  </div>
+
+  <!-- PAYMENT METHOD -->
+  <div class="card">
+    <div class="card-title">Payment Method <span class="sub">Shockwave is always cash · Insurance applies to PT and Adj only</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;" id="pPayGrid">
+      <div class="p-pay-tile" id="ppay-full" onclick="setPPay('full')" style="border:2px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;text-align:center;font-size:.77rem;font-weight:600;transition:all .15s;color:var(--muted);">
+        <span style="font-size:1.15rem;margin-bottom:3px;display:block;">💵</span>Pay in Full<br><span style="font-size:.66rem;font-weight:400;color:var(--sage-dk);">−10% discount</span>
+      </div>
+      <div class="p-pay-tile" id="ppay-2pay" onclick="setPPay('2pay')" style="border:2px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;text-align:center;font-size:.77rem;font-weight:600;transition:all .15s;color:var(--muted);">
+        <span style="font-size:1.15rem;margin-bottom:3px;display:block;">📅</span>2-Pay In-House
+      </div>
+      <div class="p-pay-tile" id="ppay-cc" onclick="setPPay('cc')" style="border:2px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;text-align:center;font-size:.77rem;font-weight:600;transition:all .15s;color:var(--muted);">
+        <span style="font-size:1.15rem;margin-bottom:3px;display:block;">💳</span>CareCredit
+      </div>
+      <div class="p-pay-tile" id="ppay-hsa" onclick="setPPay('hsa')" style="border:2px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;text-align:center;font-size:.77rem;font-weight:600;transition:all .15s;color:var(--muted);">
+        <span style="font-size:1.15rem;margin-bottom:3px;display:block;">🏦</span>HSA / FSA
+      </div>
+      <div class="p-pay-tile" id="ppay-ins" onclick="setPPay('ins')" style="border:2px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;text-align:center;font-size:.77rem;font-weight:600;transition:all .15s;color:var(--muted);">
+        <span style="font-size:1.15rem;margin-bottom:3px;display:block;">🩺</span>Insurance<br><span style="font-size:.66rem;font-weight:400;">BCBS</span>
+      </div>
+    </div>
+
+    <!-- INSURANCE BLOCK -->
+    <div id="p-ins-block" style="display:none;margin-top:14px;">
+      <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+      <div style="font-size:.73rem;color:#7a5a18;background:#fdf3e2;border-left:3px solid var(--gold);padding:8px 11px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5;">
+        ⚠️ Shockwave (RPWT) is <strong>NOT covered</strong> by BCBS — always cash-pay. Benefits below apply only to PT (97110) and Adjustments (98941 / 98943).
+      </div>
+      <!-- Plan type -->
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sage);margin-bottom:9px;">Plan Type</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <div id="p-instype-copay" onclick="setPInsType('copay')" style="flex:1;border:2px solid var(--border);border-radius:7px;padding:9px;text-align:center;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--muted);transition:all .15s;">Copay Plan</div>
+        <div id="p-instype-coins" onclick="setPInsType('coins')" style="flex:1;border:2px solid var(--border);border-radius:7px;padding:9px;text-align:center;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--muted);transition:all .15s;">Coinsurance Plan</div>
+      </div>
+      <!-- COPAY FIELDS -->
+      <div id="p-copay-block" style="display:none;">
+        <div style="font-size:.73rem;color:var(--sage-dk);background:#eaf2ec;border-left:3px solid var(--sage);padding:8px 11px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5;"><strong>Rule:</strong> Patient pays copay every visit — before AND after deductible. Once OOP max is met → $0 on covered services.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;">
+          <div class="field"><label>Copay per Visit ($)</label><input type="number" id="p-cop-copay" value="30" min="0" oninput="pCalc()"></div>
+          <div class="field"><label>Covered Visit Count</label><input type="number" id="p-cop-visits" value="6" min="1" oninput="pCalc()"></div>
+          <div class="field"><label>Out-of-Pocket Max ($)</label><input type="number" id="p-cop-oop" value="5000" min="0" oninput="pCalc()"></div>
+          <div class="field"><label>OOP Already Met ($)</label><input type="number" id="p-cop-oop-met" value="0" min="0" oninput="pCalc()"></div>
+        </div>
+      </div>
+      <!-- COINSURANCE FIELDS -->
+      <div id="p-coins-block" style="display:none;">
+        <div style="font-size:.73rem;color:var(--sage-dk);background:#eaf2ec;border-left:3px solid var(--sage);padding:8px 11px;border-radius:0 6px 6px 0;margin-bottom:10px;line-height:1.5;"><strong>Rule:</strong> Before deductible → 100% of allowable. After deductible → coinsurance % of allowable. After OOP max → $0.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;">
+          <div class="field"><label>Annual Deductible ($)</label><input type="number" id="p-co-ded" value="2000" min="0" oninput="pCalc()"></div>
+          <div class="field"><label>Deductible Already Met ($)</label><input type="number" id="p-co-ded-met" value="0" min="0" oninput="pCalc()"></div>
+          <div class="field"><label>Coinsurance % (patient pays)</label><input type="number" id="p-co-coins" value="20" min="0" max="100" oninput="pCalc()"></div>
+          <div class="field"><label>Out-of-Pocket Max ($)</label><input type="number" id="p-co-oop" value="5000" min="0" oninput="pCalc()"></div>
+          <div class="field"><label>OOP Already Met ($)</label><input type="number" id="p-co-oop-met" value="0" min="0" oninput="pCalc()"></div>
+        </div>
+      </div>
+      <!-- ALLOWABLE TABLE -->
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sage);margin:12px 0 8px;">BCBS Allowables — 2023 Fee Schedule</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.76rem;">
+        <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;font-weight:700;color:var(--muted);padding:4px 7px;font-size:.68rem;text-transform:uppercase;">Code</th><th style="text-align:left;font-weight:700;color:var(--muted);padding:4px 7px;font-size:.68rem;text-transform:uppercase;">Description</th><th style="text-align:right;font-weight:700;color:var(--muted);padding:4px 7px;font-size:.68rem;text-transform:uppercase;">Allowable</th></tr>
+        <tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:5px 7px;">98941</td><td style="padding:5px 7px;">CMT 3-4 Regions</td><td style="padding:5px 7px;text-align:right;font-weight:600;">$22.00</td></tr>
+        <tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:5px 7px;">98943</td><td style="padding:5px 7px;">Ext. Adjustment</td><td style="padding:5px 7px;text-align:right;font-weight:600;">$14.54</td></tr>
+        <tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:5px 7px;">97110 ×1</td><td style="padding:5px 7px;">Therapeutic Exercise, 1 unit</td><td style="padding:5px 7px;text-align:right;font-weight:600;">$16.40</td></tr>
+        <tr><td style="padding:5px 7px;">97110 ×2</td><td style="padding:5px 7px;">Therapeutic Exercise, 2 units (30 min)</td><td style="padding:5px 7px;text-align:right;font-weight:600;">$32.80</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- LIVE SUMMARY -->
+  <div style="background:var(--ink);color:white;border-radius:12px;padding:20px 20px 22px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12);">📋 Treatment Cost Summary</div>
+    <div id="p-sum-body"><div style="text-align:center;color:#555;font-size:.8rem;padding:14px 0;font-style:italic;">Select services and payment method above</div></div>
+    <button onclick="window.print()" style="display:block;width:100%;margin-top:14px;padding:10px;background:var(--gold);color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.03em;text-transform:uppercase;">🖨 Print / Save Pricing Summary</button>
+  </div>
+
+  <div class="btn-row" style="margin-top:18px;"><button class="btn btn-o" onclick="goTo(5)">← Back to Protocol</button><button class="btn btn-p" onclick="goTo(7)">Continue to Treatment Today →</button></div>
+</div>
+
+<!-- ═══ PHASE 7: TREATMENT TODAY ═══ -->
+<div class="phase" id="phase7">
   <div class="phase-hdr"><div class="phase-lbl">Provider — Visit Notes</div><div class="phase-title">Treatment Received Today</div><div class="phase-desc">Document all services rendered this visit. Max 3 shockwave regions per session.</div></div>
   <div class="card">
     <div class="card-title">Services Rendered <span class="sub">Check all performed today</span></div>
@@ -836,26 +1010,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     </div>
     <div class="row r1"><div class="field"><label>Next Appointment / Follow-up</label><input id="nextAppt" placeholder="e.g. Return in 5–7 days for session 2, ROF scheduled Thursday"></div></div>
   </div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(5)">← Back</button><button class="btn btn-p" onclick="buildSummary();goTo(7)">Generate Summary &amp; PDF →</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(6)">← Back</button><button class="btn btn-p" onclick="buildSummary();goTo(8)">Generate Summary &amp; PDF →</button></div>
 </div>
 
-<!-- ═══ PHASE 7: SUMMARY ═══ -->
-<div class="phase" id="phase7">
+<!-- ═══ PHASE 8: SUMMARY ═══ -->
+<div class="phase" id="phase8">
   <div class="phase-hdr"><div class="phase-lbl">Final — Summary &amp; Export</div><div class="phase-title">Clinical Summary</div><div class="phase-desc">Review, edit the note, then save and export.</div></div>
   <div class="card"><div class="card-title">Visit Summary</div><div id="summaryContent"></div></div>
   <div class="card"><div class="card-title">Clinical Note <span class="sub">Edit before saving</span></div><textarea class="note-ta" id="clinNote"></textarea></div>
   <div class="btn-row">
-    <button class="btn btn-o" onclick="goTo(6)">← Back</button>
+    <button class="btn btn-o" onclick="goTo(7)">← Back</button>
     <button class="btn btn-p" onclick="saveAll()">💾 Save to Drive &amp; Sheets</button>
     <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 Print / Preview PDF</button>
-    <button class="btn btn-gold" onclick="buildROF();goTo(8)">★ Generate Report of Findings</button>
+    <button class="btn btn-gold" onclick="buildROF();goTo(9)">★ Generate Report of Findings</button>
     <button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button>
   </div>
   <div id="saveMsg" style="margin-top:10px;font-size:14px;color:var(--sage-dk);"></div>
 </div>
 
-<!-- ═══ PHASE 8: ROF ═══ -->
-<div class="phase" id="phase8">
+<!-- ═══ PHASE 9: ROF ═══ -->
+<div class="phase" id="phase9">
   <div class="phase-hdr"><div class="phase-lbl">Day 2 Document</div><div class="phase-title">Report of Findings</div><div class="phase-desc">Review, then print or export for the patient's Day 2 visit.</div></div>
   <div class="card" style="padding:0;overflow:hidden;">
     <div style="background:var(--sage-dk);padding:13px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -870,7 +1044,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
     </div>
     <div style="padding:0;" id="rofPreview"></div>
   </div>
-  <div class="btn-row"><button class="btn btn-o" onclick="goTo(7)">← Back to Summary</button><button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button></div>
+  <div class="btn-row"><button class="btn btn-o" onclick="goTo(8)">← Back to Summary</button><button class="btn btn-o btn-sm" onclick="startNew()">+ New Patient</button></div>
 </div>
 
 </div><!-- /main -->
@@ -1038,6 +1212,7 @@ function goTo(n){
   document.getElementById('tab'+n).classList.remove('done');
   if(n===4){buildExam();calcVisits();}
   if(n===5)buildProtocol();
+  if(n===6){initPricing();pCalc();}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -2643,6 +2818,285 @@ function pickupPatient(idx){
     loadPatient(r[0],r[5]||'{}');
     document.getElementById('waitroom').classList.remove('active');
   }catch(e){alert('Error loading patient: '+e.message);}
+}
+
+// ══════════════════════════════════════════════
+// PRICING BUILDER (Phase 6)
+// ══════════════════════════════════════════════
+const PX = {
+  SW_RATES:{base:149,five:110,ten:99},
+  FLOORS:{adj:38,ext:38,ptUnit:17},
+  BCBS:{adj:22.00,ext:14.54,pt1:16.40},
+  state:{
+    sw:{on:true,v:6,r:149},
+    pt:{on:false,v:6,u:2,r:22},
+    adj:{on:false,v:6,r:60},
+    ext:{on:false,v:6,r:60},
+    pay:null,ins:null
+  }
+};
+
+// Called when entering Phase 6 — pre-populate visit count from Visit Calculator
+function initPricing(){
+  const visits = parseInt(document.getElementById('vcVisits')?.textContent)||6;
+  // Check if BCBS was entered in demographics
+  const carrier = (document.getElementById('insCarrier')?.value||'').toLowerCase();
+  const hasBCBS = carrier.includes('blue') || carrier.includes('bcbs');
+  // Set visit counts to match the recommended visit count
+  ['sw','pt','adj','ext'].forEach(s=>{
+    const el = document.getElementById('p-'+s+'-visits');
+    if(el) el.value = visits;
+    PX.state[s].v = visits;
+  });
+  // Set copay visit count too
+  const copV = document.getElementById('p-cop-visits');
+  if(copV) copV.value = visits;
+  // Auto-detect tier from exam treatment plan chips
+  const txChips = document.getElementById('txPlanChips');
+  if(txChips){
+    const sel = [...txChips.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim().toLowerCase());
+    const hasSW = sel.some(t=>t.includes('shockwave'));
+    const hasPT = sel.some(t=>t.includes('exercise')||t.includes('therapy'));
+    const hasAdj = sel.some(t=>t.includes('adjustment'));
+    if(hasSW && hasPT && hasAdj) pSetTier('best');
+    else if(hasSW && hasPT) pSetTier('better');
+    else pSetTier('good');
+  } else {
+    pSetTier('better');
+  }
+  // Auto-select insurance if BCBS detected
+  if(hasBCBS) setPPay('ins');
+  else setPPay('full');
+}
+
+function pSwRate(v){ return v>=10?PX.SW_RATES.ten:v>=5?PX.SW_RATES.five:PX.SW_RATES.base; }
+function pClamp(v,mn,mx){ return Math.min(Math.max(parseFloat(v)||mn,mn),mx); }
+function pFmt(n){ return '$'+n.toFixed(0); }
+function pFmtc(n){ return '$'+n.toFixed(2); }
+
+function pSetSvc(s,on){
+  PX.state[s].on=on;
+  const tog=document.getElementById('ptog-'+s);
+  if(tog){
+    if(on){ tog.style.background='var(--sage)'; tog.querySelector('div').style.left='18px'; }
+    else { tog.style.background='var(--border)'; tog.querySelector('div').style.left='3px'; }
+  }
+  ['visits','rate','units'].forEach(f=>{
+    const el=document.getElementById('p-'+s+'-'+f);
+    if(el) el.disabled=!on;
+  });
+}
+
+function pToggle(s){
+  pSetSvc(s,!PX.state[s].on);
+  // clear tier highlight
+  document.querySelectorAll('.price-tier-tile').forEach(t=>{
+    t.style.borderColor='var(--border)';
+    t.style.background='';
+    t.querySelector('.ptier-chk').style.display='none';
+    t.querySelector('.ptier-badge').style.background='var(--border)';
+  });
+  pCalc();
+}
+
+function setPriceTier(t){ pSetTier(t); pCalc(); }
+function pSetTier(t){
+  document.querySelectorAll('.price-tier-tile').forEach(el=>{
+    el.style.borderColor='var(--border)';
+    el.style.background='';
+    el.querySelector('.ptier-chk').style.display='none';
+    el.querySelector('.ptier-badge').style.background='var(--border)';
+  });
+  const tile=document.getElementById('ptier-'+t);
+  if(tile){
+    const isGold=t==='best';
+    tile.style.borderColor=isGold?'var(--gold)':'var(--sage-dk)';
+    tile.style.background=isGold?'#fdf3e2':'var(--cream-dk)';
+    tile.querySelector('.ptier-chk').style.display='block';
+    tile.querySelector('.ptier-badge').style.background=isGold?'var(--gold)':'var(--sage-dk)';
+  }
+  if(t==='good'){ pSetSvc('sw',true);pSetSvc('pt',false);pSetSvc('adj',false);pSetSvc('ext',false); }
+  else if(t==='better'){ pSetSvc('sw',true);pSetSvc('pt',true);pSetSvc('adj',false);pSetSvc('ext',false); }
+  else { pSetSvc('sw',true);pSetSvc('pt',true);pSetSvc('adj',true);pSetSvc('ext',false); }
+}
+
+function setPPay(p){
+  PX.state.pay=p;
+  document.querySelectorAll('.p-pay-tile').forEach(t=>{
+    t.style.borderColor='var(--border)'; t.style.background=''; t.style.color='var(--muted)';
+  });
+  const tile=document.getElementById('ppay-'+p);
+  if(tile){ tile.style.borderColor='var(--sage-dk)'; tile.style.background='var(--cream-dk)'; tile.style.color='var(--sage-dk)'; }
+  document.getElementById('p-ins-block').style.display=(p==='ins')?'block':'none';
+  pCalc();
+}
+
+function setPInsType(t){
+  PX.state.ins=t;
+  ['copay','coins'].forEach(x=>{
+    const btn=document.getElementById('p-instype-'+x);
+    if(btn){ btn.style.borderColor=x===t?'var(--sage-dk)':'var(--border)'; btn.style.background=x===t?'var(--cream-dk)':''; btn.style.color=x===t?'var(--sage-dk)':'var(--muted)'; }
+    const blk=document.getElementById('p-'+x+'-block');
+    if(blk) blk.style.display=x===t?'block':'none';
+  });
+  pCalc();
+}
+
+function pCalc(){
+  const gv=id=>document.getElementById(id);
+  const swV=parseInt(gv('p-sw-visits')?.value)||1;
+  const ptV=parseInt(gv('p-pt-visits')?.value)||1;
+  const ptU=parseInt(gv('p-pt-units')?.value)||2;
+  const adjV=parseInt(gv('p-adj-visits')?.value)||1;
+  const extV=parseInt(gv('p-ext-visits')?.value)||1;
+  const swR=pSwRate(swV);
+  if(gv('p-sw-rate')) gv('p-sw-rate').value='$'+swR;
+  let ptR=pClamp(gv('p-pt-rate')?.value,PX.FLOORS.ptUnit,22);
+  if(gv('p-pt-rate')) gv('p-pt-rate').value=ptR;
+  let adjR=pClamp(gv('p-adj-rate')?.value,PX.FLOORS.adj,60);
+  if(gv('p-adj-rate')) gv('p-adj-rate').value=adjR;
+  let extR=pClamp(gv('p-ext-rate')?.value,PX.FLOORS.ext,60);
+  if(gv('p-ext-rate')) gv('p-ext-rate').value=extR;
+  const ps=PX.state;
+  ps.sw={...ps.sw,v:swV,r:swR}; ps.pt={...ps.pt,v:ptV,u:ptU,r:ptR};
+  ps.adj={...ps.adj,v:adjV,r:adjR}; ps.ext={...ps.ext,v:extV,r:extR};
+  const swS=ps.sw.on?swV*swR:0, ptS=ps.pt.on?ptV*ptR*ptU:0;
+  const adjS=ps.adj.on?adjV*adjR:0, extS=ps.ext.on?extV*extR:0;
+  const total=swS+ptS+adjS+extS;
+  if(gv('p-sw-sub')) gv('p-sw-sub').textContent=ps.sw.on?pFmt(swS):'—';
+  if(gv('p-pt-sub')) gv('p-pt-sub').textContent=ps.pt.on?pFmt(ptS):'—';
+  if(gv('p-adj-sub')) gv('p-adj-sub').textContent=ps.adj.on?pFmt(adjS):'—';
+  if(gv('p-ext-sub')) gv('p-ext-sub').textContent=ps.ext.on?pFmt(extS):'—';
+  // volume discount callout
+  const dn=gv('p-sw-disc');
+  if(dn && ps.sw.on && swV>=5){
+    const saved=(PX.SW_RATES.base-swR)*swV;
+    dn.innerHTML=`<strong>Volume pricing applied:</strong> ${swV>=10?'10+ visit rate ($99/visit)':'5+ visit rate ($110/visit)'} — patient saves <strong>${pFmt(saved)}</strong>`;
+    dn.style.display='block';
+  } else if(dn){ dn.style.display='none'; }
+  pBuildSum(swS,ptS,adjS,extS,total,ptR,ptU,adjR,extR);
+}
+
+function pSl(l,v,disc=false,sub=false){
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);gap:7px;">
+    <div style="color:${sub?'#888':'#ccc'};flex:1;${sub?'font-size:.73rem;padding-left:10px':''}">${l}</div>
+    <div style="font-weight:600;white-space:nowrap;${disc?'color:#7EC8A4':sub?'color:#aaa;font-size:.73rem':''}">${v}</div>
+  </div>`;
+}
+
+function pBuildSum(swS,ptS,adjS,extS,total,ptR,ptU,adjR,extR){
+  const c=document.getElementById('p-sum-body');
+  if(!c)return;
+  const ps=PX.state;
+  const anyOn=ps.sw.on||ps.pt.on||ps.adj.on||ps.ext.on;
+  if(!anyOn){c.innerHTML='<div style="text-align:center;color:#555;font-size:.8rem;padding:14px 0;font-style:italic;">Enable at least one service</div>';return;}
+  let h='';
+  if(ps.sw.on){h+=pSl(`Shockwave × ${ps.sw.v} visits`,pFmt(swS));h+=pSl(`$${ps.sw.r}/visit (cash only)`,'',false,true);}
+  if(ps.pt.on){h+=pSl(`PT 97110 × ${ps.pt.v} visits`,pFmt(ptS));h+=pSl(`${ptU} units × $${ptR} = $${(ptR*ptU).toFixed(0)}/visit`,'',false,true);}
+  if(ps.adj.on){h+=pSl(`Adj 98941 × ${ps.adj.v} visits`,pFmt(adjS));h+=pSl(`$${adjR}/visit`,'',false,true);}
+  if(ps.ext.on){h+=pSl(`Ext Adj 98943 × ${ps.ext.v} visits`,pFmt(extS));h+=pSl(`$${extR}/visit`,'',false,true);}
+  h+='<div style="border:none;border-top:1px solid rgba(255,255,255,.13);margin:10px 0;"></div>';
+  const p=ps.pay;
+  if(!p){
+    h+=pSl('Total',pFmt(total));
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:2px solid rgba(255,255,255,.2);"><div style="font-family:'DM Serif Display',serif;">↑ Select payment method</div></div>`;
+    c.innerHTML=h; return;
+  }
+  if(p==='full'){
+    const d=total*.10,t=total-d;
+    h+=pSl('Subtotal',pFmt(total));
+    h+=pSl('Pay-in-Full −10%','−'+pFmt(d),true);
+    h+=pTotal(t);
+    h+=pNote('Patient pays '+pFmt(t)+' in full today. No further payments.');
+  } else if(p==='2pay'){
+    const hf=total/2;
+    h+=pSl('Total',pFmt(total));
+    h+=pSl('Payment 1 (today)',pFmt(hf));
+    h+=pSl('Payment 2 (30 days)',pFmt(hf));
+    h+=pTotal(total);
+    h+=pNote('In-house 2-pay: '+pFmt(hf)+' today, '+pFmt(hf)+' in 30 days. No interest.');
+  } else if(p==='cc'){
+    h+=pSl('Total',pFmt(total));
+    h+=pTotal(total);
+    h+=pNote('CareCredit — patient applies at carecredit.com. Verify promotional terms at enrollment.');
+  } else if(p==='hsa'){
+    h+=pSl('Total',pFmt(total));
+    h+=pTotal(total);
+    h+=pNote('HSA/FSA — all services qualify. Patient pays with HSA/FSA card at time of service.');
+  } else if(p==='ins'){
+    h+=pInsCalc(swS,total,ptR,ptU);
+    c.innerHTML=h; return;
+  }
+  c.innerHTML=h;
+}
+
+function pTotal(v){
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:2px solid rgba(255,255,255,.2);">
+    <div style="font-family:'DM Serif Display',serif;">Patient Total</div>
+    <div style="font-size:1.5rem;font-weight:700;color:var(--gold);">${pFmt(v)}</div>
+  </div>`;
+}
+function pNote(t){
+  return `<div style="margin-top:10px;font-size:.73rem;background:rgba(255,255,255,.07);border-radius:6px;padding:9px 11px;color:#ccc;line-height:1.5;">${t}</div>`;
+}
+
+function pInsCalc(swS,total,ptR,ptU){
+  const ps=PX.state;
+  let h='';
+  if(ps.ins==='copay'){
+    const copay=parseFloat(document.getElementById('p-cop-copay')?.value)||0;
+    const covV=parseInt(document.getElementById('p-cop-visits')?.value)||0;
+    const oop=parseFloat(document.getElementById('p-cop-oop')?.value)||0;
+    const oopMet=parseFloat(document.getElementById('p-cop-oop-met')?.value)||0;
+    const oopLeft=Math.max(0,oop-oopMet);
+    let patCov;
+    if(oopLeft<=0){patCov=0;h+='<div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#7EC8A4;margin:8px 0 4px;">✅ OOP Max Already Reached</div>';h+=pSl('Covered svcs patient owes','$0',true);}
+    else{patCov=Math.min(copay*covV,oopLeft);h+=pSl(`Copay × ${covV} visits @ ${pFmt(copay)}/visit`,pFmt(patCov));if(copay*covV>oopLeft)h+=pSl('Capped at remaining OOP',pFmt(oopLeft),false,true);}
+    h+='<div style="border:none;border-top:1px solid rgba(255,255,255,.13);margin:10px 0;"></div>';
+    h+=pSl('Shockwave (cash — not covered)',pFmt(swS));
+    h+=pSl('Covered svcs patient portion',pFmt(patCov));
+    const patTotal=swS+patCov;
+    h+=pTotal(patTotal);
+    h+=pNote('<strong>Copay plan:</strong> Patient owes copay every visit — before AND after deductible. Copay counts toward OOP. Once OOP max is met, patient pays $0 on covered services. Shockwave is always cash.<br><br>⚠️ Always verify current BCBS benefits before quoting.');
+  } else if(ps.ins==='coins'){
+    const ded=parseFloat(document.getElementById('p-co-ded')?.value)||0;
+    const dedMet=parseFloat(document.getElementById('p-co-ded-met')?.value)||0;
+    const coinsP=parseFloat(document.getElementById('p-co-coins')?.value)||20;
+    const oop=parseFloat(document.getElementById('p-co-oop')?.value)||0;
+    const oopMet=parseFloat(document.getElementById('p-co-oop-met')?.value)||0;
+    const dedLeft=Math.max(0,ded-dedMet);
+    const oopLeft=Math.max(0,oop-oopMet);
+    const ptAl=ps.pt.on?ps.pt.v*ptU*PX.BCBS.pt1:0;
+    const adjAl=ps.adj.on?ps.adj.v*PX.BCBS.adj:0;
+    const extAl=ps.ext.on?ps.ext.v*PX.BCBS.ext:0;
+    const totAl=ptAl+adjAl+extAl;
+    const toDed=Math.min(dedLeft,totAl);
+    const afterDed=totAl-toDed;
+    const coinsAmt=afterDed*(coinsP/100);
+    let patCov=toDed+coinsAmt;
+    let hitOop=false;
+    if(oopLeft>0&&patCov>=oopLeft){patCov=oopLeft;hitOop=true;}
+    else if(oopLeft<=0){patCov=0;}
+    if(ps.adj.on) h+=pSl(`98941 allowable × ${ps.adj.v} visits`,pFmtc(adjAl),false,true);
+    if(ps.ext.on) h+=pSl(`98943 allowable × ${ps.ext.v} visits`,pFmtc(extAl),false,true);
+    if(ps.pt.on)  h+=pSl(`97110 × ${ps.pt.v} visits × ${ptU} units @ $${PX.BCBS.pt1.toFixed(2)}`,pFmtc(ptAl),false,true);
+    h+=pSl('Total BCBS allowable',pFmtc(totAl));
+    h+='<div style="border:none;border-top:1px solid rgba(255,255,255,.13);margin:10px 0;"></div>';
+    h+=pSl(`Applied to deductible (${pFmtc(dedLeft)} remaining)`,pFmtc(toDed));
+    if(afterDed>0){h+=pSl('After-deductible amount',pFmtc(afterDed),false,true);h+=pSl(`Patient coinsurance (${coinsP}%)`,pFmtc(coinsAmt));}
+    if(hitOop) h+=pSl('Capped at OOP remaining',pFmtc(oopLeft));
+    if(oopLeft<=0) h+='<div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#7EC8A4;margin:8px 0 4px;">✅ OOP Max Reached — $0 on covered services</div>';
+    const patTotal=swS+patCov;
+    h+='<div style="border:none;border-top:1px solid rgba(255,255,255,.13);margin:10px 0;"></div>';
+    h+=pSl('Shockwave (cash — not covered)',pFmt(swS));
+    h+=pSl('Covered svcs patient portion',pFmtc(patCov));
+    h+=pTotal(patTotal);
+    h+=pNote(`<strong>Coinsurance plan:</strong> Before deductible → 100% of allowable. After deductible → ${coinsP}% of allowable. After OOP max → $0. Figures based on your 2023 BCBS fee schedule.<br><br>⚠️ Shockwave is always cash-pay. Verify current benefits before quoting.`);
+  } else {
+    h+=pSl('Shockwave (cash)',pFmt(swS));
+    h+=pNote('Select <strong>Copay Plan</strong> or <strong>Coinsurance Plan</strong> above to calculate insurance estimates.');
+  }
+  return h;
 }
 
 </script>

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Align Co. — NeuroPath Program Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#2F5C43;--sage-md:#4a7c5e;--sage-xl:#EAF4EE;--sage-lt:#B8D8C4;
+  --ink:#182820;--ink-md:#3b4e41;--ink-sm:#677a6e;
+  --cream:#f6faf7;--white:#fff;--border:#c8dcd0;--border-lt:#e2ede7;
+  --gold:#C08A32;--gold-lt:#fdf3e3;--gold-dk:#9e7028;
+  --teal:#0D7377;--teal-lt:#e4f5f5;
+  --red:#C0392B;--red-lt:#FDECEA;
+  --green:#1a6b3a;--green-lt:#e8f7ef;
+  --cc:#2563a8;--cc-lt:#eaf1fc;
+  --r:14px;--rs:9px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);font-size:15px;line-height:1.55;}
+.topbar{background:var(--ink);padding:0 22px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:300;box-shadow:0 2px 20px rgba(0,0,0,.35);}
+.brand{font-family:'DM Serif Display',serif;font-size:1.1rem;color:white;}
+.brand em{color:var(--sage-lt);font-style:italic;}
+.brand-sub{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-top:1px;}
+.badge{background:var(--sage);color:white;font-size:.65rem;font-weight:700;padding:4px 12px;border-radius:100px;letter-spacing:.07em;}
+.app{max-width:1020px;margin:0 auto;padding:24px 16px 100px;}
+.two-col{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;}
+.sticky-col{position:sticky;top:70px;}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}.sticky-col{position:static;}}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:15px;box-shadow:var(--sh);}
+.card-hdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px;}
+.card-icon{font-size:1.4rem;flex-shrink:0;}
+.card-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);}
+.card-sub{font-size:.76rem;color:var(--ink-sm);margin-top:2px;font-style:italic;}
+.sec{display:flex;align-items:center;gap:10px;margin-bottom:13px;}
+.sec h2{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--ink);}
+.sec-line{flex:1;height:1.5px;background:var(--border-lt);}
+.callout{border-radius:var(--rs);padding:9px 14px;margin-bottom:12px;font-size:.81rem;line-height:1.65;border-left:4px solid var(--sage);background:var(--sage-xl);color:var(--ink-md);}
+.callout.gold{border-left-color:var(--gold);background:var(--gold-lt);}
+.callout.teal{border-left-color:var(--teal);background:var(--teal-lt);}
+.callout.cc{border-left-color:var(--cc);background:var(--cc-lt);}
+.frow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:130px;}
+.field label{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);}
+.field input,.field select{background:var(--cream);border:1.5px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--sage);background:var(--white);}
+.field input[type=number]{-moz-appearance:textfield;}
+.field input[type=number]::-webkit-inner-spin-button,.field input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.cat-section{margin-bottom:18px;}
+.cat-title{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:8px;padding-bottom:5px;border-bottom:1.5px solid var(--border-lt);}
+.product-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1.5px solid var(--border-lt);border-radius:var(--rs);margin-bottom:5px;background:var(--cream);transition:all .15s;cursor:pointer;user-select:none;}
+.product-row:hover{border-color:var(--sage-lt);background:var(--sage-xl);}
+.product-row.added{background:var(--sage-xl);border-color:var(--sage);}
+.pr-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:.7rem;color:transparent;}
+.product-row.added .pr-check{background:var(--sage);border-color:var(--sage);color:white;}
+.pr-name{flex:1;font-size:.85rem;font-weight:600;color:var(--ink-md);}
+.pr-cost{font-size:.78rem;color:var(--ink-sm);white-space:nowrap;}
+.custom-add{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.custom-add input{flex:1;min-width:120px;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--ink);outline:none;}
+.custom-add input:focus{border-color:var(--sage);}
+.mult-track{display:flex;gap:5px;margin-top:7px;}
+.mult-btn{flex:1;padding:8px 4px;text-align:center;border-radius:var(--rs);border:1.5px solid var(--border);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;color:var(--ink-sm);background:var(--cream);}
+.mult-btn.sel{background:var(--sage);border-color:var(--sage);color:white;}
+.summary-card{background:var(--ink);border-radius:16px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;}
+.summary-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 10%,rgba(47,92,67,.25),transparent 60%);pointer-events:none;}
+.sc-in{position:relative;}
+.sc-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:white;margin-bottom:3px;}
+.sc-sub{font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:16px;}
+.price-display{text-align:center;margin-bottom:16px;}
+.price-main{font-family:'DM Serif Display',serif;font-size:2.8rem;color:white;line-height:1;}
+.price-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:4px;}
+.price-monthly{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--gold-lt);margin-top:8px;}
+.price-monthly-label{font-size:.62rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;}
+.breakdown{background:rgba(255,255,255,.07);border-radius:10px;padding:14px;}
+.bd-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.82rem;}
+.bd-row:last-child{border-bottom:none;}
+.bd-label{color:rgba(255,255,255,.55);}
+.bd-val{color:white;font-weight:700;}
+.bd-val.green{color:#6ee4a8;}
+.bd-val.gold{color:var(--gold-lt);}
+.bd-val.teal{color:#4ecdc4;}
+.bd-val.red{color:#ff8a8a;}
+.item-list{margin-bottom:12px;}
+.item-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--sage-xl);border:1px solid var(--sage-lt);border-radius:var(--rs);margin-bottom:5px;}
+.item-chip-name{flex:1;font-size:.82rem;font-weight:600;color:var(--ink-md);}
+.item-chip-cost{font-size:.75rem;color:var(--ink-sm);white-space:nowrap;}
+.item-chip-rm{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;font-weight:700;padding:0 3px;line-height:1;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.87rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;white-space:nowrap;}
+.btn-g{background:var(--sage);color:white;}
+.btn-g:hover{background:var(--sage-md);}
+.btn-gold{background:var(--gold);color:white;}
+.btn-gold:hover{background:var(--gold-dk);}
+.btn-h{background:var(--white);border:1.5px solid var(--border);color:var(--ink-md);}
+.btn-h:hover{border-color:var(--sage);color:var(--sage);}
+.btn-sm{padding:6px 12px;font-size:.79rem;}
+.btn-full{width:100%;justify-content:center;margin-bottom:8px;}
+.patient-out{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;}
+.po-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid var(--sage-xl);flex-wrap:wrap;gap:12px;}
+.po-title{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--teal);}
+.po-price{font-family:'DM Serif Display',serif;font-size:2.1rem;color:var(--sage);line-height:1;}
+.po-price-label{font-size:.62rem;color:var(--ink-sm);letter-spacing:.1em;text-transform:uppercase;}
+.po-sec-title{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:6px;margin-top:14px;}
+.po-item{font-size:.84rem;color:var(--ink-md);padding:2px 0;display:flex;align-items:flex-start;gap:6px;}
+.po-item::before{content:'✓';color:var(--sage);font-weight:700;font-size:.8rem;flex-shrink:0;margin-top:2px;}
+@media print{
+  .topbar,.no-print{display:none!important;}
+  body{background:white;}
+  .app{max-width:100%;padding:0;}
+  .two-col{display:block;}
+  .sticky-col{display:none;}
+  .patient-out{border:1px solid #ccc;}
+}
+
+.quiz-overlay{position:fixed;inset:0;background:rgba(10,20,15,.93);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
+.quiz-box{background:linear-gradient(145deg,#0f1f17,#1a3528);border:1px solid rgba(47,92,67,.35);border-radius:20px;width:100%;max-width:560px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.qz-eyebrow{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage-lt);margin-bottom:6px;}
+.qz-title{font-family:'DM Serif Display',serif;font-size:1.6rem;color:white;margin-bottom:4px;line-height:1.2;}
+.qz-sub{font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:24px;}
+.qz-prog{height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.qz-prog-bar{height:100%;background:linear-gradient(90deg,var(--sage-lt),var(--sage));border-radius:99px;transition:width .4s ease;}
+.qz-step{font-size:.68rem;color:rgba(255,255,255,.3);text-align:right;letter-spacing:.05em;margin-bottom:20px;}
+.qz-q{font-family:'DM Serif Display',serif;font-size:1.2rem;color:white;margin-bottom:6px;}
+.qz-qdesc{font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:16px;line-height:1.5;}
+.qz-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.qz-grid.col1{grid-template-columns:1fr;}
+.qz-opt{padding:12px 14px;border:1.5px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.72);cursor:pointer;transition:all .18s;font-size:.87rem;text-align:left;display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;width:100%;}
+.qz-opt:hover{border-color:rgba(184,216,196,.4);background:rgba(47,92,67,.15);}
+.qz-opt.sel{border-color:var(--sage-lt);background:rgba(47,92,67,.25);color:white;font-weight:600;}
+.qz-chk{width:18px;height:18px;border-radius:4px;border:2px solid rgba(255,255,255,.25);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;transition:all .18s;}
+.qz-opt.sel .qz-chk{background:var(--sage);border-color:var(--sage);color:white;}
+.vas-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px;}
+.vas-btn{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;font-family:'DM Sans',sans-serif;}
+.vas-disp{text-align:center;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;margin-bottom:14px;display:none;}
+.vas-val{font-family:'DM Serif Display',serif;font-size:1.5rem;font-weight:700;}
+.vas-lbl{font-size:.75rem;color:rgba(255,255,255,.4);}
+.qz-nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:8px;}
+.qz-next{background:linear-gradient(135deg,var(--sage),var(--sage-md));color:white;border:none;border-radius:10px;padding:11px 26px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;}
+.qz-next:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(47,92,67,.4);}
+.qz-next:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.qz-back{background:transparent;color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:11px 18px;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:all .18s;}
+.qz-back:hover{color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3);}
+.qz-rec{background:rgba(47,92,67,.2);border:1px solid rgba(184,216,196,.3);border-radius:14px;padding:18px;margin-bottom:14px;}
+.qz-rec-lbl{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sage-lt);margin-bottom:4px;}
+.qz-rec-big{font-family:'DM Serif Display',serif;font-size:2rem;color:white;line-height:1.1;}
+.qz-rec-sub{font-size:.85rem;color:rgba(255,255,255,.5);margin-top:3px;}
+.qz-info{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 15px;margin-bottom:10px;}
+.qz-info-lbl{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:3px;}
+.qz-info-txt{font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.55;}
+.qz-override{background:rgba(192,138,50,.08);border:1px solid rgba(192,138,50,.25);border-radius:10px;padding:11px 13px;font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:14px;line-height:1.5;}
+.qz-accept{width:100%;background:linear-gradient(135deg,var(--sage),var(--sage-md));color:white;border:none;border-radius:11px;padding:13px;font-family:'DM Serif Display',serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .18s;}
+.qz-accept:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(47,92,67,.4);}
+.qz-skip{width:100%;background:transparent;color:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;margin-top:7px;transition:all .18s;}
+.qz-skip:hover{color:rgba(255,255,255,.58);}
+.prefill-banner{background:var(--sage-xl);border:1px solid var(--sage-lt);border-radius:var(--rs);padding:9px 14px;font-size:.82rem;color:var(--ink-md);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+</style>
+</head>
+<body>
+
+<div class="quiz-overlay" id="quizOverlay">
+<div class="quiz-box">
+  <div class="qz-eyebrow">Colleyville Chiropractic &middot; Align Co.</div>
+  <div class="qz-title">NeuroPath Pre-Screening</div>
+  <div class="qz-sub">5 quick questions to build the right neuropathy protocol</div>
+  <div class="qz-prog"><div class="qz-prog-bar" id="qzBar" style="width:0%"></div></div>
+  <div class="qz-step" id="qzStep">Step 1 of 5</div>
+  <div id="qzBody"></div>
+</div>
+</div>
+
+<div id="prefill-banner-wrap"></div>
+<div class="topbar no-print">
+  <div><div class="brand">Align <em>Co.</em> — <em>NeuroPath</em></div><div class="brand-sub">Program Builder &amp; Pricing Tool</div></div>
+  <button class="btn btn-h btn-sm no-print" onclick="reopenQuiz()" style="font-size:.72rem;">&#8617; Re-run Pre-Screen</button>
+  <span class="badge">🧠 NeuroPath Builder</span>
+</div>
+<div class="app" id="mainApp" style="display:none;">
+<div class="two-col">
+<div><!-- LEFT -->
+
+  <div class="card">
+    <div class="card-hdr"><span class="card-icon">👤</span>
+      <div><div class="card-title">Patient &amp; Program Setup</div><div class="card-sub">Build a personalized NeuroPath program from the catalog below</div></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Patient Name</label><input id="pt-name" placeholder="Full name" oninput="updateSummary()"></div>
+      <div class="field"><label>Program Date</label><input id="pt-date" type="date" oninput="updateSummary()"></div>
+      <div class="field"><label>Clinician</label><input id="pt-clin" placeholder="Dr. Rudy" oninput="updateSummary()"></div>
+    </div>
+    <div class="callout teal" style="margin-top:8px;">📋 Enter the number of each visit type below. Visit fees are multiplied along with products using the clinic multiplier.</div>
+    <div class="callout">NeuroPath is a <strong>cash-pay peripheral nerve wellness protocol</strong>. Not submitted to insurance. All patient materials use scope-compliant language.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="card-icon">✖️</span>
+      <div><div class="card-title">Clinic Multiplier &amp; Visit Fees</div><div class="card-sub">Enter visit counts and fees — all multiplied with products for patient total</div></div>
+    </div>
+    <div class="callout gold">💡 All visit fees are multiplied × the selected multiplier, then added to the marked-up product cost. Patient sees one combined total.</div>
+    <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:6px;">Product &amp; Visit Multiplier</div>
+    <div class="mult-track">
+      <div class="mult-btn sel" onclick="selMult(this,2)">2×</div>
+      <div class="mult-btn" onclick="selMult(this,2.5)">2.5×</div>
+      <div class="mult-btn" onclick="selMult(this,3)">3×</div>
+      <div class="mult-btn" onclick="selMult(this,3.5)">3.5×</div>
+      <div class="mult-btn" onclick="selMult(this,4)">4×</div>
+      <div class="mult-btn" onclick="selMult(this,4.5)">4.5×</div>
+      <div class="mult-btn" onclick="selMult(this,5)">5×</div>
+    </div>
+
+    <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin:14px 0 8px;">Visit Types &amp; Quantities</div>
+    <div class="frow">
+      <div class="field"><label># Initial Exams</label><input id="vq-initial" type="number" value="1" min="0" oninput="updateSummary()"></div>
+      <div class="field"><label>Initial Exam Fee ($)</label><input id="vf-initial" type="number" value="150" min="0" oninput="updateSummary()"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label># Intensive Visits</label><input id="vq-intensive" type="number" value="12" min="0" oninput="updateSummary()"></div>
+      <div class="field"><label>Intensive Visit Fee ($)</label><input id="vf-intensive" type="number" value="150" min="0" oninput="updateSummary()"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label># Maintenance Visits</label><input id="vq-maintenance" type="number" value="12" min="0" oninput="updateSummary()"></div>
+      <div class="field"><label>Maintenance Visit Fee ($)</label><input id="vf-maintenance" type="number" value="100" min="0" oninput="updateSummary()"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label># Re-Assessments</label><input id="vq-reassess" type="number" value="3" min="0" oninput="updateSummary()"></div>
+      <div class="field"><label>Re-Assessment Fee ($)</label><input id="vf-reassess" type="number" value="75" min="0" oninput="updateSummary()"></div>
+    </div>
+    <div class="frow" style="align-items:flex-end;">
+      <div class="field"><label>Custom Visit Type</label><input id="vn-custom" placeholder="e.g. Laser Therapy" oninput="updateSummary()"></div>
+      <div class="field"><label># Custom Visits</label><input id="vq-custom" type="number" value="0" min="0" oninput="updateSummary()"></div>
+      <div class="field"><label>Custom Visit Fee ($)</label><input id="vf-custom" type="number" value="0" min="0" oninput="updateSummary()"></div>
+    </div>
+    <div id="visit-preview" style="background:var(--sage-xl);border:1px solid var(--sage-lt);border-radius:var(--rs);padding:10px 13px;font-size:.81rem;color:var(--ink-md);margin-top:4px;margin-bottom:12px;"></div>
+
+    <div class="frow" style="margin-top:6px;">
+      <div class="field"><label>Discount %</label><input id="disc-pct" type="number" value="0" min="0" max="100" oninput="updateSummary()"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label>Payment Method</label>
+        <select id="pay-method" onchange="onPayChange()">
+          <option value="cash">💵 Cash / Check</option>
+          <option value="credit">💳 Credit Card</option>
+          <option value="inhouse">🏠 In-House Financing</option>
+          <option value="carecredit">🏦 CareCredit</option>
+        </select>
+      </div>
+      <div class="field" id="cc-wrap" style="display:none;"><label>CareCredit Plan (months)</label>
+        <select id="cc-months" onchange="updateSummary()">
+          <option value="6">6 months (0% promo)</option>
+          <option value="12">12 months</option>
+          <option value="18">18 months</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+        </select>
+      </div>
+      <div class="field" id="ih-wrap" style="display:none;"><label>In-House # Months</label>
+        <input id="ih-months" type="number" value="12" min="1" max="36" oninput="updateSummary()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="card-icon">📦</span>
+      <div><div class="card-title">Product Catalog</div><div class="card-sub">Click any item to add or remove from this patient's program</div></div>
+    </div>
+    <div class="cat-section"><div class="cat-title">ReBuilder / Nerve Devices</div><div id="cat-rebuilder"></div></div>
+    <div class="cat-section"><div class="cat-title">Light Therapy Equipment</div><div id="cat-light"></div></div>
+    <div class="cat-section"><div class="cat-title">Blueprint Nutrition — Gut Health Kits</div><div id="cat-gut"></div></div>
+    <div class="cat-section"><div class="cat-title">Blueprint Nutrition — Neuropathy Kits</div><div id="cat-neuro"></div></div>
+    <div class="cat-section"><div class="cat-title">Other Blueprint Products</div><div id="cat-other"></div></div>
+    <div class="cat-section">
+      <div class="cat-title">Add Custom Item</div>
+      <div class="custom-add">
+        <input id="custom-name" placeholder="Item name">
+        <input id="custom-cost" type="number" placeholder="Your cost $" style="max-width:110px;" min="0">
+        <button class="btn btn-g btn-sm" onclick="addCustom()">+ Add</button>
+      </div>
+      <div id="cat-custom"></div>
+    </div>
+  </div>
+
+</div><!-- end left -->
+
+<div class="sticky-col"><!-- RIGHT -->
+
+  <div class="summary-card">
+    <div class="sc-in">
+      <div class="sc-title" id="sc-name">Program Summary</div>
+      <div class="sc-sub" id="sc-sub">No products selected yet</div>
+      <div class="price-display">
+        <div class="price-main" id="price-main">$0</div>
+        <div class="price-label" id="price-label">Total Program Investment</div>
+        <div class="price-monthly" id="price-monthly" style="display:none;"></div>
+        <div class="price-monthly-label" id="price-monthly-label" style="display:none;"></div>
+      </div>
+      <div class="breakdown">
+        <div class="bd-row"><span class="bd-label">Products (×<span id="bd-mult">2</span>)</span><span class="bd-val" id="bd-product">$0</span></div>
+        <div class="bd-row"><span class="bd-label">Visit Fees (×<span id="bd-vmult">2</span>)</span><span class="bd-val" id="bd-visits">$0</span></div>
+        <div class="bd-row" id="bd-disc-row" style="display:none;"><span class="bd-label" id="bd-disc-label">Discount</span><span class="bd-val red" id="bd-disc">—</span></div>
+        <div class="bd-row" id="bd-fin-row" style="display:none;"><span class="bd-label" id="bd-fin-label">Monthly</span><span class="bd-val teal" id="bd-fin">—</span></div>
+        <div class="bd-row"><span class="bd-label">Products</span><span class="bd-val" id="bd-items">0</span></div>
+        <div class="bd-row"><span class="bd-label">Total Visits</span><span class="bd-val green" id="bd-dur">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px;">
+    <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:9px;">
+      Selected Items <span id="item-count-badge" style="background:var(--sage);color:white;border-radius:100px;padding:1px 8px;font-size:.6rem;margin-left:4px;">0</span>
+    </div>
+    <div class="item-list" id="item-list"><div style="font-size:.82rem;color:var(--ink-sm);font-style:italic;">No items added yet</div></div>
+    <button class="btn btn-g btn-full" onclick="generateCard()">⚡ Generate Patient Program Card</button>
+    <button class="btn btn-h btn-full btn-sm" onclick="window.print()">🖨️ Print Program Card</button>
+    <button class="btn btn-h btn-full btn-sm" onclick="clearAll()">✕ Clear &amp; Reset</button>
+  </div>
+
+</div><!-- end right -->
+</div><!-- end two-col -->
+
+<div id="patient-card-wrap" style="display:none;margin-top:8px;">
+  <div class="sec"><h2>Patient Program Card</h2><div class="sec-line"></div></div>
+  <div class="patient-out" id="patient-card-content"></div>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+    <button class="btn btn-gold" onclick="window.print()">🖨️ Print Patient Copy</button>
+    <button class="btn btn-h btn-sm" onclick="document.getElementById('patient-card-wrap').style.display='none'">✕ Close</button>
+  </div>
+</div>
+
+</div>
+<script>
+const CATALOG={
+  'cat-rebuilder':[{id:'rb-300',name:'ReBuilder 300 Kit (E0720)',cost:427},{id:'rb-2407',name:'ReBuilder 2407 Kit (E0730)',cost:617},{id:'rb-nlap',name:'Neuro Lymphatic Activation Protocol',cost:717}],
+  'cat-light':[{id:'lt-theraray',name:'TheraRay (handheld infrared)',cost:599},{id:'lt-freedom2',name:'Freedom Pro 2 Units (foot wraps)',cost:599},{id:'lt-knee-d',name:'Anodyne Knee Pro Double',cost:699},{id:'lt-knee-s',name:'Anodyne Knee Pro Single',cost:599},{id:'lt-f300',name:'Anodyne Freedom 300 Pro',cost:599}],
+  'cat-gut':[{id:'gh-kit',name:'Gut Health Kit',cost:449},{id:'gh-fib',name:'Gut Health Fibro Kit',cost:527},{id:'gh-thy',name:'Gut Health Thyroid Kit',cost:539},{id:'gh-adv',name:'Gut Health Advanced Support Kit',cost:692},{id:'gh-adv-fib',name:'Gut Health Advanced Support Fibro Kit',cost:849},{id:'gh-adv-thy',name:'Gut Health Advanced Support Thyroid Kit',cost:849}],
+  'cat-neuro':[{id:'ng-combo',name:'Neuropathy Gut Health — Combined Niche',cost:657},{id:'ng-fib',name:'Neuropathy Gut Health Fibro — Combined',cost:739},{id:'ng-thy',name:'Neuropathy Gut Health Thyroid — Combined',cost:727},{id:'ng-adv',name:'Neuropathy Gut Health Advanced Support',cost:856},{id:'ng-adv-thy',name:'Neuropathy GH Advanced Support Thyroid',cost:996},{id:'ng-adv-fib',name:'Neuropathy GH Advanced Support Fibro',cost:1020},{id:'ng-prem',name:'Neuropathy Premium Kit',cost:449},{id:'ng-guide',name:'Neuropathy Advanced Support Guide',cost:30}],
+  'cat-other':[{id:'oth-mens',name:'Mens Vitality',cost:77},{id:'oth-keto',name:'Keto Wellness',cost:151},{id:'oth-aio',name:'All-in-ONE Wellness',cost:99},{id:'oth-imm',name:'Immunity Kit',cost:97},{id:'oth-mob',name:'Mobile Max (joint support)',cost:49},{id:'oth-jnt',name:'Joint Support Kit',cost:194},{id:'oth-nitric',name:'Nitric Oxide Bundle',cost:218},{id:'oth-wl',name:'Weight Loss Kit — Keto Round',cost:162}]
+};
+let selected={},mult=2;
+const v=id=>document.getElementById(id);
+const val=id=>parseFloat(v(id)?.value)||0;
+const txt=id=>v(id)?.value||'';
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+
+function buildCatalog(){
+  Object.entries(CATALOG).forEach(([catId,items])=>{
+    const c=v(catId);
+    items.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='product-row';d.id='pr-'+item.id;
+      d.innerHTML=`<div class="pr-check" id="prc-${item.id}"></div><div class="pr-name">${item.name}</div><div class="pr-cost">Cost: $${item.cost.toLocaleString()}</div>`;
+      d.onclick=()=>toggleProduct(item.id,item.name,item.cost);
+      c.appendChild(d);
+    });
+  });
+}
+
+function toggleProduct(id,name,cost){
+  if(selected[id]){delete selected[id];v('pr-'+id).classList.remove('added');v('prc-'+id).textContent='';}
+  else{selected[id]={name,cost};v('pr-'+id).classList.add('added');v('prc-'+id).textContent='✓';}
+  updateSummary();
+}
+
+function addCustom(){
+  const name=txt('custom-name'),cost=val('custom-cost');
+  if(!name)return;
+  const id='cust-'+Date.now();
+  selected[id]={name,cost,custom:true};
+  const d=document.createElement('div');
+  d.className='product-row added';d.id='pr-'+id;
+  d.innerHTML=`<div class="pr-check" style="background:var(--sage);border-color:var(--sage);color:white;">✓</div><div class="pr-name">${name}</div><div class="pr-cost">Cost: $${cost.toLocaleString()}</div>`;
+  d.onclick=()=>{delete selected[id];d.remove();updateSummary();};
+  v('cat-custom').appendChild(d);
+  v('custom-name').value='';v('custom-cost').value='';
+  updateSummary();
+}
+
+function selMult(el,m){
+  document.querySelectorAll('.mult-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');mult=m;v('bd-mult').textContent=m;updateSummary();
+}
+
+function onPayChange(){
+  const m=txt('pay-method');
+  v('cc-wrap').style.display=m==='carecredit'?'':'none';
+  v('ih-wrap').style.display=m==='inhouse'?'':'none';
+  updateSummary();
+}
+
+function calcVisits(){
+  const types=[
+    {key:'initial',label:'Initial Exam'},
+    {key:'intensive',label:'Intensive'},
+    {key:'maintenance',label:'Maintenance'},
+    {key:'reassess',label:'Re-Assessment'},
+    {key:'custom',label:v('vn-custom')?.value||'Custom'}
+  ];
+  let totalRawFees=0,totalCount=0,lines=[];
+  types.forEach(t=>{
+    const qty=parseInt(v('vq-'+t.key)?.value)||0;
+    const fee=parseFloat(v('vf-'+t.key)?.value)||0;
+    if(qty>0&&fee>0){
+      totalRawFees+=qty*fee;
+      totalCount+=qty;
+      lines.push(`${qty} × ${t.label} @ ${fmt(fee)}`);
+    }
+  });
+  return {rawFees:totalRawFees,totalCount,lines};
+}
+
+function updateSummary(){
+  const items=Object.values(selected);
+  const rawCost=items.reduce((a,b)=>a+b.cost,0);
+  const prodTotal=Math.round(rawCost*mult);
+  const {rawFees,totalCount,lines}=calcVisits();
+  const visitTotal=Math.round(rawFees*mult);
+  const sub=prodTotal+visitTotal;
+  const dp=val('disc-pct')||0;
+  const discAmt=Math.round(sub*(dp/100));
+  const afterDisc=sub-discAmt;
+  const pm=txt('pay-method');
+  const ccM=parseInt(txt('cc-months'))||6;
+  const ihM=parseInt(txt('ih-months'))||12;
+  const monthly=pm==='carecredit'?Math.round(afterDisc/ccM):pm==='inhouse'?Math.round(afterDisc/ihM):0;
+
+  v('sc-name').textContent=txt('pt-name')||'Patient Program';
+  v('sc-sub').textContent=items.length>0?`${items.length} item${items.length!==1?'s':''} · ${mult}× multiplier`:'No products selected yet';
+  v('price-main').textContent=fmt(afterDisc);
+  v('price-label').textContent=pm==='carecredit'?'Total (CareCredit)':'Total Program Investment';
+  v('bd-product').textContent=fmt(prodTotal);
+  v('bd-visits').textContent=fmt(visitTotal);
+  v('bd-vmult').textContent=mult;
+  v('bd-mult').textContent=mult;
+  v('bd-items').textContent=items.length;
+  v('bd-dur').textContent=totalCount+' visit'+(totalCount!==1?'s':'');
+
+  // Visit preview
+  if(v('visit-preview'))v('visit-preview').innerHTML=lines.length>0
+    ?`<strong>Visit fee subtotal (before ×${mult}):</strong> ${fmt(rawFees)}<br><span style="color:var(--ink-sm);">${lines.join(' · ')}</span>`
+    :`<span style="color:var(--ink-sm);">No visit fees entered yet</span>`;
+
+  v('bd-disc-row').style.display=dp>0?'flex':'none';
+  if(dp>0){v('bd-disc-label').textContent=`Discount (${dp}%)`;v('bd-disc').textContent='-'+fmt(discAmt);}
+
+  if(monthly>0){
+    v('bd-fin-row').style.display='flex';
+    v('bd-fin-label').textContent=pm==='carecredit'?`CareCredit ${ccM}-mo`:`In-House ${ihM}-mo`;
+    v('bd-fin').textContent=fmt(monthly)+'/mo';
+    v('price-monthly').style.display='';v('price-monthly-label').style.display='';
+    v('price-monthly').textContent=fmt(monthly)+'/mo';
+    v('price-monthly-label').textContent=pm==='carecredit'?`${ccM}-month CareCredit`:`${ihM}-month in-house`;
+  } else {
+    v('bd-fin-row').style.display='none';
+    v('price-monthly').style.display='none';v('price-monthly-label').style.display='none';
+  }
+
+  const keys=Object.keys(selected);
+  v('item-count-badge').textContent=keys.length;
+  v('item-list').innerHTML=keys.length===0
+    ?'<div style="font-size:.82rem;color:var(--ink-sm);font-style:italic;">No items added yet</div>'
+    :keys.map(k=>`<div class="item-chip"><span class="item-chip-name">${selected[k].name}</span><span class="item-chip-cost">$${selected[k].cost.toLocaleString()}</span><button class="item-chip-rm" onclick="removeItem('${k}')">✕</button></div>`).join('');
+}
+
+function removeItem(id){
+  const r=v('pr-'+id);if(r){r.classList.remove('added');const c=v('prc-'+id);if(c)c.textContent='';}
+  delete selected[id];updateSummary();
+}
+
+function generateCard(){
+  const name=txt('pt-name')||'Patient';
+  const date=v('pt-date').value;
+  const clin=txt('pt-clin')||'Dr. Rudy';
+  const items=Object.values(selected);
+  const rawCost=items.reduce((a,b)=>a+b.cost,0);
+  const prodTotal=Math.round(rawCost*mult);
+  const {rawFees,totalCount,lines}=calcVisits();
+  const visitTotal=Math.round(rawFees*mult);
+  const sub=prodTotal+visitTotal;
+  const dp=val('disc-pct')||0;
+  const discAmt=Math.round(sub*(dp/100));
+  const total=sub-discAmt;
+  const pm=txt('pay-method');
+  const ccM=parseInt(txt('cc-months'))||6;
+  const ihM=parseInt(txt('ih-months'))||12;
+  const monthly=pm==='carecredit'?Math.round(total/ccM):pm==='inhouse'?Math.round(total/ihM):0;
+
+  const visitScheduleHtml=lines.length>0?lines.map(l=>`<div style="font-size:.83rem;color:var(--ink-md);padding:2px 0;">• ${l}</div>`).join(''):'<div style="font-size:.83rem;color:var(--ink-sm);">No visits entered</div>';
+
+  const payBlock=pm==='carecredit'
+    ?`<div style="padding:10px 14px;background:var(--cc-lt);border-radius:8px;border-left:3px solid var(--cc);margin-top:12px;"><div style="font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--cc);margin-bottom:3px;">CareCredit Financing</div><div style="font-size:.83rem;color:var(--ink-md);">Total: ${fmt(total)} · ${ccM}-month plan · Est. ${fmt(monthly)}/mo<br><span style="font-size:.71rem;color:var(--ink-sm);">Apply at carecredit.com. 0% promo if paid within ${ccM} months.</span></div></div>`
+    :pm==='inhouse'
+    ?`<div style="padding:10px 14px;background:var(--gold-lt);border-radius:8px;border-left:3px solid var(--gold);margin-top:12px;"><div style="font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-dk);margin-bottom:3px;">In-House Financing</div><div style="font-size:.83rem;color:var(--ink-md);">Total: ${fmt(total)} · ${ihM}-month plan · ${fmt(monthly)}/mo</div></div>`
+    :`<div style="padding:10px 14px;background:var(--green-lt);border-radius:8px;border-left:3px solid var(--green);margin-top:12px;"><div style="font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--green);margin-bottom:3px;">${pm==='credit'?'Credit Card':'Cash / Check'} — Paid in Full</div><div style="font-size:.83rem;color:var(--ink-md);">Total: ${fmt(total)}</div></div>`;
+
+  v('patient-card-content').innerHTML=`
+    <div class="po-header">
+      <div><div class="po-title">Align Co. — NeuroPath Wellness Program</div>
+        <div style="font-size:.72rem;color:var(--ink-sm);margin-top:3px;">Colleyville Chiropractic, Spine &amp; Sport · (817) 420-7696${date?' · '+date:''}</div>
+        <div style="font-size:.9rem;font-weight:700;color:var(--ink-md);margin-top:6px;">Patient: ${name} · Clinician: ${clin}</div></div>
+      <div style="text-align:right;"><div class="po-price">${fmt(total)}</div>
+        <div class="po-price-label">${pm==='carecredit'?'CareCredit Total':pm==='inhouse'?'Financed Total':'Program Investment'}</div>
+        ${monthly>0?`<div style="font-size:.88rem;font-weight:700;color:var(--cc);margin-top:4px;">≈ ${fmt(monthly)}/mo</div>`:''}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div>
+        <div class="po-sec-title" style="margin-top:0;">Program Includes</div>
+        ${items.length>0?items.map(i=>`<div class="po-item">${i.name}</div>`).join(''):'<div style="font-size:.84rem;color:var(--ink-sm);">No products listed</div>'}
+        <div class="po-item">Peripheral nerve wellness assessments</div>
+        <div class="po-item">Home device protocol as prescribed</div>
+        <div class="po-item">Clinical nutrition support protocol</div>
+      </div>
+      <div>
+        <div class="po-sec-title" style="margin-top:0;">Visit Schedule (${totalCount} total visits)</div>
+        ${visitScheduleHtml}
+        ${payBlock}
+      </div>
+    </div>
+    ${dp>0?`<div style="margin-top:12px;padding:8px 12px;background:var(--red-lt);border-radius:8px;font-size:.82rem;color:var(--red);font-weight:600;">Discount Applied: ${dp}% — saving ${fmt(discAmt)}</div>`:''}
+    <div style="margin-top:18px;padding-top:14px;border-top:1.5px solid var(--border-lt);display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div>
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:6px;">Patient Acknowledgment</div>
+        <div style="font-size:.79rem;color:var(--ink-sm);line-height:1.55;">I understand this is a peripheral nerve wellness program and not a diagnosis or treatment of any medical condition. I agree to the program terms and the payment arrangement described above.</div>
+        <div style="margin-top:18px;border-top:1px solid #bbb;width:230px;padding-top:4px;font-size:.72rem;color:var(--ink-sm);">Patient Signature &amp; Date</div>
+      </div>
+      <div>
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:6px;">Payment Method</div>
+        <div style="font-size:.9rem;font-weight:700;color:var(--sage);">${pm==='carecredit'?'💳 CareCredit — '+ccM+' months':pm==='inhouse'?'🏠 In-House — '+ihM+' months':pm==='credit'?'💳 Credit Card':'💵 Cash / Check'}</div>
+        <div style="margin-top:18px;border-top:1px solid #bbb;width:230px;padding-top:4px;font-size:.72rem;color:var(--ink-sm);">Clinician Initials</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:.68rem;color:var(--ink-sm);text-align:center;padding-top:10px;border-top:1px solid var(--border-lt);">Align Co. · Colleyville Chiropractic, Spine &amp; Sport · (817) 420-7696 · colleyvillechiropractic.com · Cash-pay wellness program. Not submitted to insurance.</div>`;
+
+  v('patient-card-wrap').style.display='block';
+  v('patient-card-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearAll(){
+  if(!confirm('Reset program builder?'))return;
+  selected={};mult=2;
+  document.querySelectorAll('.product-row.added').forEach(r=>r.classList.remove('added'));
+  document.querySelectorAll('.pr-check').forEach(c=>c.textContent='');
+  v('cat-custom').innerHTML='';v('patient-card-wrap').style.display='none';
+  document.querySelectorAll('.mult-btn').forEach((b,i)=>b.classList.toggle('sel',i===0));
+  v('bd-mult').textContent=2;v('disc-pct').value=0;v('pay-method').value='cash';
+  ['vq-initial','vq-intensive','vq-maintenance','vq-reassess','vq-custom'].forEach(id=>{if(v(id))v(id).value=id==='vq-intensive'||id==='vq-maintenance'?12:id==='vq-reassess'?3:id==='vq-initial'?1:0;});
+  ['vf-initial','vf-intensive'].forEach(id=>{if(v(id))v(id).value=150;});
+  if(v('vf-maintenance'))v('vf-maintenance').value=100;
+  if(v('vf-reassess'))v('vf-reassess').value=75;
+  if(v('vf-custom'))v('vf-custom').value=0;
+  onPayChange();updateSummary();
+}
+
+
+/* === NEUROPATH PRE-SCREEN === */
+var npSymptoms=[];
+var npVas=null;
+var npOnset=null;
+var npCause=null;
+var npName='';
+var npStep=0;
+
+var NP_SYMS=[
+  {v:'burning',l:'Burning or tingling sensation'},
+  {v:'numbness',l:'Numbness in feet or hands'},
+  {v:'balance',l:'Balance problems / unsteadiness'},
+  {v:'night',l:'Symptoms worse at night'},
+  {v:'cold',l:'Cold / temperature sensitivity'},
+  {v:'weakness',l:'Muscle weakness in extremities'},
+];
+var NP_ONSET=[
+  {v:'acute',l:'Less than 3 months'},
+  {v:'subacute',l:'3–6 months'},
+  {v:'chronic',l:'6–12 months'},
+  {v:'longstanding',l:'1+ year'},
+];
+var NP_CAUSE=[
+  {v:'diabetic',l:'Diabetic neuropathy'},
+  {v:'chemo',l:'Chemotherapy-related'},
+  {v:'idiopathic',l:'Unknown / idiopathic'},
+  {v:'traumatic',l:'Injury or trauma'},
+  {v:'autoimmune',l:'Autoimmune condition'},
+  {v:'other',l:'Other / not sure'},
+];
+
+function npGetRec(){
+  if(npVas===null||!npOnset)return null;
+  var isLong=npOnset==='longstanding'||npOnset==='chronic';
+  var isSev=npVas>=7,isMod=npVas>=4&&npVas<=6;
+  var intensive=12,maintenance=12,reassess=3;
+  if(isSev&&isLong){intensive=24;maintenance=24;reassess=6;}
+  else if(isSev){intensive=18;maintenance=12;reassess=4;}
+  else if(isMod&&isLong){intensive=16;maintenance=16;reassess=4;}
+  else if(isMod){intensive=12;maintenance=12;reassess=3;}
+  else{intensive=8;maintenance=8;reassess=2;}
+  var tier=isSev?'Severe':isMod?'Moderate':'Mild';
+  var tierColor=isSev?'#ef4444':isMod?'#f59e0b':'#22c55e';
+  var freq=isSev||isLong?'2x/week first 8 wks, then 1x/week':'2x/week first 6 wks, then 1x/week';
+  return{intensive:intensive,maintenance:maintenance,reassess:reassess,tier:tier,tierColor:tierColor,freq:freq};
+}
+function npVasColor(n){return n<=3?'#22c55e':n<=6?'#f59e0b':'#ef4444';}
+function npVasLabel(n){return n<=2?'Minimal':n<=4?'Mild':n<=6?'Moderate':n<=8?'Severe':'Extreme';}
+
+function npSetProg(){
+  var pct=(npStep/5)*100;
+  document.getElementById('qzBar').style.width=pct+'%';
+  document.getElementById('qzStep').textContent='Step '+(npStep+1)+' of 5';
+}
+
+function npRender(){
+  npSetProg();
+  var b=document.getElementById('qzBody');
+  if(!b)return;
+  if(npStep===0)npStep0(b);
+  else if(npStep===1)npStep1(b);
+  else if(npStep===2)npStep2(b);
+  else if(npStep===3)npStep3(b);
+  else if(npStep===4)npStep4(b);
+  else if(npStep===5)npResult(b);
+}
+
+function npStep0(b){
+  var h='<div class="qz-q">What symptoms is the patient experiencing?</div>';
+  h+='<div class="qz-qdesc">Select all that apply.</div>';
+  h+='<div class="qz-grid col1">';
+  for(var i=0;i<NP_SYMS.length;i++){
+    var s=NP_SYMS[i];
+    var sel=npSymptoms.indexOf(s.v)>-1;
+    h+='<button class="qz-opt'+(sel?' sel':'')+'" onclick="npToggleSym(this,\''+s.v+'\')"><span class="qz-chk">'+(sel?'&#10003;':'')+
+       '</span><span>'+s.l+'</span></button>';
+  }
+  h+='</div>';
+  h+='<div class="qz-nav"><span></span><button class="qz-next" onclick="npStep++;npRender()">Continue &#8594;</button></div>';
+  b.innerHTML=h;
+}
+function npToggleSym(el,v){
+  var i=npSymptoms.indexOf(v);
+  if(i>-1){npSymptoms.splice(i,1);el.classList.remove('sel');el.querySelector('.qz-chk').innerHTML='';}
+  else{npSymptoms.push(v);el.classList.add('sel');el.querySelector('.qz-chk').innerHTML='&#10003;';}
+}
+
+function npStep1(b){
+  var rows='';
+  for(var n=0;n<=10;n++){
+    var col=npVasColor(n);
+    var isSel=npVas===n;
+    rows+='<button class="vas-btn" id="vasbtn'+n+'" onclick="npSelVas('+n+')" style="'+(isSel?'border-color:'+col+';background:'+col+'33;color:white;transform:scale(1.12);':'')+'">'+n+'</button>';
+  }
+  var dispStyle=npVas!==null?'display:block;':'display:none;';
+  var dispTxt=npVas!==null?(npVas+'/10 — '+npVasLabel(npVas)):'';
+  var dispColor=npVas!==null?npVasColor(npVas):'white';
+  b.innerHTML='<div class="qz-q">Rate current severity (0–10)</div>'+
+    '<div class="qz-qdesc">0 = no symptoms &middot; 10 = severe &amp; debilitating</div>'+
+    '<div class="vas-row">'+rows+'</div>'+
+    '<div class="vas-disp" id="vasDisp" style="'+dispStyle+'">'+
+    '<div class="vas-val" id="vasVal" style="color:'+dispColor+'">'+dispTxt+'</div>'+
+    '<div class="vas-lbl">Severity score</div></div>'+
+    '<div class="qz-nav"><button class="qz-back" onclick="npStep--;npRender()">&#8592; Back</button>'+
+    '<button class="qz-next" id="qzNext1" onclick="npStep++;npRender()" '+(npVas===null?'disabled':'')+'>Continue &#8594;</button></div>';
+}
+function npSelVas(n){
+  npVas=n;
+  var col=npVasColor(n);
+  for(var i=0;i<=10;i++){
+    var b=document.getElementById('vasbtn'+i);
+    if(!b)continue;
+    if(i===n){b.style.borderColor=col;b.style.background=col+'33';b.style.color='white';b.style.transform='scale(1.12)';}
+    else{b.style.borderColor='';b.style.background='';b.style.color='';b.style.transform='';}
+  }
+  var d=document.getElementById('vasDisp');
+  if(d)d.style.display='block';
+  var vv=document.getElementById('vasVal');
+  if(vv){vv.textContent=n+'/10 — '+npVasLabel(n);vv.style.color=col;}
+  var nx=document.getElementById('qzNext1');
+  if(nx)nx.disabled=false;
+}
+
+function npStep2(b){
+  var h='<div class="qz-q">How long has the patient had these symptoms?</div>';
+  h+='<div class="qz-qdesc">Chronicity affects visit count significantly.</div>';
+  h+='<div class="qz-grid col1">';
+  for(var i=0;i<NP_ONSET.length;i++){
+    var o=NP_ONSET[i];
+    h+='<button class="qz-opt'+(npOnset===o.v?' sel':'')+'" onclick="npSelOnset(this,\''+o.v+'\')"><span>'+o.l+'</span></button>';
+  }
+  h+='</div>';
+  h+='<div class="qz-nav"><button class="qz-back" onclick="npStep--;npRender()">&#8592; Back</button>'+
+     '<button class="qz-next" id="qzNext2" onclick="npStep++;npRender()" '+(npOnset?'':'disabled')+'>Continue &#8594;</button></div>';
+  b.innerHTML=h;
+}
+function npSelOnset(el,v){
+  npOnset=v;
+  var all=el.parentElement.querySelectorAll('.qz-opt');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('sel');
+  el.classList.add('sel');
+  var nx=document.getElementById('qzNext2');
+  if(nx)nx.disabled=false;
+}
+
+function npStep3(b){
+  var h='<div class="qz-q">What is the suspected cause?</div>';
+  h+='<div class="qz-qdesc">Helps determine the appropriate protocol variant.</div>';
+  h+='<div class="qz-grid">';
+  for(var i=0;i<NP_CAUSE.length;i++){
+    var ca=NP_CAUSE[i];
+    h+='<button class="qz-opt'+(npCause===ca.v?' sel':'')+'" onclick="npSelCause(this,\''+ca.v+'\')"><span>'+ca.l+'</span></button>';
+  }
+  h+='</div>';
+  h+='<div class="qz-nav"><button class="qz-back" onclick="npStep--;npRender()">&#8592; Back</button>'+
+     '<button class="qz-next" id="qzNext3" onclick="npStep++;npRender()" '+(npCause?'':'disabled')+'>Continue &#8594;</button></div>';
+  b.innerHTML=h;
+}
+function npSelCause(el,v){
+  npCause=v;
+  var all=el.parentElement.querySelectorAll('.qz-opt');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('sel');
+  el.classList.add('sel');
+  var nx=document.getElementById('qzNext3');
+  if(nx)nx.disabled=false;
+}
+
+function npStep4(b){
+  b.innerHTML='<div class="qz-q">Patient information</div>'+
+    '<div class="qz-qdesc">Used to personalize the program card.</div>'+
+    '<div style="margin-bottom:14px;"><label style="font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:5px;">Patient Name</label>'+
+    '<input id="npNameIn" style="width:100%;padding:12px 14px;border:1.5px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.05);color:white;font-family:DM Sans,sans-serif;font-size:.9rem;outline:none;" placeholder="Full name" value="'+npName+'"></div>'+
+    '<div class="qz-nav"><button class="qz-back" onclick="npStep--;npRender()">&#8592; Back</button>'+
+    '<button class="qz-next" onclick="npName=document.getElementById(\'npNameIn\').value;npStep++;npRender()">View Results &#8594;</button></div>';
+}
+
+function npResult(b){
+  var rec=npGetRec();
+  if(!rec){b.innerHTML='<p style="color:white;">Please complete all steps.</p>';return;}
+  b.innerHTML=
+    '<div style="display:inline-block;padding:5px 14px;border-radius:99px;background:'+rec.tierColor+'22;border:1px solid '+rec.tierColor+'55;color:'+rec.tierColor+';font-size:.82rem;font-weight:700;margin-bottom:12px;">'+rec.tier+' Severity &middot; VAS '+npVas+'/10</div>'+
+    '<div class="qz-rec"><div class="qz-rec-lbl">Recommended Protocol</div>'+
+    '<div class="qz-rec-big">'+rec.intensive+' Intensive + '+rec.maintenance+' Maintenance</div>'+
+    '<div class="qz-rec-sub">'+rec.reassess+' re-assessments &middot; '+rec.freq+'</div></div>'+
+    '<div class="qz-info"><div class="qz-info-lbl">Visit Breakdown</div>'+
+    '<div class="qz-info-txt">Intensive: '+rec.intensive+' visits @ $150 &middot; Maintenance: '+rec.maintenance+' @ $100 &middot; Re-assessments: '+rec.reassess+' @ $75<br>Total: '+(rec.intensive+rec.maintenance+rec.reassess)+' visits</div></div>'+
+    '<div class="qz-override">&#9999;&#65039; These counts will pre-fill the builder. All fields remain editable.</div>'+
+    '<button class="qz-accept" onclick="npApply()">Apply to NeuroPath Builder &#8594;</button>'+
+    '<button class="qz-skip" onclick="npSkip()">Skip &mdash; Open Builder Without Pre-fill</button>';
+}
+
+function npApply(){
+  var rec=npGetRec();
+  document.getElementById('quizOverlay').style.display='none';
+  document.getElementById('mainApp').style.display='';
+  if(!rec)return;
+  if(npName){var el=document.getElementById('pt-name');if(el)el.value=npName;}
+  var fields={'vq-intensive':rec.intensive,'vq-maintenance':rec.maintenance,'vq-reassess':rec.reassess};
+  for(var id in fields){
+    var el=document.getElementById(id);
+    if(el){
+      el.value=fields[id];
+      el.style.borderColor='var(--sage)';el.style.background='var(--sage-xl)';
+      (function(e){setTimeout(function(){e.style.borderColor='';e.style.background='';},3000);})(el);
+    }
+  }
+  var b=document.getElementById('prefill-banner-wrap');
+  if(b)b.innerHTML='<div class="prefill-banner">&#9989; Pre-screen complete &mdash; '+rec.intensive+' intensive + '+rec.maintenance+' maintenance + '+rec.reassess+' re-assessments recommended ('+rec.tier+' severity). All fields editable.</div>';
+  updateSummary();
+}
+function npSkip(){
+  document.getElementById('quizOverlay').style.display='none';
+  document.getElementById('mainApp').style.display='';
+}
+function reopenQuiz(){
+  npSymptoms=[];npVas=null;npOnset=null;npCause=null;npName='';npStep=0;
+  document.getElementById('quizOverlay').style.display='flex';
+  npRender();
+}
+
+window.addEventListener('load',()=>{
+  v('pt-date').value=new Date().toISOString().split('T')[0];
+  v('pt-clin').value='Dr. Rudy';
+  buildCatalog();updateSummary();npRender();
+});
+</script>
+</body>
+</html>

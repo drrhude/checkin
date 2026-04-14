@@ -3,1265 +3,2215 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>NeuroPath — Initial Exam | CVC Spine & Sport</title>
+<title>NeuroPath — Exam &amp; Program Builder | CVC Spine &amp; Sport</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+/* ── TOKENS ── */
 :root{
-  --sage:#2F5C43;--sage-md:#4a7c5e;--sage-lt:#B8D8C4;--sage-xl:#EAF4EE;
+  --sage:#2F5C43;--sage-md:#4a7c5e;--sage-lt:#B8D8C4;--sage-xl:#EAF4EE;--sage-dk:#1e3d2c;
   --ink:#182820;--ink-md:#3b4e41;--ink-sm:#677a6e;
-  --cream:#f6faf7;--white:#fff;
-  --border:#c8dcd0;--border-lt:#e2ede7;
+  --cream:#f6faf7;--white:#fff;--border:#c8dcd0;--border-lt:#e2ede7;
   --gold:#C08A32;--gold-lt:#fdf3e3;--gold-dk:#9e7028;
   --teal:#0D7377;--teal-lt:#e4f5f5;
   --red:#C0392B;--red-lt:#FDECEA;
   --amber:#D4860A;--amber-lt:#FEF6E4;
   --green:#1a6b3a;--green-lt:#e8f7ef;
-  --r:14px;--rs:9px;--sh:0 2px 12px rgba(0,0,0,.07);
+  --cc:#2563a8;--cc-lt:#eaf1fc;
+  --r:14px;--rs:9px;--sh:0 2px 12px rgba(0,0,0,.07);--sh-lg:0 8px 40px rgba(0,0,0,.10);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;padding-bottom:90px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh;padding-bottom:80px;}
+input,select,textarea,button{font-family:inherit;font-size:inherit;}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline-offset:1px;}
 
 /* ── TOPBAR ── */
-.topbar{position:sticky;top:0;z-index:100;background:var(--ink);height:58px;display:flex;align-items:center;padding:0 20px;gap:12px;box-shadow:0 2px 14px rgba(0,0,0,.22)}
-.tb-brand{font-family:'DM Serif Display',serif;font-size:1.05rem;color:#fff;white-space:nowrap}
-.tb-brand em{color:var(--sage-lt);font-style:italic}
-.tb-sub{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38)}
-.tb-divider{width:1px;height:22px;background:rgba(255,255,255,.12);margin:0 4px}
-.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.badge{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:var(--teal);color:#fff}
-.badge.gold{background:var(--gold)}
+.topbar{
+  background:linear-gradient(135deg,#1e3d2c,#152c1e);
+  padding:0 20px;height:58px;
+  display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 20px rgba(0,0,0,.22);
+}
+.tb-mark{
+  width:36px;height:36px;background:var(--sage);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:white;flex-shrink:0;
+}
+.tb-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:white;}
+.tb-name span{display:block;font-size:.6rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.08em;}
+.tb-divider{width:1px;height:22px;background:rgba(255,255,255,.12);margin:0 2px;}
 
-/* ── STEP STRIP ── */
-.step-strip{display:flex;gap:0;overflow:hidden;border-radius:var(--r);margin:18px 20px 0;box-shadow:var(--sh)}
-.pip{flex:1;padding:9px 4px;text-align:center;font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--white);color:var(--ink-sm);border-right:1px solid var(--border-lt);cursor:pointer;transition:all .2s;position:relative}
-.pip:last-child{border-right:none}
-.pip.active{background:var(--teal);color:#fff}
-.pip.done{background:var(--sage-xl);color:var(--sage)}
-.pip.done::after{content:'✓';position:absolute;top:3px;right:5px;font-size:.5rem;color:var(--sage)}
+/* MODE TABS */
+.mode-tabs{display:flex;gap:4px;background:rgba(255,255,255,.08);border-radius:10px;padding:3px;}
+.mode-tab{
+  padding:5px 14px;border-radius:7px;font-size:.75rem;font-weight:700;
+  letter-spacing:.04em;cursor:pointer;color:rgba(255,255,255,.5);
+  transition:all .18s;border:none;background:transparent;
+}
+.mode-tab.active{background:var(--sage);color:white;box-shadow:0 2px 8px rgba(47,92,67,.4);}
+.mode-tab:hover:not(.active){color:rgba(255,255,255,.8);}
 
-/* ── MAIN ── */
-.main{max-width:780px;margin:0 auto;padding:20px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tb-badge{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;padding:4px 12px;font-size:.65rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);
+}
+.tb-btn{
+  padding:6px 13px;border-radius:8px;font-size:.73rem;font-weight:600;
+  cursor:pointer;border:none;transition:all .17s;
+}
+.tb-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.14);}
+.tb-ghost:hover{background:rgba(255,255,255,.15);color:white;}
+.tb-drive{background:linear-gradient(135deg,#1a73e8,#0d5fbc);color:white;}
+.tb-drive:hover{box-shadow:0 4px 14px rgba(26,115,232,.4);}
+.tb-drive:disabled{opacity:.4;cursor:not-allowed;}
+.tb-pt-name{font-size:.78rem;color:rgba(255,255,255,.55);font-style:italic;white-space:nowrap;}
 
-/* ── PHASE ── */
-.phase{display:none}
-.phase.active{display:block}
+/* ── MODE PANELS ── */
+.mode-panel{display:none;}
+.mode-panel.active{display:block;}
 
-/* ── CARD ── */
-.card{background:var(--white);border-radius:var(--r);padding:20px;box-shadow:var(--sh);margin-bottom:14px}
-.card-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:9px}
-.card-sub{font-size:.76rem;color:var(--ink-sm);margin-bottom:16px}
+/* ══════════════════════════════════
+   EXAM STYLES
+══════════════════════════════════ */
+.step-strip{
+  display:flex;overflow:hidden;border-radius:var(--r);
+  margin:16px 20px 0;box-shadow:var(--sh);
+}
+.pip{
+  flex:1;padding:8px 4px;text-align:center;font-size:.57rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;background:var(--white);
+  color:var(--ink-sm);border-right:1px solid var(--border-lt);cursor:pointer;transition:all .2s;position:relative;
+}
+.pip:last-child{border-right:none;}
+.pip.active{background:var(--teal);color:#fff;}
+.pip.done{background:var(--sage-xl);color:var(--sage);}
+.pip.done::after{content:'✓';position:absolute;top:3px;right:4px;font-size:.48rem;color:var(--sage);}
+.exam-main{max-width:780px;margin:0 auto;padding:18px 20px;}
+.phase{display:none;}
+.phase.active{display:block;}
+.phase-hdr{margin-bottom:14px;}
+.phase-hdr h2{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:var(--ink);margin-bottom:2px;}
+.phase-hdr p{font-size:.78rem;color:var(--ink-sm);}
 
-/* ── SECTION LABEL ── */
-.sec-lbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sage);margin-bottom:8px;display:flex;align-items:center;gap:7px}
-.sec-lbl::after{content:'';flex:1;height:1px;background:var(--sage-lt)}
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);margin-bottom:14px;border:1px solid var(--border-lt);}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.card-sub{font-size:.75rem;color:var(--ink-sm);margin-bottom:14px;}
+.card-icon{width:36px;height:36px;background:var(--sage-xl);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.card-hdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.card-hdr-text .card-title{font-size:1.08rem;}
 
-/* ── FORM FIELDS ── */
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px}
-.field-grid.three{grid-template-columns:1fr 1fr 1fr}
-.field-grid.one{grid-template-columns:1fr}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:.7rem;font-weight:600;color:var(--ink-md)}
-.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--ink);background:var(--cream)}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--sage);background:#fff}
-.field textarea{resize:vertical;min-height:70px}
+/* ── SEC LABEL ── */
+.sec-lbl{
+  font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--sage);margin-bottom:8px;margin-top:12px;
+  display:flex;align-items:center;gap:7px;
+}
+.sec-lbl:first-child{margin-top:0;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--sage-lt);}
 
-/* ── CHIP TOGGLES ── */
-.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-.chip{border:1.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .15s;color:var(--ink-sm);background:var(--white);user-select:none}
-.chip:hover{border-color:var(--sage-md);color:var(--ink)}
-.chip.on{background:var(--sage);border-color:var(--sage);color:#fff}
-.chip.red.on{background:var(--red);border-color:var(--red);color:#fff}
-.chip.gold.on{background:var(--gold);border-color:var(--gold);color:#fff}
-.chip.teal.on{background:var(--teal);border-color:var(--teal);color:#fff}
+/* ── FIELDS ── */
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-bottom:10px;}
+.fg.one{grid-template-columns:1fr;}
+.fg.two{grid-template-columns:1fr 1fr;}
+.fg.three{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:.67rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-sm);}
+.field input,.field select,.field textarea{
+  border:1.5px solid var(--border);border-radius:var(--rs);
+  padding:8px 11px;background:var(--cream);color:var(--ink);font-size:.88rem;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--sage);background:white;outline:none;}
+.field textarea{resize:vertical;min-height:68px;}
 
-/* ── SENSORY SCORING ── */
-.limb-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.limb-tab{padding:7px 16px;border-radius:var(--rs);font-size:.8rem;font-weight:600;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;color:var(--ink-sm);background:var(--white)}
-.limb-tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
-.limb-tab.done{background:var(--sage-xl);border-color:var(--sage);color:var(--sage)}
+/* ── CHIPS ── */
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+.chip{
+  border:1.5px solid var(--border);border-radius:20px;padding:5px 12px;
+  font-size:.76rem;font-weight:500;cursor:pointer;transition:all .15s;
+  color:var(--ink-sm);background:var(--white);user-select:none;
+}
+.chip:hover{border-color:var(--sage-md);color:var(--ink);}
+.chip.on{background:var(--sage);border-color:var(--sage);color:#fff;}
+.chip.red.on{background:var(--red);border-color:var(--red);color:#fff;}
+.chip.gold.on{background:var(--gold);border-color:var(--gold);color:#fff;}
+.chip.teal.on{background:var(--teal);border-color:var(--teal);color:#fff;}
 
-.test-row{display:grid;grid-template-columns:170px 1fr auto;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-lt)}
-.test-row:last-child{border-bottom:none}
-.test-name{font-size:.8rem;font-weight:600;color:var(--ink-md)}
-.test-name span{display:block;font-size:.66rem;font-weight:400;color:var(--ink-sm)}
-.score-btns{display:flex;gap:4px;flex-wrap:wrap}
-.sb{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);font-size:.75rem;font-weight:700;cursor:pointer;background:var(--white);color:var(--ink-sm);transition:all .15s;display:flex;align-items:center;justify-content:center}
-.sb:hover{border-color:var(--sage-md)}
-.sb.sel-0{background:#b71c1c;border-color:#b71c1c;color:#fff}
-.sb.sel-1{background:#d32f2f;border-color:#d32f2f;color:#fff}
-.sb.sel-2{background:#e64a19;border-color:#e64a19;color:#fff}
-.sb.sel-3{background:#ef6c00;border-color:#ef6c00;color:#fff}
-.sb.sel-4{background:#f57c00;border-color:#f57c00;color:#fff}
-.sb.sel-5{background:#fbc02d;border-color:#fbc02d;color:var(--ink)}
-.sb.sel-6{background:#c0ca33;border-color:#c0ca33;color:var(--ink)}
-.sb.sel-7{background:#7cb342;border-color:#7cb342;color:#fff}
-.sb.sel-8{background:#43a047;border-color:#43a047;color:#fff}
-.sb.sel-9{background:#2e7d32;border-color:#2e7d32;color:#fff}
-.sb.sel-10{background:#1b5e20;border-color:#1b5e20;color:#fff}
-.sb.sel-neg{background:var(--red);border-color:var(--red);color:#fff}
-.score-val{font-size:.88rem;font-weight:700;width:48px;text-align:right;color:var(--ink)}
-
-.limb-result{background:var(--ink);color:#fff;border-radius:10px;padding:13px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.lr-score{font-family:'DM Serif Display',serif;font-size:1.1rem}
-.lr-score span{font-size:.62rem;font-weight:500;opacity:.5;font-family:'DM Sans',sans-serif}
-.sev-badge{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px}
-.sev-mild{background:var(--green-lt);color:var(--green)}
-.sev-mod{background:var(--amber-lt);color:var(--amber)}
-.sev-sev{background:var(--red-lt);color:var(--red)}
-.sev-crit{background:var(--red);color:#fff}
+/* ── SENSORY ── */
+.limb-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.limb-tab{padding:7px 15px;border-radius:var(--rs);font-size:.78rem;font-weight:600;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;color:var(--ink-sm);background:var(--white);}
+.limb-tab.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+.limb-tab.done{background:var(--sage-xl);border-color:var(--sage);color:var(--sage);}
+.test-row{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-lt);}
+.test-row:last-child{border-bottom:none;}
+.test-name{font-size:.78rem;font-weight:600;color:var(--ink-md);}
+.test-name span{display:block;font-size:.63rem;font-weight:400;color:var(--ink-sm);}
+.score-btns{display:flex;gap:3px;flex-wrap:wrap;}
+.sb{width:30px;height:30px;border-radius:5px;border:1.5px solid var(--border);font-size:.72rem;font-weight:700;cursor:pointer;background:var(--white);color:var(--ink-sm);transition:all .13s;display:flex;align-items:center;justify-content:center;}
+.sb:hover{border-color:var(--sage-md);}
+.sb.sel-0{background:#b71c1c;border-color:#b71c1c;color:#fff;}
+.sb.sel-1{background:#d32f2f;border-color:#d32f2f;color:#fff;}
+.sb.sel-2{background:#e64a19;border-color:#e64a19;color:#fff;}
+.sb.sel-3{background:#ef6c00;border-color:#ef6c00;color:#fff;}
+.sb.sel-4{background:#f57c00;border-color:#f57c00;color:#fff;}
+.sb.sel-5{background:#fbc02d;border-color:#fbc02d;color:var(--ink);}
+.sb.sel-6{background:#c0ca33;border-color:#c0ca33;color:var(--ink);}
+.sb.sel-7{background:#7cb342;border-color:#7cb342;color:#fff;}
+.sb.sel-8{background:#43a047;border-color:#43a047;color:#fff;}
+.sb.sel-9{background:#2e7d32;border-color:#2e7d32;color:#fff;}
+.sb.sel-10{background:#1b5e20;border-color:#1b5e20;color:#fff;}
+.sb.sel-neg{background:var(--red);border-color:var(--red);color:#fff;}
+.score-val{font-size:.85rem;font-weight:700;width:44px;text-align:right;}
+.limb-result{background:var(--ink);color:#fff;border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.sev-badge{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.sev-mild{background:var(--green-lt);color:var(--green);}
+.sev-mod{background:var(--amber-lt);color:var(--amber);}
+.sev-sev{background:var(--red-lt);color:var(--red);}
+.sev-crit{background:var(--red);color:#fff;}
 
 /* ── BALANCE ── */
-.bal-row{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:start;padding:9px 0;border-bottom:1px solid var(--border-lt)}
-.bal-row:last-child{border-bottom:none}
-.bal-label{font-size:.8rem;font-weight:600;color:var(--ink-md)}
-.bal-label span{display:block;font-size:.67rem;font-weight:400;color:var(--ink-sm);margin-top:2px}
-.bal-opts{display:flex;flex-wrap:wrap;gap:5px}
-.bo{padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);font-size:.73rem;cursor:pointer;transition:all .15s;background:var(--white);color:var(--ink-sm)}
-.bo:hover{border-color:var(--sage-md)}
-.bo.sel-pos{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600}
-.bo.sel-n{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);font-weight:600}
-.bo.sel-neg{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600}
+.bal-row{display:grid;grid-template-columns:155px 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--border-lt);}
+.bal-row:last-child{border-bottom:none;}
+.bal-label{font-size:.78rem;font-weight:600;color:var(--ink-md);}
+.bal-label span{display:block;font-size:.64rem;font-weight:400;color:var(--ink-sm);margin-top:2px;}
+.bal-opts{display:flex;flex-wrap:wrap;gap:5px;}
+.bo{padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);font-size:.72rem;cursor:pointer;transition:all .13s;background:var(--white);color:var(--ink-sm);}
+.bo:hover{border-color:var(--sage-md);}
+.bo.sel-pos{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600;}
+.bo.sel-n{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);font-weight:600;}
+.bo.sel-neg{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600;}
 
 /* ── THERMAL ── */
-.thermal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.th-card{border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
-.th-card:hover{border-color:var(--sage)}
-.th-card.sel{border-color:var(--teal);background:var(--teal-lt)}
-.th-icon{font-size:1.6rem;margin-bottom:5px}
-.th-name{font-size:.82rem;font-weight:700;color:var(--ink)}
-.th-sub{font-size:.67rem;color:var(--ink-sm)}
-
-.limb-thermal{margin-bottom:14px}
-.lt-header{font-size:.78rem;font-weight:700;color:var(--ink-md);margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.th-opts{display:flex;gap:6px;flex-wrap:wrap}
-.tho{padding:6px 13px;border-radius:var(--rs);border:1.5px solid var(--border);font-size:.76rem;cursor:pointer;transition:all .15s;background:var(--white);color:var(--ink-sm)}
-.tho:hover{border-color:var(--sage-md)}
-.tho.sel-normal{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600}
-.tho.sel-mild{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);font-weight:600}
-.tho.sel-sig{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600}
-
-/* ── CALLOUT ── */
-.callout{border-radius:var(--rs);padding:11px 14px;font-size:.8rem;line-height:1.55;margin-bottom:10px}
-.callout.teal{background:var(--teal-lt);border-left:3px solid var(--teal);color:var(--teal)}
-.callout.gold{background:var(--gold-lt);border-left:3px solid var(--gold);color:var(--gold-dk)}
-.callout.red{background:var(--red-lt);border-left:3px solid var(--red);color:var(--red)}
-.callout.green{background:var(--green-lt);border-left:3px solid var(--green);color:var(--green)}
-.callout.sage{background:var(--sage-xl);border-left:3px solid var(--sage);color:var(--sage)}
-
-/* ── DARK SUMMARY ── */
-.dark-sum{background:var(--ink);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
-.dark-sum::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(13,115,119,.22),transparent 55%)}
-.ds-in{position:relative}
-.ds-title{font-family:'DM Serif Display',serif;font-size:1.5rem;color:#fff;margin-bottom:3px}
-.ds-title em{color:var(--sage-lt);font-style:italic}
-.ds-sub{font-size:.72rem;color:rgba(255,255,255,.4);margin-bottom:16px}
-.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:7px}
-.ds-cell{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 8px;text-align:center}
-.ds-val{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff;line-height:1}
-.ds-lbl{font-size:.53rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-top:3px}
-
-/* ── TX RECOMMENDATION ── */
-.tx-card{border-radius:10px;padding:14px;margin-bottom:8px;border-left:4px solid transparent}
-.tx-card.protocol{border-color:var(--teal);background:var(--teal-lt)}
-.tx-card.standard{border-color:var(--sage);background:var(--sage-xl)}
-.tx-card.optional{border-color:var(--gold);background:var(--gold-lt)}
-.tx-label{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
-.tx-label.teal{color:var(--teal)}
-.tx-label.sage{color:var(--sage)}
-.tx-label.gold{color:var(--gold-dk)}
-.tx-name{font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:3px}
-.tx-detail{font-size:.77rem;color:var(--ink-sm);line-height:1.5}
-
-/* ── NOTE OUTPUT ── */
-.note-block{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px}
-.note-sec h3{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--sage);margin-bottom:7px;display:flex;align-items:center;gap:8px}
-.note-sec h3::after{content:'';flex:1;height:1px;background:var(--border-lt)}
-.note-text{font-size:.85rem;color:var(--ink-md);line-height:1.75;white-space:pre-wrap}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
-.btn-t{background:var(--teal);color:#fff;box-shadow:0 3px 14px rgba(13,115,119,.28)}
-.btn-t:hover{background:#0a5a5e}
-.btn-g{background:var(--sage);color:#fff}
-.btn-g:hover{background:#1f4530}
-.btn-gold{background:var(--gold);color:#fff}
-.btn-gold:hover{background:var(--gold-dk)}
-.btn-h{background:var(--white);border:1.5px solid var(--border);color:var(--ink-md)}
-.btn-h:hover{border-color:var(--teal);color:var(--teal)}
-.btn-sm{padding:7px 14px;font-size:.8rem}
-.btn-red{background:var(--red);color:#fff}
-
-/* ── ACTION BAR ── */
-.ab{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99;box-shadow:0 -2px 14px rgba(0,0,0,.07)}
-.ab-prog{font-size:.73rem;color:var(--ink-sm)}
-.ab-prog strong{color:var(--ink)}
-.ab-btns{display:flex;gap:8px}
-
-/* ── REBUILDER ── */
-.rb-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-lt)}
-.rb-label{font-size:.8rem;font-weight:600;color:var(--ink-md);width:160px;flex-shrink:0}
-.rb-btns{display:flex;gap:5px;flex-wrap:wrap}
-.rbb{width:34px;height:34px;border-radius:6px;border:1.5px solid var(--border);font-size:.77rem;font-weight:700;cursor:pointer;background:var(--white);color:var(--ink-sm);transition:all .15s;display:flex;align-items:center;justify-content:center}
-.rbb:hover{border-color:var(--sage)}
-.rbb.sel{background:var(--teal);border-color:var(--teal);color:#fff}
-.rbb.dnf.sel{background:var(--red);border-color:var(--red);color:#fff}
+.limb-thermal{margin-bottom:12px;}
+.lt-header{font-size:.76rem;font-weight:700;color:var(--ink-md);margin-bottom:6px;}
+.th-opts{display:flex;gap:6px;flex-wrap:wrap;}
+.tho{padding:6px 12px;border-radius:var(--rs);border:1.5px solid var(--border);font-size:.74rem;cursor:pointer;transition:all .13s;background:var(--white);color:var(--ink-sm);}
+.tho:hover{border-color:var(--sage-md);}
+.tho.sel-normal{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600;}
+.tho.sel-mild{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);font-weight:600;}
+.tho.sel-sig{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600;}
 
 /* ── ORTHO ── */
-.ortho-row{display:grid;grid-template-columns:170px 1fr;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-lt)}
-.ortho-row:last-child{border-bottom:none}
-.ortho-name{font-size:.8rem;font-weight:600;color:var(--ink-md)}
-.ortho-name span{display:block;font-size:.66rem;font-weight:400;color:var(--ink-sm)}
-.ortho-opts{display:flex;gap:6px;flex-wrap:wrap}
-.oo{padding:5px 11px;border-radius:6px;border:1.5px solid var(--border);font-size:.74rem;cursor:pointer;transition:all .15s;background:var(--white);color:var(--ink-sm)}
-.oo:hover{border-color:var(--sage)}
-.oo.pos{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600}
-.oo.neg{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600}
+.ortho-row{display:grid;grid-template-columns:165px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-lt);}
+.ortho-row:last-child{border-bottom:none;}
+.ortho-name{font-size:.78rem;font-weight:600;color:var(--ink-md);}
+.ortho-name span{display:block;font-size:.63rem;font-weight:400;color:var(--ink-sm);}
+.ortho-opts{display:flex;gap:5px;flex-wrap:wrap;}
+.oo{padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);font-size:.72rem;cursor:pointer;transition:all .13s;background:var(--white);color:var(--ink-sm);}
+.oo:hover{border-color:var(--sage);}
+.oo.pos{background:var(--red-lt);border-color:var(--red);color:var(--red);font-weight:600;}
+.oo.neg{background:var(--green-lt);border-color:var(--green);color:var(--green);font-weight:600;}
 
-/* ── SUMMARY COMPARISON ── */
-.comp-bar{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.comp-label{font-size:.76rem;font-weight:600;width:90px;color:var(--ink-md)}
-.comp-track{flex:1;height:8px;background:var(--border-lt);border-radius:10px;overflow:hidden}
-.comp-fill{height:100%;border-radius:10px;transition:width .6s ease}
-.comp-pct{font-size:.74rem;font-weight:700;width:44px;text-align:right}
+/* ── REBUILDER ── */
+.rb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-lt);}
+.rb-label{font-size:.78rem;font-weight:600;color:var(--ink-md);width:120px;flex-shrink:0;}
+.rb-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.rbb{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);font-size:.72rem;font-weight:700;cursor:pointer;background:var(--white);color:var(--ink-sm);transition:all .13s;display:flex;align-items:center;justify-content:center;}
+.rbb:hover{border-color:var(--sage);}
+.rbb.sel{background:var(--teal);border-color:var(--teal);color:#fff;}
+.rbb.dnf.sel{background:var(--red);border-color:var(--red);color:#fff;}
 
-/* ── PRINT ── */
-@media print{
-  .topbar,.step-strip,.ab,.btn,button{display:none!important}
-  .phase{display:block!important}
-  body{padding:0}
-  .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
-  .print-hdr{display:block!important}
+/* ── DARK SUMMARY ── */
+.dark-sum{background:var(--ink);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.dark-sum::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(13,115,119,.22),transparent 55%);}
+.ds-in{position:relative;}
+.ds-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;color:#fff;margin-bottom:2px;}
+.ds-title em{color:var(--sage-lt);font-style:italic;}
+.ds-sub{font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:14px;}
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:7px;}
+.ds-cell{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 8px;text-align:center;}
+.ds-val{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:#fff;line-height:1;}
+.ds-lbl{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:3px;}
+
+/* ── TX CARDS ── */
+.tx-card{border-radius:10px;padding:13px;margin-bottom:8px;border-left:4px solid transparent;}
+.tx-card.protocol{border-color:var(--teal);background:var(--teal-lt);}
+.tx-card.standard{border-color:var(--sage);background:var(--sage-xl);}
+.tx-card.optional{border-color:var(--gold);background:var(--gold-lt);}
+.tx-lbl{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+.tx-lbl.teal{color:var(--teal);}
+.tx-lbl.sage{color:var(--sage);}
+.tx-lbl.gold{color:var(--gold-dk);}
+.tx-name{font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.tx-detail{font-size:.75rem;color:var(--ink-sm);line-height:1.5;}
+
+/* ── ROF ── */
+.note-block{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:10px;}
+.note-block h3{font-family:'Cormorant Garamond',serif;font-size:.98rem;color:var(--sage);margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.note-block h3::after{content:'';flex:1;height:1px;background:var(--border-lt);}
+.note-text{font-size:.83rem;color:var(--ink-md);line-height:1.75;white-space:pre-wrap;}
+
+/* ── COMP BARS ── */
+.comp-bar{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.comp-label{font-size:.74rem;font-weight:600;width:85px;color:var(--ink-md);}
+.comp-track{flex:1;height:8px;background:var(--border-lt);border-radius:10px;overflow:hidden;}
+.comp-fill{height:100%;border-radius:10px;transition:width .6s ease;}
+.comp-pct{font-size:.72rem;font-weight:700;width:40px;text-align:right;}
+
+/* ── CALLOUT ── */
+.callout{border-radius:var(--rs);padding:10px 13px;font-size:.79rem;line-height:1.55;margin-bottom:10px;}
+.callout.teal{background:var(--teal-lt);border-left:3px solid var(--teal);color:var(--teal);}
+.callout.gold{background:var(--gold-lt);border-left:3px solid var(--gold);color:var(--gold-dk);}
+.callout.red{background:var(--red-lt);border-left:3px solid var(--red);color:var(--red);}
+.callout.green{background:var(--green-lt);border-left:3px solid var(--green);color:var(--green);}
+.callout.sage{background:var(--sage-xl);border-left:3px solid var(--sage);color:var(--sage);}
+
+/* ── EXAM ACTION BAR ── */
+.exam-ab{
+  position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  border-top:1px solid var(--border);padding:11px 20px;
+  display:flex;justify-content:space-between;align-items:center;
+  z-index:99;box-shadow:0 -2px 14px rgba(0,0,0,.07);
 }
-.print-hdr{display:none;text-align:center;padding:16px 0 10px;border-bottom:2px solid var(--sage);margin-bottom:20px}
-.print-hdr h1{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--sage)}
-.print-hdr p{font-size:.78rem;color:var(--ink-sm);margin-top:3px}
+.ab-prog{font-size:.72rem;color:var(--ink-sm);}
+.ab-btns{display:flex;gap:8px;}
 
-/* ── MISC ── */
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.divider{height:1px;background:var(--border-lt);margin:14px 0}
-.info-pill{display:inline-flex;align-items:center;gap:5px;background:var(--sage-xl);border-radius:20px;padding:4px 11px;font-size:.72rem;color:var(--sage);font-weight:600}
-.phase-header{margin-bottom:16px}
-.phase-header h2{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:3px}
-.phase-header p{font-size:.8rem;color:var(--ink-sm)}
+/* ══════════════════════════════════
+   BUILDER STYLES
+══════════════════════════════════ */
+.quiz-overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(160deg,rgba(10,20,13,.97),rgba(18,35,22,.97));
+  z-index:999;display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow-y:auto;
+}
+.quiz-box{
+  background:linear-gradient(145deg,#0d1f14,#172b1e);
+  border:1px solid rgba(47,92,67,.45);border-radius:22px;
+  width:100%;max-width:580px;padding:40px 36px;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);position:relative;
+}
+.quiz-box::before{content:'';position:absolute;inset:0;border-radius:22px;background:radial-gradient(ellipse at 70% 0%,rgba(47,92,67,.18) 0%,transparent 65%);pointer-events:none;}
+.qz-logo{display:flex;align-items:center;gap:10px;margin-bottom:26px;}
+.qz-logo-mark{width:36px;height:36px;background:var(--sage);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:white;flex-shrink:0;}
+.qz-logo-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.03em;line-height:1.2;}
+.qz-logo-text strong{color:rgba(255,255,255,.85);display:block;}
+.qz-prog{height:2px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-bottom:5px;}
+.qz-prog-bar{height:100%;background:linear-gradient(90deg,var(--sage-lt),var(--sage));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.qz-step{font-size:.62rem;color:rgba(255,255,255,.28);text-align:right;letter-spacing:.12em;text-transform:uppercase;margin-bottom:26px;}
+.qz-q{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:white;margin-bottom:5px;line-height:1.25;}
+.qz-qdesc{font-size:.8rem;color:rgba(255,255,255,.42);margin-bottom:18px;line-height:1.6;}
+.qz-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:18px;}
+.qz-grid.col1{grid-template-columns:1fr;}
+.qz-opt{padding:12px 14px;border:1.5px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.65);cursor:pointer;font-size:.84rem;text-align:left;display:flex;align-items:center;gap:10px;width:100%;transition:all .17s;}
+.qz-opt:hover{border-color:rgba(184,216,196,.35);background:rgba(47,92,67,.18);color:rgba(255,255,255,.85);}
+.qz-opt.sel{border-color:var(--sage-lt);background:rgba(47,92,67,.28);color:white;font-weight:600;}
+.qz-chk{width:17px;height:17px;border-radius:4px;border:2px solid rgba(255,255,255,.2);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;transition:all .17s;}
+.qz-opt.sel .qz-chk{background:var(--sage);border-color:var(--sage);color:white;}
+.vas-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;}
+.vas-btn{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04);color:rgba(255,255,255,.75);font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .17s;}
+.vas-disp{text-align:center;padding:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:11px;margin-bottom:14px;}
+.vas-val{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;}
+.qz-nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;}
+.qz-next{background:linear-gradient(135deg,var(--sage-md),var(--sage));color:white;border:none;border-radius:11px;padding:11px 26px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .18s;}
+.qz-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(47,92,67,.45);}
+.qz-next:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
+.qz-back{background:transparent;color:rgba(255,255,255,.38);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:11px 16px;font-size:.83rem;cursor:pointer;transition:all .17s;}
+.qz-back:hover{color:rgba(255,255,255,.7);}
+.qz-field-lbl{font-size:.63rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;}
+.qz-input{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(255,255,255,.05);color:white;font-size:.88rem;outline:none;transition:border-color .17s;}
+.qz-input:focus{border-color:var(--sage-lt);}
+.qz-rec{background:rgba(47,92,67,.2);border:1px solid rgba(184,216,196,.28);border-radius:14px;padding:18px;margin-bottom:12px;}
+.qz-rec-eyebrow{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sage-lt);margin-bottom:5px;}
+.qz-rec-big{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:white;line-height:1.1;}
+.qz-rec-sub{font-size:.8rem;color:rgba(255,255,255,.45);margin-top:4px;line-height:1.5;}
+.qz-info{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:13px 15px;margin-bottom:9px;}
+.qz-info-lbl{font-size:.57rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:3px;}
+.qz-info-txt{font-size:.8rem;color:rgba(255,255,255,.6);line-height:1.6;}
+.qz-note{background:rgba(192,138,50,.07);border:1px solid rgba(192,138,50,.2);border-radius:10px;padding:10px 13px;font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:14px;line-height:1.55;}
+.qz-accept{width:100%;background:linear-gradient(135deg,var(--sage-md),var(--sage));color:white;border:none;border-radius:12px;padding:13px;font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:700;cursor:pointer;transition:all .18s;}
+.qz-accept:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(47,92,67,.45);}
+.qz-skip{width:100%;background:transparent;color:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:9px;font-size:.78rem;cursor:pointer;margin-top:7px;transition:all .17s;}
+.qz-skip:hover{color:rgba(255,255,255,.55);}
+
+/* BUILDER LAYOUT */
+.builder-wrap{display:grid;grid-template-columns:1fr 320px;gap:20px;padding:20px 22px;max-width:1340px;margin:0 auto;align-items:start;}
+@media(max-width:960px){.builder-wrap{grid-template-columns:1fr;}}
+
+/* TIER SELECTOR */
+.tier-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.tier-card{
+  border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;
+  transition:all .2s;background:var(--white);text-align:center;position:relative;
+}
+.tier-card:hover{border-color:var(--sage-lt);}
+.tier-card.sel{border-color:var(--sage);background:var(--sage-xl);}
+.tier-card.sel-t2{border-color:var(--teal);background:var(--teal-lt);}
+.tier-card.sel-t3{border-color:var(--gold);background:var(--gold-lt);}
+.tier-num{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:3px;}
+.tier-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.tier-price{font-size:.85rem;font-weight:700;color:var(--sage);}
+.tier-badge{
+  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:white;font-size:.55rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px;white-space:nowrap;
+}
+
+/* CATALOG */
+.cat-section{margin-bottom:18px;}
+.cat-title{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;color:var(--ink);margin-bottom:9px;padding-bottom:6px;border-bottom:1.5px solid var(--border-lt);display:flex;align-items:center;gap:7px;}
+.cat-icon{width:24px;height:24px;background:var(--sage-xl);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+.product-row{display:grid;grid-template-columns:22px 1fr auto;gap:9px;align-items:center;padding:8px 11px;border:1px solid var(--border-lt);border-radius:8px;margin-bottom:5px;cursor:pointer;background:var(--white);transition:all .16s;}
+.product-row:hover{border-color:var(--sage-lt);background:var(--sage-xl);}
+.product-row.added{border-color:var(--sage);background:var(--sage-xl);}
+.pr-check{width:19px;height:19px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;color:white;background:white;transition:all .16s;flex-shrink:0;}
+.product-row.added .pr-check{background:var(--sage);border-color:var(--sage);}
+.pr-name{font-size:.83rem;color:var(--ink-md);line-height:1.35;}
+.pr-name small{display:block;font-size:.67rem;color:var(--ink-sm);}
+.pr-price{font-size:.76rem;font-weight:700;color:var(--sage);white-space:nowrap;}
+
+/* VISIT ROWS */
+.visit-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:9px 11px;border:1px solid var(--border-lt);border-radius:var(--rs);margin-bottom:7px;background:var(--cream);}
+.vr-label{font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:3px;}
+.vr-input{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;background:white;font-size:.87rem;}
+
+/* DISCOUNT / PAY */
+.pay-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+
+/* SUMMARY SIDEBAR */
+.summary{
+  background:linear-gradient(145deg,var(--sage-dk),#1e3d2c);
+  border-radius:var(--r);padding:22px;color:white;
+  box-shadow:0 8px 40px rgba(47,92,67,.25);
+  position:sticky;top:72px;margin-bottom:16px;
+}
+.summary::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(ellipse at 90% 10%,rgba(192,138,50,.12) 0%,transparent 60%);pointer-events:none;}
+.sum-label{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:3px;}
+.sum-name{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:white;margin-bottom:2px;line-height:1.15;}
+.sum-sub{font-size:.75rem;color:rgba(255,255,255,.4);margin-bottom:18px;}
+.price-block{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;}
+.price-main{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:700;color:white;line-height:1;}
+.price-lbl{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:3px;letter-spacing:.06em;}
+.price-monthly{font-size:1.1rem;font-weight:700;color:var(--sage-lt);margin-top:5px;}
+.bd-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:.8rem;}
+.bd-row:last-child{border-bottom:none;}
+.bd-lbl{color:rgba(255,255,255,.45);}
+.bd-val{font-weight:600;color:rgba(255,255,255,.8);}
+.bd-total .bd-lbl{color:white;font-weight:700;}
+.bd-total .bd-val{color:var(--sage-lt);font-size:.92rem;}
+.items-area{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:11px;margin-bottom:12px;max-height:160px;overflow-y:auto;}
+.item-chip{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:rgba(255,255,255,.06);border-radius:6px;margin-bottom:4px;gap:7px;}
+.item-chip:last-child{margin-bottom:0;}
+.ic-name{font-size:.77rem;color:rgba(255,255,255,.75);flex:1;line-height:1.3;}
+.ic-price{font-size:.72rem;font-weight:600;color:var(--sage-lt);white-space:nowrap;}
+.ic-rm{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;padding:2px 3px;transition:color .13s;flex-shrink:0;}
+.ic-rm:hover{color:var(--red);}
+.count-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--sage);color:white;border-radius:999px;width:19px;height:19px;font-size:.67rem;font-weight:700;margin-left:5px;}
+
+/* PATIENT CARD */
+.patient-card{background:white;border:1px solid var(--border);border-radius:var(--r);padding:26px 30px;box-shadow:var(--sh-lg);}
+.pc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--border-lt);}
+.pc-logo-box{width:42px;height:42px;background:var(--sage);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:white;flex-shrink:0;}
+.pc-clinic{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--ink);line-height:1.2;}
+.pc-clinic-sub{font-size:.7rem;color:var(--ink-sm);margin-top:2px;}
+.pc-total{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;color:var(--sage);line-height:1;}
+.pc-total-lbl{font-size:.67rem;color:var(--ink-sm);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;}
+.pc-monthly{font-size:.88rem;font-weight:700;color:var(--cc);margin-top:3px;}
+.pc-body{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px;}
+.pc-sec-title{font-size:.6rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:9px;}
+.pc-item{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--border-lt);font-size:.83rem;color:var(--ink-md);line-height:1.4;}
+.pc-item::before{content:'·';color:var(--sage);font-weight:700;flex-shrink:0;}
+.pc-item:last-child{border-bottom:none;}
+.pc-visit-line{font-size:.81rem;color:var(--ink-md);padding:3px 0;}
+.pc-sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding-top:14px;border-top:1.5px solid var(--border-lt);margin-top:14px;}
+.sig-line{border-top:1px solid #bbb;padding-top:4px;font-size:.68rem;color:var(--ink-sm);margin-top:22px;}
+.pc-footer{font-size:.64rem;color:var(--ink-sm);text-align:center;padding-top:10px;border-top:1px solid var(--border-lt);margin-top:5px;line-height:1.6;}
+.pc-tier-banner{background:var(--sage);color:white;border-radius:9px;padding:9px 15px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+
+/* DRIVE STATUS */
+.drive-status{display:none;padding:9px 13px;border-radius:var(--rs);font-size:.79rem;margin-top:7px;line-height:1.5;align-items:center;gap:7px;}
+.drive-status.show{display:flex;}
+.drive-status.success{background:var(--green-lt);color:var(--green);border:1px solid rgba(26,107,58,.2);}
+.drive-status.error{background:var(--red-lt);color:var(--red);border:1px solid rgba(192,57,43,.2);}
+.drive-status.loading{background:var(--cc-lt);color:var(--cc);border:1px solid rgba(37,99,168,.2);}
+.spinner{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--rs);font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:all .18s;white-space:nowrap;}
+.btn-t{background:var(--teal);color:#fff;}
+.btn-t:hover{background:#0a5a5e;}
+.btn-g{background:var(--sage);color:#fff;}
+.btn-g:hover{background:#1f4530;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:var(--gold-dk);}
+.btn-h{background:var(--white);border:1.5px solid var(--border);color:var(--ink-md);}
+.btn-h:hover{border-color:var(--sage);color:var(--sage);}
+.btn-sm{padding:7px 13px;font-size:.77rem;}
+.btn-red{background:var(--red-lt);color:var(--red);border:1px solid rgba(192,57,43,.18);}
+.btn-red:hover{background:#fcd9d6;}
+.btn-primary{background:linear-gradient(135deg,var(--sage-md),var(--sage));color:white;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(47,92,67,.35);}
+.btn-drive{background:linear-gradient(135deg,#1a73e8,#0d5fbc);color:white;}
+.btn-drive:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,115,232,.35);}
+.btn-drive:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-block{display:block;width:100%;text-align:center;justify-content:center;}
+.btn-block+.btn-block{margin-top:7px;}
+
+/* PREFILL BANNER */
+.prefill-banner{background:var(--sage-xl);border:1px solid var(--sage-lt);border-radius:var(--rs);padding:9px 13px;font-size:.79rem;color:var(--ink-md);margin-bottom:12px;display:flex;align-items:flex-start;gap:7px;line-height:1.5;}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border-lt);margin:12px 0;}
+
+/* PRINT */
+@media print{
+  .topbar,.step-strip,.exam-ab,.mode-tabs,.tb-right,
+  .quiz-overlay,.builder-wrap>*:last-child,.prefill-banner,
+  .btn,.no-print{display:none!important;}
+  .mode-panel{display:block!important;}
+  .exam-main,.patient-card-section{padding:16px;}
+  .card,.note-block{box-shadow:none;break-inside:avoid;}
+  body{background:white;padding:0;}
+}
+.print-hdr{display:none;}
+@media print{.print-hdr{display:block;text-align:center;padding:14px 0 10px;border-bottom:2px solid var(--sage);margin-bottom:18px;}}
+.print-hdr h1{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:var(--sage);}
+.print-hdr p{font-size:.76rem;color:var(--ink-sm);margin-top:2px;}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
+<!-- ════ TOPBAR ════ -->
+<div class="topbar" id="mainTopbar">
+  <div class="tb-mark">C</div>
   <div>
-    <div class="tb-brand">CVC Spine &amp; Sport — <em>NeuroPath</em></div>
-    <div class="tb-sub">Initial Examination Workflow</div>
+    <div class="tb-name">NeuroPath Clinical Suite <span>Colleyville Chiropractic · CVC Spine &amp; Sport</span></div>
   </div>
   <div class="tb-divider"></div>
-  <div id="ptName" style="font-size:.82rem;color:rgba(255,255,255,.6);font-style:italic">No patient loaded</div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-exam" onclick="switchMode('exam')">🩺 Exam</button>
+    <button class="mode-tab" id="tab-builder" onclick="switchMode('builder')">📋 Program Builder</button>
+  </div>
   <div class="tb-right">
-    <span class="badge" id="phaseBadge">Demographics</span>
+    <span class="tb-pt-name" id="tb-pt-display">No patient</span>
+    <button class="tb-btn tb-ghost" onclick="window.print()">🖨 Print</button>
+    <button class="tb-btn tb-drive" id="tb-drive-btn" onclick="saveToDrive()" disabled>☁ Save to Drive</button>
   </div>
 </div>
 
-<!-- STEP STRIP -->
-<div class="step-strip">
-  <div class="pip active" id="pip0" onclick="goTo(0)">1 Demo</div>
-  <div class="pip" id="pip1" onclick="goTo(1)">2 History</div>
-  <div class="pip" id="pip2" onclick="goTo(2)">3 Symptoms</div>
-  <div class="pip" id="pip3" onclick="goTo(3)">4 Sensory</div>
-  <div class="pip" id="pip4" onclick="goTo(4)">5 ReBuilder</div>
-  <div class="pip" id="pip5" onclick="goTo(5)">6 Balance</div>
-  <div class="pip" id="pip6" onclick="goTo(6)">7 Thermal</div>
-  <div class="pip" id="pip7" onclick="goTo(7)">8 Ortho</div>
-  <div class="pip" id="pip8" onclick="goTo(8)">9 Summary</div>
-  <div class="pip" id="pip9" onclick="goTo(9)">★ ROF</div>
-</div>
+<!-- ════ EXAM MODE ════ -->
+<div class="mode-panel active" id="mode-exam">
 
-<div class="main">
-<div class="print-hdr">
-  <h1>NeuroPath — Initial Examination</h1>
-  <p>Colleyville Chiropractic | CVC Spine &amp; Sport · 1001 Glade Rd Ste 120, Colleyville TX · (817) 420-7696</p>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 0 — DEMOGRAPHICS
-════════════════════════════════ -->
-<div class="phase active" id="phase0">
-  <div class="phase-header">
-    <h2>Patient Demographics</h2>
-    <p>Basic intake information for this NeuroPath exam</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Patient Information</div>
-    <div class="field-grid">
-      <div class="field"><label>First Name</label><input id="firstName" oninput="updatePtName()" placeholder="First"/></div>
-      <div class="field"><label>Last Name</label><input id="lastName" oninput="updatePtName()" placeholder="Last"/></div>
-    </div>
-    <div class="field-grid three">
-      <div class="field"><label>Date of Birth</label><input type="date" id="dob"/></div>
-      <div class="field"><label>Age</label><input type="number" id="age" placeholder="Age"/></div>
-      <div class="field"><label>Sex</label><select id="sex"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(000) 000-0000"/></div>
-      <div class="field"><label>Email</label><input type="email" id="email" placeholder="email@example.com"/></div>
-    </div>
-    <div class="field-grid one">
-      <div class="field"><label>Address</label><input id="address" placeholder="Street address"/></div>
-    </div>
-    <div class="field-grid three">
-      <div class="field"><label>City</label><input id="city" placeholder="City"/></div>
-      <div class="field"><label>State</label><input id="state" placeholder="TX" maxlength="2"/></div>
-      <div class="field"><label>ZIP</label><input id="zip" placeholder="00000"/></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Exam Info</div>
-    <div class="field-grid three">
-      <div class="field"><label>Exam Date</label><input type="date" id="examDate"/></div>
-      <div class="field"><label>Provider</label><select id="provider"><option>Dr. Rudy Urrutia, DC</option></select></div>
-      <div class="field"><label>Visit Type</label><select id="visitType"><option>Initial NeuroPath Exam</option><option>Re-Examination</option></select></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 1 — HISTORY
-════════════════════════════════ -->
-<div class="phase" id="phase1">
-  <div class="phase-header">
-    <h2>Health History</h2>
-    <p>Relevant medical background and neuropathy history</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Chief Complaint</div>
-    <div class="field-grid one">
-      <div class="field"><label>Primary complaint in patient's own words</label><textarea id="chiefComplaint" placeholder="e.g. 'My feet feel like they're on fire at night and I can't feel the floor when I walk'"></textarea></div>
-    </div>
-    <div class="sec-lbl" style="margin-top:4px">Duration &amp; Onset</div>
-    <div class="field-grid three">
-      <div class="field"><label>Symptom Duration</label><input id="duration" placeholder="e.g. 3 years"/></div>
-      <div class="field"><label>Onset</label><select id="onset"><option value="">—</option><option>Sudden</option><option>Gradual</option><option>Unknown</option></select></div>
-      <div class="field"><label>Progression</label><select id="progression"><option value="">—</option><option>Worsening</option><option>Stable</option><option>Improving</option><option>Fluctuating</option></select></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Relevant Medical History</div>
-    <p class="card-sub">Select all that apply</p>
-    <div class="chip-row" id="medHistory">
-      <div class="chip" onclick="tog(this)">Type 2 Diabetes</div>
-      <div class="chip" onclick="tog(this)">Type 1 Diabetes</div>
-      <div class="chip" onclick="tog(this)">Pre-Diabetes</div>
-      <div class="chip" onclick="tog(this)">Chemotherapy</div>
-      <div class="chip" onclick="tog(this)">Hypothyroidism</div>
-      <div class="chip" onclick="tog(this)">Hyperthyroidism</div>
-      <div class="chip" onclick="tog(this)">Autoimmune Condition</div>
-      <div class="chip" onclick="tog(this)">Spinal Stenosis</div>
-      <div class="chip" onclick="tog(this)">Disc Herniation</div>
-      <div class="chip" onclick="tog(this)">Alcohol Use</div>
-      <div class="chip" onclick="tog(this)">Vitamin B12 Deficiency</div>
-      <div class="chip" onclick="tog(this)">Kidney Disease</div>
-      <div class="chip" onclick="tog(this)">Cardiovascular Disease</div>
-      <div class="chip" onclick="tog(this)">Lyme Disease</div>
-      <div class="chip" onclick="tog(this)">HIV/AIDS</div>
-      <div class="chip" onclick="tog(this)">GI Disorder</div>
-    </div>
-    <div class="field-grid one">
-      <div class="field"><label>Other relevant history</label><input id="otherHistory" placeholder="Additional medical history..."/></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Current Medications</div>
-    <div class="field-grid one">
-      <div class="field"><label>List current medications</label><textarea id="medications" placeholder="Metformin 500mg, Gabapentin 300mg..."></textarea></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Prior Treatment</div>
-    <div class="chip-row" id="priorTx">
-      <div class="chip" onclick="tog(this)">Medication only</div>
-      <div class="chip" onclick="tog(this)">Physical therapy</div>
-      <div class="chip" onclick="tog(this)">Chiropractic</div>
-      <div class="chip" onclick="tog(this)">Acupuncture</div>
-      <div class="chip" onclick="tog(this)">Injections</div>
-      <div class="chip" onclick="tog(this)">Surgery</div>
-      <div class="chip" onclick="tog(this)">No prior treatment</div>
-    </div>
-    <div class="field-grid one">
-      <div class="field"><label>Outcome of prior treatment</label><input id="priorOutcome" placeholder="e.g. Temporary relief, no improvement..."/></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 2 — SYMPTOMS
-════════════════════════════════ -->
-<div class="phase" id="phase2">
-  <div class="phase-header">
-    <h2>Symptom Profile</h2>
-    <p>Characterize the patient's neuropathy presentation</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Symptom Location</div>
-    <p class="card-sub">Select all affected areas</p>
-    <div class="chip-row">
-      <div class="chip teal" onclick="tog(this)">Left Foot / Toes</div>
-      <div class="chip teal" onclick="tog(this)">Right Foot / Toes</div>
-      <div class="chip teal" onclick="tog(this)">Left Lower Leg</div>
-      <div class="chip teal" onclick="tog(this)">Right Lower Leg</div>
-      <div class="chip gold" onclick="tog(this)">Left Hand / Fingers</div>
-      <div class="chip gold" onclick="tog(this)">Right Hand / Fingers</div>
-      <div class="chip gold" onclick="tog(this)">Left Forearm</div>
-      <div class="chip gold" onclick="tog(this)">Right Forearm</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Symptom Type</div>
-    <p class="card-sub">Select all that apply</p>
-    <div class="chip-row">
-      <div class="chip red" onclick="tog(this)">Burning Pain</div>
-      <div class="chip red" onclick="tog(this)">Sharp / Stabbing</div>
-      <div class="chip red" onclick="tog(this)">Aching / Dull Pain</div>
-      <div class="chip" onclick="tog(this)">Numbness</div>
-      <div class="chip" onclick="tog(this)">Tingling</div>
-      <div class="chip" onclick="tog(this)">Pins &amp; Needles</div>
-      <div class="chip" onclick="tog(this)">Electric Shock Sensation</div>
-      <div class="chip" onclick="tog(this)">Cold Sensation (feet feel cold)</div>
-      <div class="chip" onclick="tog(this)">Hot Sensation (feet feel hot)</div>
-      <div class="chip" onclick="tog(this)">Loss of Feeling</div>
-      <div class="chip" onclick="tog(this)">Hypersensitivity to Touch</div>
-      <div class="chip" onclick="tog(this)">Muscle Weakness</div>
-      <div class="chip" onclick="tog(this)">Balance / Coordination Issues</div>
-      <div class="chip" onclick="tog(this)">Falls / Near-Falls</div>
-      <div class="chip" onclick="tog(this)">Sleep Disruption</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Pain Rating</div>
-    <div class="field-grid three">
-      <div class="field"><label>Current Pain (0–10)</label><input type="number" id="painCurrent" min="0" max="10" placeholder="0"/></div>
-      <div class="field"><label>Worst Pain (0–10)</label><input type="number" id="painWorst" min="0" max="10" placeholder="0"/></div>
-      <div class="field"><label>Best Pain (0–10)</label><input type="number" id="painBest" min="0" max="10" placeholder="0"/></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>Pain Worse At</label><select id="painWorse"><option value="">—</option><option>Night</option><option>Morning</option><option>With activity</option><option>At rest</option><option>No pattern</option></select></div>
-      <div class="field"><label>What Helps</label><input id="painHelp" placeholder="e.g. Elevation, heat, cold..."/></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Functional Impact</div>
-    <div class="chip-row">
-      <div class="chip red" onclick="tog(this)">Cannot walk unassisted</div>
-      <div class="chip red" onclick="tog(this)">Cannot stand for >10 min</div>
-      <div class="chip" onclick="tog(this)">Difficulty with stairs</div>
-      <div class="chip" onclick="tog(this)">Difficulty dressing / shoes</div>
-      <div class="chip" onclick="tog(this)">Cannot exercise</div>
-      <div class="chip" onclick="tog(this)">Driving impaired</div>
-      <div class="chip" onclick="tog(this)">Sleep disruption</div>
-      <div class="chip" onclick="tog(this)">Work limitations</div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 3 — SENSORY TESTING
-════════════════════════════════ -->
-<div class="phase" id="phase3">
-  <div class="phase-header">
-    <h2>Sensory Testing</h2>
-    <p>7-test battery per limb · Score 0–10 (higher = more sensation) · –5 = allodynia</p>
+  <div class="step-strip">
+    <div class="pip active" id="pip0" onclick="goTo(0)">1 Demo</div>
+    <div class="pip" id="pip1" onclick="goTo(1)">2 History</div>
+    <div class="pip" id="pip2" onclick="goTo(2)">3 Symptoms</div>
+    <div class="pip" id="pip3" onclick="goTo(3)">4 Sensory</div>
+    <div class="pip" id="pip4" onclick="goTo(4)">5 ReBuilder</div>
+    <div class="pip" id="pip5" onclick="goTo(5)">6 Balance</div>
+    <div class="pip" id="pip6" onclick="goTo(6)">7 Thermal</div>
+    <div class="pip" id="pip7" onclick="goTo(7)">8 Ortho</div>
+    <div class="pip" id="pip8" onclick="goTo(8)">9 Summary</div>
+    <div class="pip" id="pip9" onclick="goTo(9)">★ ROF</div>
   </div>
 
-  <div class="card">
-    <div class="sec-lbl">Select Limb to Score</div>
-    <div class="limb-tabs">
-      <div class="limb-tab active" id="lt-lf" onclick="setLimb('lf')">Left Foot</div>
-      <div class="limb-tab" id="lt-rf" onclick="setLimb('rf')">Right Foot</div>
-      <div class="limb-tab" id="lt-lh" onclick="setLimb('lh')">Left Hand</div>
-      <div class="limb-tab" id="lt-rh" onclick="setLimb('rh')">Right Hand</div>
-    </div>
+  <div class="exam-main">
+  <div class="print-hdr">
+    <h1>NeuroPath — Initial Examination</h1>
+    <p>Colleyville Chiropractic | CVC Spine &amp; Sport · 1001 Glade Rd Ste 120, Colleyville TX · (817) 420-7696</p>
+  </div>
 
-    <div id="sensory-panel"></div>
-
-    <!-- Limb result bar -->
-    <div class="limb-result" id="limb-result" style="display:none">
-      <div>
-        <div style="font-size:.6rem;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Sensory Loss</div>
-        <div class="lr-score" id="lr-score-text">—</div>
+  <!-- PHASE 0: DEMOGRAPHICS -->
+  <div class="phase active" id="phase0">
+    <div class="phase-hdr"><h2>Patient Demographics</h2><p>Basic intake information for this NeuroPath exam</p></div>
+    <div class="card">
+      <div class="sec-lbl">Patient Information</div>
+      <div class="fg two">
+        <div class="field"><label>First Name</label><input id="firstName" oninput="updatePtName()" placeholder="First"/></div>
+        <div class="field"><label>Last Name</label><input id="lastName" oninput="updatePtName()" placeholder="Last"/></div>
       </div>
-      <div id="lr-sev-badge"></div>
-      <div style="font-size:.72rem;opacity:.5">Total: <span id="lr-total">—</span>/70</div>
-    </div>
-  </div>
-
-  <!-- Summary across limbs -->
-  <div class="card" id="sensory-summary-card" style="display:none">
-    <div class="sec-lbl">Sensory Summary</div>
-    <div id="sensory-summary-content"></div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 4 — REBUILDER
-════════════════════════════════ -->
-<div class="phase" id="phase4">
-  <div class="phase-header">
-    <h2>ReBuilder Reaction Time</h2>
-    <p>Record reaction time score per limb after all manual sensory testing is complete. Score 1–8, or DNF.</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Reaction Time Scores</div>
-    <div id="rb-panel">
-      <div class="rb-row">
-        <div class="rb-label">Left Foot</div>
-        <div class="rb-btns" id="rb-lf"></div>
+      <div class="fg three">
+        <div class="field"><label>Date of Birth</label><input type="date" id="dob"/></div>
+        <div class="field"><label>Age</label><input type="number" id="age" placeholder="Age"/></div>
+        <div class="field"><label>Sex</label><select id="sex"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
       </div>
-      <div class="rb-row">
-        <div class="rb-label">Right Foot</div>
-        <div class="rb-btns" id="rb-rf"></div>
+      <div class="fg two">
+        <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(817) 000-0000"/></div>
+        <div class="field"><label>Email</label><input type="email" id="email" placeholder="email@example.com"/></div>
       </div>
-      <div class="rb-row">
-        <div class="rb-label">Left Hand</div>
-        <div class="rb-btns" id="rb-lh"></div>
+      <div class="fg one">
+        <div class="field"><label>Address</label><input id="address" placeholder="Street address"/></div>
       </div>
-      <div class="rb-row">
-        <div class="rb-label">Right Hand</div>
-        <div class="rb-btns" id="rb-rh"></div>
+      <div class="fg three">
+        <div class="field"><label>City</label><input id="city" placeholder="Colleyville"/></div>
+        <div class="field"><label>State</label><input id="state" placeholder="TX" maxlength="2"/></div>
+        <div class="field"><label>ZIP</label><input id="zip" placeholder="76034"/></div>
       </div>
     </div>
-    <div class="callout sage" style="margin-top:14px">
-      <strong>Interpretation:</strong> Score 1–3 = near normal · 4–5 = mildly impaired · 6–7 = moderately impaired · 8 = severely impaired · DNF = unable to complete
+    <div class="card">
+      <div class="sec-lbl">Exam Info</div>
+      <div class="fg three">
+        <div class="field"><label>Exam Date</label><input type="date" id="examDate"/></div>
+        <div class="field"><label>Provider</label><select id="provider"><option>Dr. Rudy Urrutia, DC</option></select></div>
+        <div class="field"><label>Visit Type</label><select id="visitType"><option>Initial NeuroPath Exam</option><option>Re-Examination (Week 4)</option><option>Re-Examination (Week 8)</option><option>Re-Examination (Week 12)</option></select></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ════════════════════════════════
-     PHASE 5 — BALANCE
-════════════════════════════════ -->
-<div class="phase" id="phase5">
-  <div class="phase-header">
-    <h2>Balance &amp; Gait Assessment</h2>
-    <p>Proprioceptive and vestibular screening</p>
+  <!-- PHASE 1: HISTORY -->
+  <div class="phase" id="phase1">
+    <div class="phase-hdr"><h2>Health History</h2><p>Relevant medical background and neuropathy history</p></div>
+    <div class="card">
+      <div class="sec-lbl">Chief Complaint</div>
+      <div class="fg one"><div class="field"><label>Primary complaint in patient's own words</label><textarea id="chiefComplaint" placeholder="e.g. 'My feet feel like they're on fire at night and I can't feel the floor when I walk'"></textarea></div></div>
+      <div class="sec-lbl">Duration &amp; Onset</div>
+      <div class="fg three">
+        <div class="field"><label>Duration</label><input id="duration" placeholder="e.g. 3 years"/></div>
+        <div class="field"><label>Onset</label><select id="onset"><option value="">—</option><option>Sudden</option><option>Gradual</option><option>Unknown</option></select></div>
+        <div class="field"><label>Progression</label><select id="progression"><option value="">—</option><option>Worsening</option><option>Stable</option><option>Improving</option><option>Fluctuating</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Relevant Medical History</div>
+      <p class="card-sub">Select all that apply</p>
+      <div class="chip-row" id="medHistory">
+        <div class="chip" onclick="tog(this)">Type 2 Diabetes</div>
+        <div class="chip" onclick="tog(this)">Type 1 Diabetes</div>
+        <div class="chip" onclick="tog(this)">Pre-Diabetes</div>
+        <div class="chip" onclick="tog(this)">Chemotherapy</div>
+        <div class="chip" onclick="tog(this)">Hypothyroidism</div>
+        <div class="chip" onclick="tog(this)">Hyperthyroidism</div>
+        <div class="chip" onclick="tog(this)">Autoimmune Condition</div>
+        <div class="chip" onclick="tog(this)">Spinal Stenosis</div>
+        <div class="chip" onclick="tog(this)">Disc Herniation</div>
+        <div class="chip" onclick="tog(this)">Alcohol Use</div>
+        <div class="chip" onclick="tog(this)">B12 Deficiency</div>
+        <div class="chip" onclick="tog(this)">Kidney Disease</div>
+        <div class="chip" onclick="tog(this)">Cardiovascular Disease</div>
+        <div class="chip" onclick="tog(this)">Lyme Disease</div>
+        <div class="chip" onclick="tog(this)">GI Disorder</div>
+        <div class="chip" onclick="tog(this)">Metabolic Syndrome</div>
+      </div>
+      <div class="fg one"><div class="field"><label>Other relevant history</label><input id="otherHistory" placeholder="Additional medical history..."/></div></div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Current Medications</div>
+      <div class="fg one"><div class="field"><label>List current medications</label><textarea id="medications" placeholder="Metformin 500mg, Gabapentin 300mg..."></textarea></div></div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Prior Treatment</div>
+      <div class="chip-row" id="priorTx">
+        <div class="chip" onclick="tog(this)">Medication only</div>
+        <div class="chip" onclick="tog(this)">Physical therapy</div>
+        <div class="chip" onclick="tog(this)">Chiropractic</div>
+        <div class="chip" onclick="tog(this)">Acupuncture</div>
+        <div class="chip" onclick="tog(this)">Injections</div>
+        <div class="chip" onclick="tog(this)">Surgery</div>
+        <div class="chip" onclick="tog(this)">No prior treatment</div>
+      </div>
+      <div class="fg one"><div class="field"><label>Outcome of prior treatment</label><input id="priorOutcome" placeholder="e.g. Temporary relief, no improvement..."/></div></div>
+    </div>
   </div>
-  <div class="card">
-    <div class="sec-lbl">Standing Balance</div>
-    <div id="bal-panel">
-      <div class="bal-row">
-        <div class="bal-label">Two-Leg Stance (eyes open)<span>Standard floor, 30 sec</span></div>
-        <div class="bal-opts" id="bal-2leg-eo">
-          <div class="bo" onclick="selBal(this,'2leg-eo')">Normal</div>
-          <div class="bo" onclick="selBal(this,'2leg-eo')">Mild sway</div>
-          <div class="bo" onclick="selBal(this,'2leg-eo')">Moderate sway</div>
-          <div class="bo" onclick="selBal(this,'2leg-eo')">Could not complete</div>
+
+  <!-- PHASE 2: SYMPTOMS -->
+  <div class="phase" id="phase2">
+    <div class="phase-hdr"><h2>Symptom Profile</h2><p>Characterize the patient's neuropathy presentation</p></div>
+    <div class="card">
+      <div class="sec-lbl">Symptom Location</div>
+      <div class="chip-row">
+        <div class="chip teal" onclick="tog(this)">Left Foot / Toes</div>
+        <div class="chip teal" onclick="tog(this)">Right Foot / Toes</div>
+        <div class="chip teal" onclick="tog(this)">Left Lower Leg</div>
+        <div class="chip teal" onclick="tog(this)">Right Lower Leg</div>
+        <div class="chip gold" onclick="tog(this)">Left Hand / Fingers</div>
+        <div class="chip gold" onclick="tog(this)">Right Hand / Fingers</div>
+        <div class="chip gold" onclick="tog(this)">Left Forearm</div>
+        <div class="chip gold" onclick="tog(this)">Right Forearm</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Symptom Type</div>
+      <div class="chip-row">
+        <div class="chip red" onclick="tog(this)">Burning Pain</div>
+        <div class="chip red" onclick="tog(this)">Sharp / Stabbing</div>
+        <div class="chip red" onclick="tog(this)">Aching / Dull Pain</div>
+        <div class="chip" onclick="tog(this)">Numbness</div>
+        <div class="chip" onclick="tog(this)">Tingling</div>
+        <div class="chip" onclick="tog(this)">Pins &amp; Needles</div>
+        <div class="chip" onclick="tog(this)">Electric Shock Sensation</div>
+        <div class="chip" onclick="tog(this)">Cold Sensation</div>
+        <div class="chip" onclick="tog(this)">Hot Sensation</div>
+        <div class="chip" onclick="tog(this)">Loss of Feeling</div>
+        <div class="chip" onclick="tog(this)">Hypersensitivity to Touch</div>
+        <div class="chip" onclick="tog(this)">Muscle Weakness</div>
+        <div class="chip" onclick="tog(this)">Balance / Coordination Issues</div>
+        <div class="chip" onclick="tog(this)">Falls / Near-Falls</div>
+        <div class="chip" onclick="tog(this)">Sleep Disruption</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Pain Rating</div>
+      <div class="fg three">
+        <div class="field"><label>Current Pain (0–10)</label><input type="number" id="painCurrent" min="0" max="10" placeholder="0"/></div>
+        <div class="field"><label>Worst Pain (0–10)</label><input type="number" id="painWorst" min="0" max="10" placeholder="0"/></div>
+        <div class="field"><label>Best Pain (0–10)</label><input type="number" id="painBest" min="0" max="10" placeholder="0"/></div>
+      </div>
+      <div class="fg two">
+        <div class="field"><label>Pain Worse At</label><select id="painWorse"><option value="">—</option><option>Night</option><option>Morning</option><option>With activity</option><option>At rest</option><option>No pattern</option></select></div>
+        <div class="field"><label>What Helps</label><input id="painHelp" placeholder="e.g. Elevation, heat, cold..."/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Functional Impact</div>
+      <div class="chip-row">
+        <div class="chip red" onclick="tog(this)">Cannot walk unassisted</div>
+        <div class="chip red" onclick="tog(this)">Cannot stand &gt;10 min</div>
+        <div class="chip" onclick="tog(this)">Difficulty with stairs</div>
+        <div class="chip" onclick="tog(this)">Difficulty dressing / shoes</div>
+        <div class="chip" onclick="tog(this)">Cannot exercise</div>
+        <div class="chip" onclick="tog(this)">Driving impaired</div>
+        <div class="chip" onclick="tog(this)">Sleep disruption</div>
+        <div class="chip" onclick="tog(this)">Work limitations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3: SENSORY -->
+  <div class="phase" id="phase3">
+    <div class="phase-hdr"><h2>Sensory Testing</h2><p>7-test battery per limb · Score 0–10 (higher = more sensation) · –5 = allodynia</p></div>
+    <div class="card">
+      <div class="sec-lbl">Select Limb</div>
+      <div class="limb-tabs">
+        <div class="limb-tab active" id="lt-lf" onclick="setLimb('lf')">Left Foot</div>
+        <div class="limb-tab" id="lt-rf" onclick="setLimb('rf')">Right Foot</div>
+        <div class="limb-tab" id="lt-lh" onclick="setLimb('lh')">Left Hand</div>
+        <div class="limb-tab" id="lt-rh" onclick="setLimb('rh')">Right Hand</div>
+      </div>
+      <div id="sensory-panel"></div>
+      <div class="limb-result" id="limb-result" style="display:none">
+        <div><div style="font-size:.58rem;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Sensory Loss</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:white" id="lr-score-text">—</div></div>
+        <div id="lr-sev-badge"></div>
+        <div style="font-size:.7rem;opacity:.5">Total: <span id="lr-total">—</span>/70</div>
+      </div>
+    </div>
+    <div class="card" id="sensory-summary-card" style="display:none">
+      <div class="sec-lbl">Sensory Summary — All Limbs</div>
+      <div id="sensory-summary-content"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 4: REBUILDER -->
+  <div class="phase" id="phase4">
+    <div class="phase-hdr"><h2>Nerve Stimulation Reaction Time</h2><p>Record reaction time score per limb · Score 1–8 or DNF</p></div>
+    <div class="card">
+      <div class="sec-lbl">Reaction Time Scores</div>
+      <div class="rb-row"><div class="rb-label">Left Foot</div><div class="rb-btns" id="rb-lf"></div></div>
+      <div class="rb-row"><div class="rb-label">Right Foot</div><div class="rb-btns" id="rb-rf"></div></div>
+      <div class="rb-row"><div class="rb-label">Left Hand</div><div class="rb-btns" id="rb-lh"></div></div>
+      <div class="rb-row"><div class="rb-label">Right Hand</div><div class="rb-btns" id="rb-rh"></div></div>
+      <div class="callout sage" style="margin-top:12px"><strong>Interpretation:</strong> 1–3 = near normal · 4–5 = mildly impaired · 6–7 = moderately impaired · 8 = severely impaired · DNF = unable to complete</div>
+    </div>
+  </div>
+
+  <!-- PHASE 5: BALANCE -->
+  <div class="phase" id="phase5">
+    <div class="phase-hdr"><h2>Balance &amp; Gait Assessment</h2><p>Proprioceptive and vestibular screening</p></div>
+    <div class="card">
+      <div class="sec-lbl">Standing Balance</div>
+      <div class="bal-row"><div class="bal-label">Two-Leg Stance (eyes open)<span>Standard floor, 30 sec</span></div><div class="bal-opts" id="bal-2leg-eo"><div class="bo" onclick="selBal(this,'2leg-eo')">Normal</div><div class="bo" onclick="selBal(this,'2leg-eo')">Mild sway</div><div class="bo" onclick="selBal(this,'2leg-eo')">Moderate sway</div><div class="bo" onclick="selBal(this,'2leg-eo')">Could not complete</div></div></div>
+      <div class="bal-row"><div class="bal-label">Two-Leg Stance (eyes closed)<span>Romberg test</span></div><div class="bal-opts" id="bal-2leg-ec"><div class="bo" onclick="selBal(this,'2leg-ec')">Normal</div><div class="bo" onclick="selBal(this,'2leg-ec')">Mild sway</div><div class="bo" onclick="selBal(this,'2leg-ec')">Moderate sway</div><div class="bo" onclick="selBal(this,'2leg-ec')">Could not complete</div></div></div>
+      <div class="bal-row"><div class="bal-label">Tandem Stance<span>Heel-to-toe, eyes open, 10 sec</span></div><div class="bal-opts" id="bal-tandem"><div class="bo" onclick="selBal(this,'tandem')">≥10 sec</div><div class="bo" onclick="selBal(this,'tandem')">5–9 sec</div><div class="bo" onclick="selBal(this,'tandem')">&lt;5 sec</div><div class="bo" onclick="selBal(this,'tandem')">Could not attempt</div></div></div>
+      <div class="bal-row"><div class="bal-label">Single-Leg Stance<span>Eyes open, 10 sec per side</span></div><div class="bal-opts" id="bal-single"><div class="bo" onclick="selBal(this,'single')">≥10 sec bilat.</div><div class="bo" onclick="selBal(this,'single')">5–9 sec</div><div class="bo" onclick="selBal(this,'single')">&lt;5 sec</div><div class="bo" onclick="selBal(this,'single')">Could not attempt</div></div></div>
+    </div>
+    <div class="card">
+      <div class="sec-lbl">Gait Observations</div>
+      <div class="bal-row"><div class="bal-label">Gait Pattern</div><div class="bal-opts" id="bal-gait"><div class="bo" onclick="selBal(this,'gait')">Normal</div><div class="bo" onclick="selBal(this,'gait')">Antalgic</div><div class="bo" onclick="selBal(this,'gait')">Wide-based</div><div class="bo" onclick="selBal(this,'gait')">Steppage / foot drop</div><div class="bo" onclick="selBal(this,'gait')">Assistive device used</div></div></div>
+      <div class="bal-row"><div class="bal-label">Fall History<span>Past 12 months</span></div><div class="bal-opts" id="bal-falls"><div class="bo" onclick="selBal(this,'falls')">No falls</div><div class="bo" onclick="selBal(this,'falls')">Near-falls only</div><div class="bo" onclick="selBal(this,'falls')">1–2 falls</div><div class="bo" onclick="selBal(this,'falls')">3+ falls</div></div></div>
+      <div class="fg one" style="margin-top:8px"><div class="field"><label>Additional balance notes</label><textarea id="balNotes" placeholder="Any pertinent observations..."></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 6: THERMAL -->
+  <div class="phase" id="phase6">
+    <div class="phase-hdr"><h2>Thermal Imaging</h2><p>Color zone grading per limb based on infrared imaging findings</p></div>
+    <div class="card">
+      <div class="sec-lbl">Limb Color Zone Findings</div>
+      <div class="limb-thermal"><div class="lt-header">🦶 Left Foot</div><div class="th-opts" id="th-lf"><div class="tho" onclick="selThermal(this,'lf','Normal')">🟢 Normal</div><div class="tho" onclick="selThermal(this,'lf','Mildly Reduced')">🟡 Mildly Reduced</div><div class="tho" onclick="selThermal(this,'lf','Significantly Reduced')">🔴 Significantly Reduced</div><div class="tho" onclick="selThermal(this,'lf','Not assessed')">— Not assessed</div></div></div>
+      <div class="divider"></div>
+      <div class="limb-thermal"><div class="lt-header">🦶 Right Foot</div><div class="th-opts" id="th-rf"><div class="tho" onclick="selThermal(this,'rf','Normal')">🟢 Normal</div><div class="tho" onclick="selThermal(this,'rf','Mildly Reduced')">🟡 Mildly Reduced</div><div class="tho" onclick="selThermal(this,'rf','Significantly Reduced')">🔴 Significantly Reduced</div><div class="tho" onclick="selThermal(this,'rf','Not assessed')">— Not assessed</div></div></div>
+      <div class="divider"></div>
+      <div class="limb-thermal"><div class="lt-header">✋ Left Hand</div><div class="th-opts" id="th-lh"><div class="tho" onclick="selThermal(this,'lh','Normal')">🟢 Normal</div><div class="tho" onclick="selThermal(this,'lh','Mildly Reduced')">🟡 Mildly Reduced</div><div class="tho" onclick="selThermal(this,'lh','Significantly Reduced')">🔴 Significantly Reduced</div><div class="tho" onclick="selThermal(this,'lh','Not assessed')">— Not assessed</div></div></div>
+      <div class="divider"></div>
+      <div class="limb-thermal"><div class="lt-header">✋ Right Hand</div><div class="th-opts" id="th-rh"><div class="tho" onclick="selThermal(this,'rh','Normal')">🟢 Normal</div><div class="tho" onclick="selThermal(this,'rh','Mildly Reduced')">🟡 Mildly Reduced</div><div class="tho" onclick="selThermal(this,'rh','Significantly Reduced')">🔴 Significantly Reduced</div><div class="tho" onclick="selThermal(this,'rh','Not assessed')">— Not assessed</div></div></div>
+      <div class="fg one" style="margin-top:10px"><div class="field"><label>Thermal notes</label><textarea id="thermalNotes" placeholder="Pattern of findings, asymmetries, notable features..."></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 7: ORTHO -->
+  <div class="phase" id="phase7">
+    <div class="phase-hdr"><h2>Orthopedic Differential</h2><p>Rule out radiculopathy and central causes</p></div>
+    <div class="card">
+      <div class="sec-lbl">Orthopedic Tests</div>
+      <div class="ortho-row"><div class="ortho-name">SLR — Left<span>Straight leg raise, pain below knee = positive</span></div><div class="ortho-opts" id="ot-slr-l"><div class="oo" onclick="selOrtho(this,'slr-l','Positive')">Positive</div><div class="oo" onclick="selOrtho(this,'slr-l','Negative')">Negative</div><div class="oo" onclick="selOrtho(this,'slr-l','Not assessed')">Not assessed</div></div></div>
+      <div class="ortho-row"><div class="ortho-name">SLR — Right<span>Straight leg raise, pain below knee = positive</span></div><div class="ortho-opts" id="ot-slr-r"><div class="oo" onclick="selOrtho(this,'slr-r','Positive')">Positive</div><div class="oo" onclick="selOrtho(this,'slr-r','Negative')">Negative</div><div class="oo" onclick="selOrtho(this,'slr-r','Not assessed')">Not assessed</div></div></div>
+      <div class="ortho-row"><div class="ortho-name">Slump Test<span>Seated neural tension — radiculopathy screen</span></div><div class="ortho-opts" id="ot-slump"><div class="oo" onclick="selOrtho(this,'slump','Positive')">Positive</div><div class="oo" onclick="selOrtho(this,'slump','Negative')">Negative</div><div class="oo" onclick="selOrtho(this,'slump','Not assessed')">Not assessed</div></div></div>
+      <div class="ortho-row"><div class="ortho-name">Kemp's — Left<span>Extension + lateral flexion + rotation</span></div><div class="ortho-opts" id="ot-kemps-l"><div class="oo" onclick="selOrtho(this,'kemps-l','Positive')">Positive</div><div class="oo" onclick="selOrtho(this,'kemps-l','Negative')">Negative</div><div class="oo" onclick="selOrtho(this,'kemps-l','Not assessed')">Not assessed</div></div></div>
+      <div class="ortho-row"><div class="ortho-name">Kemp's — Right</div><div class="ortho-opts" id="ot-kemps-r"><div class="oo" onclick="selOrtho(this,'kemps-r','Positive')">Positive</div><div class="oo" onclick="selOrtho(this,'kemps-r','Negative')">Negative</div><div class="oo" onclick="selOrtho(this,'kemps-r','Not assessed')">Not assessed</div></div></div>
+      <div class="fg one" style="margin-top:10px"><div class="field"><label>Orthopedic notes</label><textarea id="orthoNotes" placeholder="Findings, clinical impression regarding radicular vs peripheral etiology..."></textarea></div></div>
+    </div>
+  </div>
+
+  <!-- PHASE 8: SUMMARY -->
+  <div class="phase" id="phase8">
+    <div class="phase-hdr"><h2>Exam Summary</h2><p>Auto-generated from findings — review before ROF</p></div>
+    <div class="dark-sum" id="summary-banner">
+      <div class="ds-in">
+        <div class="ds-title">NeuroPath <em>Exam Complete</em></div>
+        <div class="ds-sub" id="sum-pt-line">—</div>
+        <div class="ds-grid" id="sum-grid"></div>
+      </div>
+    </div>
+    <div class="card" id="sum-sensory-card"><div class="sec-lbl">Sensory Loss Overview</div><div id="sum-sensory-bars"></div></div>
+    <div class="card" id="sum-tx-card"><div class="sec-lbl">Protocol Recommendation</div><div id="sum-tx-content"></div></div>
+    <div class="card" id="sum-flags-card"><div class="sec-lbl">Clinical Flags</div><div id="sum-flags-content"></div></div>
+    <div class="card">
+      <div class="sec-lbl">Send to Program Builder</div>
+      <div class="callout sage">Exam complete. Click below to pre-load the recommended tier and patient data into the Program Builder.</div>
+      <button class="btn btn-gold" onclick="sendToBuilder()" style="margin-top:6px">📋 Open Program Builder with This Patient →</button>
+    </div>
+  </div>
+
+  <!-- PHASE 9: ROF -->
+  <div class="phase" id="phase9">
+    <div class="phase-hdr"><h2>Report of Findings</h2><p>Scope-safe clinical documentation — ready to copy, print, or save to Drive</p></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-g" onclick="buildROF()">↺ Regenerate</button>
+      <button class="btn btn-h" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-h" onclick="copyROF()">📋 Copy All</button>
+      <button class="btn btn-drive" id="rof-drive-btn" onclick="saveROFToDrive()">☁ Save ROF to Drive</button>
+    </div>
+    <div id="rof-output"></div>
+  </div>
+
+  </div><!-- /exam-main -->
+
+  <!-- EXAM ACTION BAR -->
+  <div class="exam-ab" id="examAB">
+    <div class="ab-prog">Step <strong id="ab-step">1</strong> of <strong>10</strong> — <span id="ab-label">Demographics</span></div>
+    <div class="ab-btns">
+      <button class="btn btn-h" id="btn-back" onclick="goBack()" style="display:none">← Back</button>
+      <button class="btn btn-t" id="btn-next" onclick="goNext()">Next →</button>
+    </div>
+  </div>
+
+</div><!-- /mode-exam -->
+
+<!-- ════ BUILDER MODE ════ -->
+<div class="mode-panel" id="mode-builder">
+
+  <!-- QUIZ OVERLAY -->
+  <div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-box">
+      <div class="qz-logo"><div class="qz-logo-mark">C</div><div class="qz-logo-text"><strong>Colleyville Chiropractic</strong>NeuroPath Program Builder</div></div>
+      <div class="qz-prog"><div class="qz-prog-bar" id="qzBar" style="width:0%"></div></div>
+      <div class="qz-step" id="qzStep">Step 1 of 5</div>
+      <div id="qzBody"></div>
+    </div>
+  </div>
+
+  <div id="prefill-banner-wrap" style="padding:0 22px;"></div>
+
+  <div class="builder-wrap" id="builderApp">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Patient Setup -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon">👤</div>
+          <div class="card-hdr-text">
+            <div class="card-title">Patient &amp; Program Setup</div>
+            <div class="card-sub">Build a personalized NeuroPath peripheral nerve wellness program</div>
+          </div>
+        </div>
+        <div class="fg three">
+          <div class="field"><label>Patient Name</label><input id="pt-name" placeholder="Full name" oninput="updateSummary()"/></div>
+          <div class="field"><label>Program Date</label><input id="pt-date" type="date" oninput="updateSummary()"/></div>
+          <div class="field"><label>Clinician</label><input id="pt-clin" placeholder="Dr. Urrutia" oninput="updateSummary()"/></div>
+        </div>
+        <div class="callout teal" style="margin-top:4px">📋 Cash-pay peripheral nerve wellness protocol — not submitted to insurance. All patient materials use scope-compliant wellness language.</div>
+      </div>
+
+      <!-- TIER SELECTOR -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon">⚡</div>
+          <div class="card-hdr-text">
+            <div class="card-title">Program Tier</div>
+            <div class="card-sub">Select a tier to pre-load all items and pricing — or build manually below</div>
+          </div>
+        </div>
+        <div class="tier-grid">
+          <div class="tier-card" id="tc-1" onclick="loadTier(1)">
+            <div class="tier-num">Tier 1</div>
+            <div class="tier-name">Essentials</div>
+            <div class="tier-price">$5,980</div>
+            <div style="font-size:.67rem;color:var(--ink-sm);margin-top:4px;">Clinical only · No devices</div>
+          </div>
+          <div class="tier-card" id="tc-2" onclick="loadTier(2)">
+            <div class="tier-num">Tier 2</div>
+            <div class="tier-name">Advanced</div>
+            <div class="tier-price">$7,261</div>
+            <div style="font-size:.67rem;color:var(--ink-sm);margin-top:4px;">Devices + Nerve Nutrition</div>
+          </div>
+          <div class="tier-card" id="tc-3" onclick="loadTier(3)">
+            <div class="tier-badge">Best Results</div>
+            <div class="tier-num">Tier 3</div>
+            <div class="tier-name">Complete</div>
+            <div class="tier-price">$8,193</div>
+            <div style="font-size:.67rem;color:var(--ink-sm);margin-top:4px;">Devices + Full Gut Protocol</div>
+          </div>
+        </div>
+        <div class="callout gold">💡 Selecting a tier clears current selections and pre-loads the full program. All items remain editable.</div>
+      </div>
+
+      <!-- Visit Structure -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon">📅</div>
+          <div class="card-hdr-text">
+            <div class="card-title">Visit Structure</div>
+            <div class="card-sub">12-week intensive base · Add-on weeks and maintenance available</div>
+          </div>
+        </div>
+        <div class="visit-row">
+          <div><div class="vr-label">Intensive Visits</div><input class="vr-input" id="vq-intensive" type="number" value="12" min="0" oninput="updateSummary()"/></div>
+          <div><div class="vr-label">Maintenance Visits</div><input class="vr-input" id="vq-maintenance" type="number" value="0" min="0" oninput="updateSummary()"/></div>
+        </div>
+        <div class="visit-row">
+          <div><div class="vr-label">Add-On Weeks</div><input class="vr-input" id="vq-addon" type="number" value="0" min="0" oninput="updateSummary()"/></div>
+          <div><div class="vr-label">Re-Assessments</div><input class="vr-input" id="vq-reassess" type="number" value="3" min="0" oninput="updateSummary()"/></div>
+        </div>
+        <div id="visit-preview" style="font-size:.78rem;color:var(--ink-sm);padding:8px 11px;background:var(--cream);border-radius:7px;margin-top:6px;line-height:1.7;"></div>
+      </div>
+
+      <!-- Product Catalog -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon">📦</div>
+          <div class="card-hdr-text">
+            <div class="card-title">Product &amp; Supplement Catalog <span class="count-badge" id="item-count-badge">0</span></div>
+            <div class="card-sub">Click to add — prices are retail patient-facing rates</div>
+          </div>
+        </div>
+
+        <!-- Program Fees -->
+        <div class="cat-section">
+          <div class="cat-title"><div class="cat-icon">⚡</div>Clinical Program Fees (12-Week)</div>
+          <div id="cat-programs"></div>
+        </div>
+
+        <!-- CVC Devices -->
+        <div class="cat-section">
+          <div class="cat-title"><div class="cat-icon">🔌</div>CVC Home Devices</div>
+          <div id="cat-devices"></div>
+        </div>
+
+        <!-- Thorne Supplements — Tier 2 -->
+        <div class="cat-section">
+          <div class="cat-title"><div class="cat-icon">🌿</div>Thorne Nerve Support (Tier 2)</div>
+          <div id="cat-nerve"></div>
+        </div>
+
+        <!-- Thorne Supplements — Tier 3 -->
+        <div class="cat-section">
+          <div class="cat-title"><div class="cat-icon">🧬</div>Thorne Gut + Metabolic Protocol (Tier 3)</div>
+          <div id="cat-gut"></div>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="cat-section">
+          <div class="cat-title"><div class="cat-icon">🔄</div>Maintenance &amp; Add-Ons</div>
+          <div id="cat-maintenance"></div>
+        </div>
+
+        <!-- Custom item -->
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:flex-end;">
+          <div class="field" style="flex:1"><label>Custom Item</label><input id="custom-name" placeholder="Item name..."/></div>
+          <div class="field" style="width:100px"><label>Price ($)</label><input id="custom-price" type="number" min="0" placeholder="0"/></div>
+          <button class="btn btn-h btn-sm" onclick="addCustomItem()" style="flex-shrink:0;margin-bottom:1px">+ Add</button>
         </div>
       </div>
-      <div class="bal-row">
-        <div class="bal-label">Two-Leg Stance (eyes closed)<span>Romberg</span></div>
-        <div class="bal-opts" id="bal-2leg-ec">
-          <div class="bo" onclick="selBal(this,'2leg-ec')">Normal</div>
-          <div class="bo" onclick="selBal(this,'2leg-ec')">Mild sway</div>
-          <div class="bo" onclick="selBal(this,'2leg-ec')">Moderate sway</div>
-          <div class="bo" onclick="selBal(this,'2leg-ec')">Could not complete</div>
+
+      <!-- Discount & Payment -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon">💳</div>
+          <div class="card-hdr-text">
+            <div class="card-title">Discount &amp; Payment</div>
+            <div class="card-sub">Applied to total patient investment</div>
+          </div>
+        </div>
+        <div class="pay-row">
+          <div class="field"><label>Discount %</label><input id="disc-pct" type="number" value="0" min="0" max="50" oninput="updateSummary()"/></div>
+          <div class="field"><label>Payment Method</label>
+            <select id="pay-method" onchange="updateSummary()">
+              <option value="cash">Cash / Check</option>
+              <option value="credit">Credit Card</option>
+              <option value="carecredit">CareCredit</option>
+              <option value="inhouse">In-House Financing</option>
+            </select>
+          </div>
+        </div>
+        <div id="finance-opts" style="display:none;">
+          <div class="pay-row">
+            <div class="field"><label>CC Months</label><input id="cc-months" type="number" value="12" min="3" max="60" oninput="updateSummary()"/></div>
+            <div class="field"><label>In-House Months</label><input id="ih-months" type="number" value="12" min="3" max="36" oninput="updateSummary()"/></div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:8px;font-size:.76rem;">
+          <strong>Pay-in-full (10% off):</strong> <span id="pif-display">—</span> &nbsp;|&nbsp;
+          <strong>6-mo CC:</strong> <span id="cc6-display">—</span>/mo &nbsp;|&nbsp;
+          <strong>12-mo CC:</strong> <span id="cc12-display">—</span>/mo &nbsp;|&nbsp;
+          <strong>18-mo CC:</strong> <span id="cc18-display">—</span>/mo
         </div>
       </div>
-      <div class="bal-row">
-        <div class="bal-label">Tandem Stance<span>Heel-to-toe, eyes open, 10 sec</span></div>
-        <div class="bal-opts" id="bal-tandem">
-          <div class="bo" onclick="selBal(this,'tandem')">≥10 sec</div>
-          <div class="bo" onclick="selBal(this,'tandem')">5–9 sec</div>
-          <div class="bo" onclick="selBal(this,'tandem')">&lt;5 sec</div>
-          <div class="bo" onclick="selBal(this,'tandem')">Could not attempt</div>
+
+    </div><!-- /left column -->
+
+    <!-- RIGHT COLUMN: SUMMARY -->
+    <div>
+      <div class="summary" style="position:relative;">
+        <div style="position:relative;z-index:1;">
+          <div class="sum-label">Program Summary</div>
+          <div class="sum-name" id="sum-name">Patient Program</div>
+          <div class="sum-sub" id="sum-sub">No items selected</div>
+          <div class="price-block">
+            <div class="price-main" id="price-main">$0</div>
+            <div class="price-lbl" id="price-lbl">Total Investment</div>
+            <div class="price-monthly" id="price-monthly" style="display:none;"></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="bd-row"><span class="bd-lbl">Program Fee</span><span class="bd-val" id="bd-program">$0</span></div>
+            <div class="bd-row"><span class="bd-lbl">Devices</span><span class="bd-val" id="bd-devices">$0</span></div>
+            <div class="bd-row"><span class="bd-lbl">Supplements</span><span class="bd-val" id="bd-supps">$0</span></div>
+            <div class="bd-row" id="bd-disc-row" style="display:none;"><span class="bd-lbl" id="bd-disc-lbl">Discount</span><span class="bd-val" style="color:#ef4444;" id="bd-disc">-$0</span></div>
+            <div class="bd-row" id="bd-fin-row" style="display:none;"><span class="bd-lbl" id="bd-fin-lbl">Monthly</span><span class="bd-val" id="bd-fin">$0/mo</span></div>
+            <div class="bd-row bd-total"><span class="bd-lbl">Total</span><span class="bd-val" id="bd-total">$0</span></div>
+          </div>
+          <div class="sum-label" style="color:rgba(255,255,255,.35);margin-bottom:7px;">Items <span class="count-badge" id="sum-count">0</span></div>
+          <div class="items-area" id="items-area"><div style="font-size:.77rem;color:rgba(255,255,255,.28);font-style:italic;">No items added yet</div></div>
+          <button class="btn btn-primary btn-block" onclick="generateCard()">⚡ Generate Program Card</button>
+          <button class="btn btn-drive btn-block" id="card-drive-btn" onclick="saveProgramToDrive()" disabled style="margin-top:7px;">☁ Save Program Card to Drive</button>
+          <button class="btn btn-h btn-block" style="margin-top:7px;" onclick="window.print()">🖨 Print Card</button>
+          <button class="btn btn-red btn-sm btn-block" style="margin-top:7px;" onclick="clearAll()">✕ Clear &amp; Reset</button>
+          <div class="drive-status" id="driveStatus"></div>
         </div>
       </div>
-      <div class="bal-row">
-        <div class="bal-label">Single-Leg Stance<span>Eyes open, 10 sec per side</span></div>
-        <div class="bal-opts" id="bal-single">
-          <div class="bo" onclick="selBal(this,'single')">≥10 sec bilat.</div>
-          <div class="bo" onclick="selBal(this,'single')">5–9 sec</div>
-          <div class="bo" onclick="selBal(this,'single')">&lt;5 sec</div>
-          <div class="bo" onclick="selBal(this,'single')">Could not attempt</div>
+
+      <!-- Drive Auth -->
+      <div class="card" id="driveAuthCard">
+        <div class="card-hdr" style="margin-bottom:8px;">
+          <div class="card-icon" style="background:var(--cc-lt);">☁</div>
+          <div class="card-hdr-text">
+            <div class="card-title" style="font-size:.98rem;">Google Drive</div>
+            <div class="card-sub">Save exam ROFs and program cards directly to Drive</div>
+          </div>
         </div>
+        <div class="callout" style="background:var(--cc-lt);border-left:3px solid var(--cc);color:var(--cc);font-size:.76rem;">Files save to a <strong>CVC NeuroPath</strong> folder in your Google Drive. Authorize once per session.</div>
+        <button class="btn btn-h btn-sm" onclick="initDriveAuth()" id="authBtn">🔐 Connect Google Drive</button>
+        <div id="authStatus" style="font-size:.77rem;color:var(--ink-sm);margin-top:7px;"></div>
       </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Gait Observations</div>
-    <div id="gait-panel">
-      <div class="bal-row">
-        <div class="bal-label">Gait Pattern<span>Observation during ambulation</span></div>
-        <div class="bal-opts" id="bal-gait">
-          <div class="bo" onclick="selBal(this,'gait')">Normal</div>
-          <div class="bo" onclick="selBal(this,'gait')">Antalgic</div>
-          <div class="bo" onclick="selBal(this,'gait')">Wide-based</div>
-          <div class="bo" onclick="selBal(this,'gait')">Steppage (foot drop)</div>
-          <div class="bo" onclick="selBal(this,'gait')">Assistive device used</div>
-        </div>
-      </div>
-      <div class="bal-row">
-        <div class="bal-label">Fall History<span>Past 12 months</span></div>
-        <div class="bal-opts" id="bal-falls">
-          <div class="bo" onclick="selBal(this,'falls')">No falls</div>
-          <div class="bo" onclick="selBal(this,'falls')">Near-falls only</div>
-          <div class="bo" onclick="selBal(this,'falls')">1–2 falls</div>
-          <div class="bo" onclick="selBal(this,'falls')">3+ falls</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Balance Notes</div>
-    <div class="field-grid one">
-      <div class="field"><label>Additional observations</label><textarea id="balNotes" placeholder="Any pertinent observations about the patient's balance or gait..."></textarea></div>
-    </div>
-  </div>
-</div>
 
-<!-- ════════════════════════════════
-     PHASE 6 — THERMAL IMAGING
-════════════════════════════════ -->
-<div class="phase" id="phase6">
-  <div class="phase-header">
-    <h2>Thermal Imaging</h2>
-    <p>Color zone grading per limb based on infrared imaging findings</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Limb Color Zone Findings</div>
-    <div class="limb-thermal">
-      <div class="lt-header">🦶 Left Foot</div>
-      <div class="th-opts" id="th-lf">
-        <div class="tho" onclick="selThermal(this,'lf','Normal')">🟢 Normal</div>
-        <div class="tho" onclick="selThermal(this,'lf','Mildly Reduced')">🟡 Mildly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'lf','Significantly Reduced')">🔴 Significantly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'lf','Not assessed')">— Not assessed</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="limb-thermal">
-      <div class="lt-header">🦶 Right Foot</div>
-      <div class="th-opts" id="th-rf">
-        <div class="tho" onclick="selThermal(this,'rf','Normal')">🟢 Normal</div>
-        <div class="tho" onclick="selThermal(this,'rf','Mildly Reduced')">🟡 Mildly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'rf','Significantly Reduced')">🔴 Significantly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'rf','Not assessed')">— Not assessed</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="limb-thermal">
-      <div class="lt-header">✋ Left Hand</div>
-      <div class="th-opts" id="th-lh">
-        <div class="tho" onclick="selThermal(this,'lh','Normal')">🟢 Normal</div>
-        <div class="tho" onclick="selThermal(this,'lh','Mildly Reduced')">🟡 Mildly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'lh','Significantly Reduced')">🔴 Significantly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'lh','Not assessed')">— Not assessed</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="limb-thermal">
-      <div class="lt-header">✋ Right Hand</div>
-      <div class="th-opts" id="th-rh">
-        <div class="tho" onclick="selThermal(this,'rh','Normal')">🟢 Normal</div>
-        <div class="tho" onclick="selThermal(this,'rh','Mildly Reduced')">🟡 Mildly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'rh','Significantly Reduced')">🔴 Significantly Reduced</div>
-        <div class="tho" onclick="selThermal(this,'rh','Not assessed')">— Not assessed</div>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Thermal Notes</div>
-    <div class="field-grid one">
-      <div class="field"><label>Additional imaging observations</label><textarea id="thermalNotes" placeholder="Pattern of findings, asymmetries, notable features..."></textarea></div>
-    </div>
-  </div>
-</div>
+  </div><!-- /builder-wrap -->
 
-<!-- ════════════════════════════════
-     PHASE 7 — ORTHO DIFFERENTIAL
-════════════════════════════════ -->
-<div class="phase" id="phase7">
-  <div class="phase-header">
-    <h2>Orthopedic Differential</h2>
-    <p>Rule out radiculopathy and central causes contributing to symptom pattern</p>
-  </div>
-  <div class="card">
-    <div class="sec-lbl">Orthopedic Tests</div>
-    <div id="ortho-panel">
-      <div class="ortho-row">
-        <div class="ortho-name">SLR — Left<span>Straight leg raise, pain below knee = positive</span></div>
-        <div class="ortho-opts" id="ot-slr-l">
-          <div class="oo" onclick="selOrtho(this,'slr-l','Positive')">Positive</div>
-          <div class="oo" onclick="selOrtho(this,'slr-l','Negative')">Negative</div>
-          <div class="oo" onclick="selOrtho(this,'slr-l','Not assessed')">Not assessed</div>
-        </div>
-      </div>
-      <div class="ortho-row">
-        <div class="ortho-name">SLR — Right<span>Straight leg raise, pain below knee = positive</span></div>
-        <div class="ortho-opts" id="ot-slr-r">
-          <div class="oo" onclick="selOrtho(this,'slr-r','Positive')">Positive</div>
-          <div class="oo" onclick="selOrtho(this,'slr-r','Negative')">Negative</div>
-          <div class="oo" onclick="selOrtho(this,'slr-r','Not assessed')">Not assessed</div>
-        </div>
-      </div>
-      <div class="ortho-row">
-        <div class="ortho-name">Slump Test<span>Seated neural tension — radiculopathy screen</span></div>
-        <div class="ortho-opts" id="ot-slump">
-          <div class="oo" onclick="selOrtho(this,'slump','Positive')">Positive</div>
-          <div class="oo" onclick="selOrtho(this,'slump','Negative')">Negative</div>
-          <div class="oo" onclick="selOrtho(this,'slump','Not assessed')">Not assessed</div>
-        </div>
-      </div>
-      <div class="ortho-row">
-        <div class="ortho-name">Kemp's / Quadrant — Left<span>Extension + lateral flexion + rotation</span></div>
-        <div class="ortho-opts" id="ot-kemps-l">
-          <div class="oo" onclick="selOrtho(this,'kemps-l','Positive')">Positive</div>
-          <div class="oo" onclick="selOrtho(this,'kemps-l','Negative')">Negative</div>
-          <div class="oo" onclick="selOrtho(this,'kemps-l','Not assessed')">Not assessed</div>
-        </div>
-      </div>
-      <div class="ortho-row">
-        <div class="ortho-name">Kemp's / Quadrant — Right<span>Extension + lateral flexion + rotation</span></div>
-        <div class="ortho-opts" id="ot-kemps-r">
-          <div class="oo" onclick="selOrtho(this,'kemps-r','Positive')">Positive</div>
-          <div class="oo" onclick="selOrtho(this,'kemps-r','Negative')">Negative</div>
-          <div class="oo" onclick="selOrtho(this,'kemps-r','Not assessed')">Not assessed</div>
-        </div>
-      </div>
-    </div>
-    <div class="field-grid one" style="margin-top:12px">
-      <div class="field"><label>Additional orthopedic notes</label><textarea id="orthoNotes" placeholder="Findings, clinical impression regarding radicular vs peripheral etiology..."></textarea></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 8 — SUMMARY
-════════════════════════════════ -->
-<div class="phase" id="phase8">
-  <div class="phase-header">
-    <h2>Exam Summary</h2>
-    <p>Auto-generated from your findings — review before ROF</p>
-  </div>
-
-  <!-- Dark summary banner -->
-  <div class="dark-sum" id="summary-banner">
-    <div class="ds-in">
-      <div class="ds-title">NeuroPath <em>Exam Complete</em></div>
-      <div class="ds-sub" id="sum-pt-line">—</div>
-      <div class="ds-grid" id="sum-grid"></div>
+  <!-- PATIENT CARD OUTPUT -->
+  <div id="patient-card-section" style="display:none;padding:20px 22px;max-width:1340px;margin:0 auto;">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--ink);margin-bottom:4px;" class="no-print">Patient Program Card</h2>
+    <div style="height:2px;background:linear-gradient(90deg,var(--sage),transparent);border-radius:99px;margin-bottom:16px;" class="no-print"></div>
+    <div class="patient-card" id="patient-card"></div>
+    <div class="no-print" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="window.print()">🖨 Print Card</button>
+      <button class="btn btn-drive" id="card-drive-btn-2" onclick="saveProgramToDrive()" disabled>☁ Save to Drive</button>
+      <button class="btn btn-h" onclick="generateCard()">↺ Regenerate</button>
     </div>
   </div>
 
-  <!-- Sensory visual bars -->
-  <div class="card" id="sum-sensory-card">
-    <div class="sec-lbl">Sensory Loss Overview</div>
-    <div id="sum-sensory-bars"></div>
-  </div>
+</div><!-- /mode-builder -->
 
-  <!-- TX Recommendation -->
-  <div class="card" id="sum-tx-card">
-    <div class="sec-lbl">Protocol Recommendation</div>
-    <div id="sum-tx-content"></div>
-  </div>
-
-  <!-- Flags -->
-  <div class="card" id="sum-flags-card">
-    <div class="sec-lbl">Clinical Flags</div>
-    <div id="sum-flags-content"></div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════
-     PHASE 9 — ROF
-════════════════════════════════ -->
-<div class="phase" id="phase9">
-  <div class="phase-header">
-    <h2>Report of Findings</h2>
-    <p>Scope-safe clinical documentation — ready to copy or print</p>
-  </div>
-
-  <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-    <button class="btn btn-g" onclick="buildROF()">⟳ Regenerate ROF</button>
-    <button class="btn btn-h" onclick="window.print()">🖨 Print</button>
-    <button class="btn btn-h btn-sm" onclick="copyROF()">📋 Copy All</button>
-  </div>
-
-  <div id="rof-output"></div>
-</div>
-
-</div><!-- /main -->
-
-<!-- ACTION BAR -->
-<div class="ab">
-  <div class="ab-prog">Step <strong id="ab-step">1</strong> of <strong>10</strong> — <span id="ab-label">Demographics</span></div>
-  <div class="ab-btns">
-    <button class="btn btn-h" id="btn-back" onclick="goBack()" style="display:none">← Back</button>
-    <button class="btn btn-t" id="btn-next" onclick="goNext()">Next →</button>
-  </div>
-</div>
-
+<!-- ════ ALL SCRIPTS ════ -->
 <script>
-// ════════════════════════════════
-// STATE
-// ════════════════════════════════
+// ═══════════════════════════════════════════
+// SHARED STATE & UTILS
+// ═══════════════════════════════════════════
+const v = id => document.getElementById(id);
+const txt = id => v(id)?.value?.trim() || '';
+const val = id => parseFloat(v(id)?.value) || 0;
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+let currentMode = 'exam';
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  v(`mode-${mode}`).classList.add('active');
+  v(`tab-${mode}`).classList.add('active');
+  v('examAB').style.display = mode === 'exam' ? '' : 'none';
+  if (mode === 'builder' && !builderInitialized) initBuilder();
+}
+
+// ═══════════════════════════════════════════
+// EXAM — STATE
+// ═══════════════════════════════════════════
 let currentPhase = 0;
 const totalPhases = 10;
 const phaseLabels = ['Demographics','Health History','Symptoms','Sensory Testing','ReBuilder','Balance','Thermal','Ortho','Summary','Report of Findings'];
-const phaseBadges = ['Demographics','History','Symptoms','Sensory','ReBuilder','Balance','Thermal','Ortho','Summary','ROF'];
+const phaseBadges = ['Demo','History','Symptoms','Sensory','ReBuilder','Balance','Thermal','Ortho','Summary','ROF'];
 
-// Sensory data: scores[limb][testIndex] = value
 const scores = { lf:{}, rf:{}, lh:{}, rh:{} };
 let activeLimb = 'lf';
-
-// ReBuilder data
 const rbScores = { lf:null, rf:null, lh:null, rh:null };
-
-// Balance data
 const balData = {};
-
-// Thermal data
 const thermalData = { lf:null, rf:null, lh:null, rh:null };
-
-// Ortho data
 const orthoData = {};
 
-const tests = [
+const SENSORY_TESTS = [
   {name:'Cold Sensation', sub:'Cold tuning fork or cold pack'},
-  {name:'Pinwheel', sub:'Neurological pinwheel, dermatome pattern'},
-  {name:'10g Monofilament', sub:'Semmes-Weinstein monofilament'},
+  {name:'Pinwheel', sub:'Neurological pinwheel'},
+  {name:'10g Monofilament', sub:'Semmes-Weinstein'},
   {name:'Vibration', sub:'128 Hz tuning fork'},
   {name:'Cool Sensation', sub:'Medi-tip cool stimulus'},
   {name:'Medi-tip', sub:'Blunt vs. sharp discrimination'},
   {name:'Hot Sensation', sub:'Warm stimulus 40–45°C'},
 ];
 
-// ════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════
+// ── EXAM NAVIGATION ──
 function goTo(idx) {
-  if(idx < 0 || idx >= totalPhases) return;
+  if (idx < 0 || idx >= totalPhases) return;
   document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.pip').forEach((p,i) => {
-    p.classList.remove('active');
-    if(i < idx) p.classList.add('done');
-    else if(i === idx) p.classList.add('active');
-    else p.classList.remove('done');
+  document.querySelectorAll('.pip').forEach((p, i) => {
+    p.classList.remove('active','done');
+    if (i < idx) p.classList.add('done');
+    else if (i === idx) p.classList.add('active');
   });
-  document.getElementById(`phase${idx}`).classList.add('active');
+  v(`phase${idx}`).classList.add('active');
   currentPhase = idx;
-  document.getElementById('ab-step').textContent = idx + 1;
-  document.getElementById('ab-label').textContent = phaseLabels[idx];
-  document.getElementById('phaseBadge').textContent = phaseBadges[idx];
-  document.getElementById('btn-back').style.display = idx > 0 ? '' : 'none';
-  document.getElementById('btn-next').textContent = idx === totalPhases - 1 ? '🖨 Print' : idx === totalPhases - 2 ? '★ Generate ROF →' : 'Next →';
-  if(idx === 8) buildSummary();
-  if(idx === 9) buildROF();
+  v('ab-step').textContent = idx + 1;
+  v('ab-label').textContent = phaseLabels[idx];
+  v('btn-back').style.display = idx > 0 ? '' : 'none';
+  v('btn-next').textContent = idx === totalPhases - 1 ? '🖨 Print' : idx === totalPhases - 2 ? '★ Generate ROF →' : 'Next →';
+  if (idx === 8) buildSummary();
+  if (idx === 9) buildROF();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function goNext() {
-  if(currentPhase === totalPhases - 1){ window.print(); return; }
-  if(currentPhase === totalPhases - 2){ buildROF(); goTo(9); return; }
+  if (currentPhase === totalPhases - 1) { window.print(); return; }
+  if (currentPhase === totalPhases - 2) { buildROF(); goTo(9); return; }
   goTo(currentPhase + 1);
 }
 function goBack() { goTo(currentPhase - 1); }
 
-// ════════════════════════════════
-// UTILITIES
-// ════════════════════════════════
+// ── UTILS ──
 function tog(el) { el.classList.toggle('on'); }
-
 function updatePtName() {
-  const fn = document.getElementById('firstName').value;
-  const ln = document.getElementById('lastName').value;
-  const full = [fn,ln].filter(Boolean).join(' ');
-  document.getElementById('ptName').textContent = full || 'No patient loaded';
+  const full = [v('firstName').value, v('lastName').value].filter(Boolean).join(' ');
+  v('tb-pt-display').textContent = full || 'No patient';
+  const ptNameEl = v('pt-name');
+  if (ptNameEl && full) ptNameEl.value = full;
 }
-
 function getChips(containerId) {
   return [...document.querySelectorAll(`#${containerId} .chip.on`)].map(c => c.textContent.trim());
 }
 
-// ════════════════════════════════
-// SENSORY TESTING
-// ════════════════════════════════
+// ── SENSORY ──
 function setLimb(limb) {
   activeLimb = limb;
   document.querySelectorAll('.limb-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`lt-${limb}`).classList.add('active');
+  v(`lt-${limb}`).classList.add('active');
   renderSensoryPanel();
 }
-
 function renderSensoryPanel() {
-  const panel = document.getElementById('sensory-panel');
+  const panel = v('sensory-panel');
   const limb = activeLimb;
   let html = '';
-  tests.forEach((t,i) => {
+  SENSORY_TESTS.forEach((t, i) => {
     const cur = scores[limb][i];
     html += `<div class="test-row">
       <div class="test-name">${t.name}<span>${t.sub}</span></div>
-      <div class="score-btns">`;
-    // allodynia button
-    html += `<div class="sb${cur===-5?' sel-neg':''}" onclick="setScore('${limb}',${i},-5)" title="Allodynia">-5</div>`;
-    for(let v=0;v<=10;v++){
-      const cls = cur===v ? ` sel-${v}` : '';
-      html += `<div class="sb${cls}" onclick="setScore('${limb}',${i},${v})">${v}</div>`;
+      <div class="score-btns">
+        <div class="sb${cur===-5?' sel-neg':''}" onclick="setScore('${limb}',${i},-5)" title="Allodynia">-5</div>`;
+    for (let s = 0; s <= 10; s++) {
+      html += `<div class="sb${cur===s?` sel-${s}`:''}" onclick="setScore('${limb}',${i},${s})">${s}</div>`;
     }
-    html += `</div>
-      <div class="score-val">${cur!==undefined?cur:'—'}</div>
-    </div>`;
+    html += `</div><div class="score-val">${cur !== undefined ? cur : '—'}</div></div>`;
   });
   panel.innerHTML = html;
   updateLimbResult(limb);
 }
-
 function setScore(limb, testIdx, val) {
   scores[limb][testIdx] = val;
   renderSensoryPanel();
   updateSensorySummaryCard();
 }
-
 function calcLoss(limb) {
   const vals = Object.values(scores[limb]);
-  if(vals.length < 7) return null;
-  const total = vals.reduce((a,b) => a + Math.max(0,b), 0);
-  return { total, loss: 100 - Math.round((total/70)*100) };
+  if (vals.length < 7) return null;
+  const total = vals.reduce((a, b) => a + Math.max(0, b), 0);
+  return { total, loss: 100 - Math.round((total / 70) * 100) };
 }
-
 function sevLabel(loss) {
-  if(loss <= 20) return {label:'Mild', cls:'sev-mild'};
-  if(loss <= 40) return {label:'Moderate', cls:'sev-mod'};
-  if(loss <= 65) return {label:'Severe', cls:'sev-sev'};
-  return {label:'Critical', cls:'sev-crit'};
+  if (loss <= 20) return { label:'Mild', cls:'sev-mild' };
+  if (loss <= 40) return { label:'Moderate', cls:'sev-mod' };
+  if (loss <= 65) return { label:'Severe', cls:'sev-sev' };
+  return { label:'Critical', cls:'sev-crit' };
 }
-
 function updateLimbResult(limb) {
-  const res = document.getElementById('limb-result');
+  const res = v('limb-result');
   const r = calcLoss(limb);
-  if(!r){ res.style.display='none'; return; }
-  res.style.display='flex';
-  document.getElementById('lr-score-text').textContent = `${r.loss}% sensory loss`;
-  document.getElementById('lr-total').textContent = r.total;
+  if (!r) { res.style.display = 'none'; return; }
+  res.style.display = 'flex';
+  v('lr-score-text').textContent = `${r.loss}% sensory loss`;
+  v('lr-total').textContent = r.total;
   const sev = sevLabel(r.loss);
-  document.getElementById('lr-sev-badge').innerHTML = `<span class="sev-badge ${sev.cls}">${sev.label}</span>`;
-  // mark limb tab done
-  document.getElementById(`lt-${limb}`).classList.add('done');
+  v('lr-sev-badge').innerHTML = `<span class="sev-badge ${sev.cls}">${sev.label}</span>`;
+  v(`lt-${limb}`).classList.add('done');
 }
-
 function updateSensorySummaryCard() {
-  const card = document.getElementById('sensory-summary-card');
+  const card = v('sensory-summary-card');
   const limbs = [{k:'lf',l:'Left Foot'},{k:'rf',l:'Right Foot'},{k:'lh',l:'Left Hand'},{k:'rh',l:'Right Hand'}];
-  const results = limbs.map(lb => ({...lb, r:calcLoss(lb.k)})).filter(x=>x.r);
-  if(!results.length){ card.style.display='none'; return; }
-  card.style.display='block';
-  let html = '';
-  results.forEach(x => {
+  const results = limbs.map(lb => ({...lb, r:calcLoss(lb.k)})).filter(x => x.r);
+  if (!results.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  v('sensory-summary-content').innerHTML = results.map(x => {
     const sev = sevLabel(x.r.loss);
-    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border-lt)">
-      <span style="font-size:.83rem;font-weight:600">${x.l}</span>
-      <span style="font-size:.8rem">${x.r.total}/70 &nbsp;→&nbsp; <strong>${x.r.loss}%</strong> sensory loss &nbsp;<span class="sev-badge ${sev.cls}">${sev.label}</span></span>
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-lt)">
+      <span style="font-size:.81rem;font-weight:600">${x.l}</span>
+      <span style="font-size:.78rem">${x.r.total}/70 → <strong>${x.r.loss}%</strong> sensory loss &nbsp;<span class="sev-badge ${sev.cls}">${sev.label}</span></span>
     </div>`;
-  });
-  document.getElementById('sensory-summary-content').innerHTML = html;
+  }).join('');
 }
 
-// ════════════════════════════════
-// REBUILDER
-// ════════════════════════════════
+// ── REBUILDER ──
 function buildRBPanel() {
   ['lf','rf','lh','rh'].forEach(limb => {
-    const container = document.getElementById(`rb-${limb}`);
+    const c = v(`rb-${limb}`);
     let html = '';
-    for(let v=1;v<=8;v++){
-      const sel = rbScores[limb]===v?' sel':'';
-      html += `<div class="rbb${sel}" onclick="setRB('${limb}',${v})">${v}</div>`;
-    }
-    const dnfSel = rbScores[limb]==='DNF'?' sel dnf':'';
-    html += `<div class="rbb dnf${dnfSel}" onclick="setRB('${limb}','DNF')">DNF</div>`;
-    container.innerHTML = html;
+    for (let i = 1; i <= 8; i++) html += `<div class="rbb${rbScores[limb]===i?' sel':''}" onclick="setRB('${limb}',${i})">${i}</div>`;
+    html += `<div class="rbb dnf${rbScores[limb]==='DNF'?' sel dnf':''}" onclick="setRB('${limb}','DNF')">DNF</div>`;
+    c.innerHTML = html;
   });
 }
-function setRB(limb, val) {
-  rbScores[limb] = val;
-  buildRBPanel();
-}
+function setRB(limb, val) { rbScores[limb] = val; buildRBPanel(); }
 
-// ════════════════════════════════
-// BALANCE
-// ════════════════════════════════
+// ── BALANCE ──
 function selBal(el, id) {
-  const parent = el.parentElement;
-  parent.querySelectorAll('.bo').forEach(b => b.className='bo');
-  const v = el.textContent.trim();
-  const isGood = ['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(v);
-  const isWarn = ['Mild sway','5–9 sec','Near-falls only','1–2 falls','Antalgic'].includes(v);
-  el.classList.add(isGood?'sel-pos':isWarn?'sel-n':'sel-neg');
-  balData[id] = v;
+  el.parentElement.querySelectorAll('.bo').forEach(b => b.className = 'bo');
+  const vv = el.textContent.trim();
+  const isGood = ['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(vv);
+  const isWarn = ['Mild sway','5–9 sec','Near-falls only','1–2 falls','Antalgic'].includes(vv);
+  el.classList.add(isGood ? 'sel-pos' : isWarn ? 'sel-n' : 'sel-neg');
+  balData[id] = vv;
 }
 
-// ════════════════════════════════
-// THERMAL
-// ════════════════════════════════
+// ── THERMAL ──
 function selThermal(el, limb, val) {
-  const parent = el.parentElement;
-  parent.querySelectorAll('.tho').forEach(t => t.className='tho');
-  const cls = val==='Normal'?'sel-normal':val==='Mildly Reduced'?'sel-mild':val==='Significantly Reduced'?'sel-sig':'';
-  if(cls) el.classList.add(cls);
+  el.parentElement.querySelectorAll('.tho').forEach(t => t.className = 'tho');
+  const cls = val === 'Normal' ? 'sel-normal' : val === 'Mildly Reduced' ? 'sel-mild' : val === 'Significantly Reduced' ? 'sel-sig' : '';
+  if (cls) el.classList.add(cls);
   thermalData[limb] = val;
 }
 
-// ════════════════════════════════
-// ORTHO
-// ════════════════════════════════
+// ── ORTHO ──
 function selOrtho(el, id, val) {
-  const parent = el.parentElement;
-  parent.querySelectorAll('.oo').forEach(o => o.className='oo');
-  el.classList.add(val==='Positive'?'pos':val==='Negative'?'neg':'');
+  el.parentElement.querySelectorAll('.oo').forEach(o => o.className = 'oo');
+  el.classList.add(val === 'Positive' ? 'pos' : val === 'Negative' ? 'neg' : '');
   orthoData[id] = val;
 }
 
-// ════════════════════════════════
-// SUMMARY BUILD
-// ════════════════════════════════
+// ── SUMMARY ──
 function buildSummary() {
-  const fn = document.getElementById('firstName').value;
-  const ln = document.getElementById('lastName').value;
-  const age = document.getElementById('age').value;
-  const ptLine = [fn,ln].filter(Boolean).join(' ') + (age?`, age ${age}`:'');
-  document.getElementById('sum-pt-line').textContent = ptLine || '—';
+  const fn = v('firstName').value, ln = v('lastName').value, age = v('age').value;
+  v('sum-pt-line').textContent = [[fn,ln].filter(Boolean).join(' '), age?`Age ${age}`:''].filter(Boolean).join(' · ') || '—';
 
-  // Metrics grid
   const limbs = [{k:'lf',l:'L.Foot'},{k:'rf',l:'R.Foot'},{k:'lh',l:'L.Hand'},{k:'rh',l:'R.Hand'}];
-  const results = limbs.map(lb=>({...lb,r:calcLoss(lb.k)})).filter(x=>x.r);
-  let maxLoss = 0;
-  let gridHtml = '';
-  results.forEach(x => {
-    if(x.r.loss > maxLoss) maxLoss = x.r.loss;
-    gridHtml += `<div class="ds-cell"><div class="ds-val">${x.r.loss}%</div><div class="ds-lbl">${x.l}</div></div>`;
-  });
-  // ReBuilder
-  const rbVals = Object.entries(rbScores).filter(([k,v])=>v!==null);
-  if(rbVals.length){
-    const rbAvg = rbVals.map(([k,v])=>v==='DNF'?8:v).reduce((a,b)=>a+b,0)/rbVals.length;
-    gridHtml += `<div class="ds-cell"><div class="ds-val">${rbAvg.toFixed(1)}</div><div class="ds-lbl">ReBuilder Avg</div></div>`;
+  const results = limbs.map(lb => ({...lb, r:calcLoss(lb.k)})).filter(x => x.r);
+  let maxLoss = results.length ? Math.max(...results.map(x => x.r.loss)) : 0;
+
+  let gridHtml = results.map(x => `<div class="ds-cell"><div class="ds-val">${x.r.loss}%</div><div class="ds-lbl">${x.l}</div></div>`).join('');
+  const rbVals = Object.entries(rbScores).filter(([k,vv]) => vv !== null);
+  if (rbVals.length) {
+    const avg = rbVals.map(([k,vv]) => vv === 'DNF' ? 8 : vv).reduce((a,b) => a+b, 0) / rbVals.length;
+    gridHtml += `<div class="ds-cell"><div class="ds-val">${avg.toFixed(1)}</div><div class="ds-lbl">RT Avg</div></div>`;
   }
-  // Balance flag
-  const balFlags = Object.values(balData).filter(v=>!['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(v)).length;
-  gridHtml += `<div class="ds-cell"><div class="ds-val">${balFlags}</div><div class="ds-lbl">Balance Flags</div></div>`;
-  document.getElementById('sum-grid').innerHTML = gridHtml;
+  const balFlags = Object.values(balData).filter(vv => !['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(vv)).length;
+  gridHtml += `<div class="ds-cell"><div class="ds-val">${balFlags}</div><div class="ds-lbl">Bal.Flags</div></div>`;
+  v('sum-grid').innerHTML = gridHtml;
 
   // Sensory bars
-  let barsHtml = '';
-  results.forEach(x => {
+  v('sum-sensory-bars').innerHTML = results.length ? results.map(x => {
     const sev = sevLabel(x.r.loss);
-    const barColor = x.r.loss<=20?'var(--green)':x.r.loss<=40?'var(--amber)':x.r.loss<=65?'var(--red)':'#7b0000';
-    barsHtml += `<div class="comp-bar">
-      <div class="comp-label">${x.l}</div>
-      <div class="comp-track"><div class="comp-fill" style="width:${x.r.loss}%;background:${barColor}"></div></div>
-      <div class="comp-pct" style="color:${barColor}">${x.r.loss}%</div>
-      <span class="sev-badge ${sev.cls}">${sev.label}</span>
-    </div>`;
-  });
-  document.getElementById('sum-sensory-bars').innerHTML = barsHtml || '<p style="font-size:.8rem;color:var(--ink-sm)">No sensory data entered yet.</p>';
+    const clr = x.r.loss<=20?'var(--green)':x.r.loss<=40?'var(--amber)':x.r.loss<=65?'var(--red)':'#7b0000';
+    return `<div class="comp-bar"><div class="comp-label">${x.l}</div><div class="comp-track"><div class="comp-fill" style="width:${x.r.loss}%;background:${clr}"></div></div><div class="comp-pct" style="color:${clr}">${x.r.loss}%</div><span class="sev-badge ${sev.cls}">${sev.label}</span></div>`;
+  }).join('') : '<p style="font-size:.78rem;color:var(--ink-sm)">No sensory data entered yet.</p>';
 
-  // TX Recommendation
+  // TX Recommendation — uses CVC tiers
+  const medHist = getChips('medHistory');
+  const isDiabetic = medHist.some(m => m.toLowerCase().includes('diabet'));
+  const isGI = medHist.some(m => m.toLowerCase().includes('gi'));
+  const isThyroid = medHist.some(m => m.toLowerCase().includes('thyroid'));
   let txHtml = '';
-  if(maxLoss >= 50){
+  if (maxLoss >= 50) {
     txHtml += `<div class="tx-card protocol">
-      <div class="tx-label teal">Primary Protocol — Full Intensive</div>
-      <div class="tx-name">ReBuilder 2407 + Neuro Lymphatic Activation + Red Light Therapy</div>
-      <div class="tx-detail">Critical-range sensory loss (${maxLoss}%). Full bilateral protocol strongly indicated. Consider ReBuilder 2407, TheraRay or Freedom Pro bilateral, Neuropathy Gut Health Combined. Extended weekly visits with monthly reassessment.</div>
+      <div class="tx-lbl teal">Recommended: Tier 3 — NeuroPath Complete</div>
+      <div class="tx-name">$8,193 · Full clinical program + home devices + nerve &amp; gut/metabolic nutrition</div>
+      <div class="tx-detail">Critical-to-severe sensory loss (${maxLoss}%). Full 12-week protocol with all 4 in-office modalities, Neuro Volt + Ember+ home devices, and complete 3-phase Thorne supplement protocol targeting nerve repair, circulation, and metabolic function. Consider extended intensive phase.</div>
     </div>`;
-  } else if(maxLoss >= 30){
+  } else if (maxLoss >= 30) {
     txHtml += `<div class="tx-card protocol">
-      <div class="tx-label teal">Primary Protocol — Standard</div>
-      <div class="tx-name">ReBuilder 300 or 2407 + Light Therapy + Gut Health Support</div>
-      <div class="tx-detail">Moderate-range sensory loss (${maxLoss}%). Standard 12-week intensive program. ReBuilder 300 or 2407, TheraRay or Freedom Pro, Gut Health Kit or Neuropathy Combined.</div>
+      <div class="tx-lbl teal">Recommended: Tier 2 — NeuroPath Advanced</div>
+      <div class="tx-name">$7,261 · Clinical program + home devices + nerve nutrition protocol</div>
+      <div class="tx-detail">Moderate sensory loss (${maxLoss}%). Standard 12-week program with Neuro Volt + Ember+ devices and Thorne nerve support stack. Reassess at weeks 4, 8, 12.</div>
     </div>`;
-  } else if(maxLoss > 0){
+  } else if (maxLoss > 0) {
     txHtml += `<div class="tx-card standard">
-      <div class="tx-label sage">Primary Protocol — Basic</div>
-      <div class="tx-name">ReBuilder 300 + TheraRay + Gut Health Kit</div>
-      <div class="tx-detail">Mild sensory loss (${maxLoss}%). 12-week program with monthly reassessment. ReBuilder 300 home unit, TheraRay, Gut Health Kit.</div>
+      <div class="tx-lbl sage">Recommended: Tier 1 — NeuroPath Essentials</div>
+      <div class="tx-name">$5,980 · Clinical program only</div>
+      <div class="tx-detail">Mild sensory loss (${maxLoss}%). 12-week in-office program. Monitor response at Week 4 re-exam — upgrade to Tier 2 if progress is slower than expected.</div>
     </div>`;
   } else {
     txHtml += `<div class="callout sage">Complete sensory testing to generate protocol recommendation.</div>`;
   }
-  // Thyroid add-on
-  const medHist = getChips('medHistory');
-  if(medHist.some(m=>m.includes('Thyroid'))){
-    txHtml += `<div class="tx-card optional"><div class="tx-label gold">Add-On Indicated</div><div class="tx-name">Gut Health Thyroid Kit</div><div class="tx-detail">Thyroid condition noted in history — thyroid-supportive gut protocol add-on indicated.</div></div>`;
-  }
-  if(medHist.some(m=>m.includes('GI'))){
-    txHtml += `<div class="tx-card optional"><div class="tx-label gold">Add-On Indicated</div><div class="tx-name">GI / Gut Protocol</div><div class="tx-detail">GI disorder noted — gut-focused protocol essential component of care.</div></div>`;
-  }
-  document.getElementById('sum-tx-content').innerHTML = txHtml;
+  if (isDiabetic || isGI) txHtml += `<div class="tx-card optional"><div class="tx-lbl gold">Metabolic Flag — Gut Protocol Essential</div><div class="tx-name">Tier 3 strongly indicated</div><div class="tx-detail">${isDiabetic?'Diabetic history — berberine + blood sugar regulation is critical to slowing nerve damage progression. ':''}${isGI?'GI disorder noted — gut-nerve axis protocol (Phase 1–2 gut reset) is a priority add-on.':''}</div></div>`;
+  if (isThyroid) txHtml += `<div class="tx-card optional"><div class="tx-lbl gold">Thyroid History Noted</div><div class="tx-name">Tier 3 gut/metabolic protocol recommended</div><div class="tx-detail">Thyroid dysfunction affects peripheral nerve health. Metabolic optimization phase (Omega-3, Magnesium) is particularly indicated.</div></div>`;
+  v('sum-tx-content').innerHTML = txHtml;
 
-  // Clinical flags
+  // Flags
   let flagHtml = '';
-  const positiveOrtho = Object.entries(orthoData).filter(([k,v])=>v==='Positive').map(([k])=>k);
-  if(positiveOrtho.length){
-    flagHtml += `<div class="callout gold">⚠️ <strong>Positive orthopedic findings:</strong> ${positiveOrtho.join(', ')} — radicular component possible. Consider spinal evaluation alongside neuropathy program.</div>`;
-  }
-  const thermalSig = Object.entries(thermalData).filter(([k,v])=>v==='Significantly Reduced').map(([k])=>k);
-  if(thermalSig.length){
-    flagHtml += `<div class="callout red">🌡 <strong>Significantly reduced perfusion:</strong> ${thermalSig.join(', ')} — vascular component possible. Evaluate cardiovascular risk factors.</div>`;
-  }
-  if(balFlags >= 3){
-    flagHtml += `<div class="callout red">⚖️ <strong>Significant balance impairment</strong> — fall risk is elevated. Proprioceptive training priority. Consider referral safety evaluation.</div>`;
-  }
-  if(!flagHtml) flagHtml = `<div class="callout green">✅ No major clinical flags identified at this time.</div>`;
-  document.getElementById('sum-flags-content').innerHTML = flagHtml;
+  const posOrtho = Object.entries(orthoData).filter(([k,vv]) => vv === 'Positive').map(([k]) => k);
+  const thermalSig = Object.entries(thermalData).filter(([k,vv]) => vv === 'Significantly Reduced').map(([k]) => k);
+  if (posOrtho.length) flagHtml += `<div class="callout gold">⚠️ <strong>Positive orthopedic findings:</strong> ${posOrtho.join(', ')} — radicular component possible. Evaluate spinal alongside neuropathy program.</div>`;
+  if (thermalSig.length) flagHtml += `<div class="callout red">🌡 <strong>Significantly reduced perfusion:</strong> ${thermalSig.join(', ')} — vascular component. Evaluate cardiovascular risk.</div>`;
+  if (balFlags >= 3) flagHtml += `<div class="callout red">⚖️ <strong>Significant balance impairment</strong> — elevated fall risk. Proprioceptive training priority. Safety evaluation recommended.</div>`;
+  if (!flagHtml) flagHtml = `<div class="callout green">✅ No major clinical flags identified at this time.</div>`;
+  v('sum-flags-content').innerHTML = flagHtml;
 }
 
-// ════════════════════════════════
-// ROF BUILD
-// ════════════════════════════════
-function buildROF() {
-  const fn = document.getElementById('firstName').value || 'Patient';
-  const ln = document.getElementById('lastName').value;
-  const ptName = [fn,ln].filter(Boolean).join(' ');
-  const age = document.getElementById('age').value;
-  const sex = document.getElementById('sex').value;
-  const examDate = document.getElementById('examDate').value || new Date().toLocaleDateString();
-  const provider = document.getElementById('provider').value;
-  const chiefComp = document.getElementById('chiefComplaint').value || 'Peripheral neuropathy symptoms';
-  const duration = document.getElementById('duration').value;
-  const progression = document.getElementById('progression').value;
+// ── SEND TO BUILDER ──
+function sendToBuilder() {
+  const fn = v('firstName').value, ln = v('lastName').value;
+  const fullName = [fn, ln].filter(Boolean).join(' ');
+  const limbs = [{k:'lf',l:'Left Foot'},{k:'rf',l:'Right Foot'},{k:'lh',l:'Left Hand'},{k:'rh',l:'Right Hand'}];
+  const results = limbs.map(lb => ({...lb, r:calcLoss(lb.k)})).filter(x => x.r);
+  const maxLoss = results.length ? Math.max(...results.map(x => x.r.loss)) : 0;
+  const recTier = maxLoss >= 50 ? 3 : maxLoss >= 30 ? 2 : 1;
   const medHist = getChips('medHistory');
-  const sxType = getChips('phase2'); // rough
-  const painCur = document.getElementById('painCurrent').value;
-  const painWorst = document.getElementById('painWorst').value;
-  const meds = document.getElementById('medications').value;
-  const balNotes = document.getElementById('balNotes').value;
-  const thermalNotes = document.getElementById('thermalNotes').value;
-  const orthoNotes = document.getElementById('orthoNotes').value;
+  const isDiabetic = medHist.some(m => m.toLowerCase().includes('diabet'));
+  const finalTier = isDiabetic && recTier < 3 ? 3 : recTier;
 
-  // Sensory narrative
+  switchMode('builder');
+  if (!builderInitialized) initBuilder();
+  if (fullName) { const el = v('pt-name'); if (el) el.value = fullName; }
+  setTimeout(() => {
+    loadTier(finalTier);
+    const bw = v('prefill-banner-wrap');
+    if (bw) bw.innerHTML = `<div class="prefill-banner" style="max-width:1340px;margin:0 auto;"><span>✅</span> Pre-loaded from exam: <strong>${fullName || 'Patient'}</strong> · Recommended <strong>Tier ${finalTier}</strong> based on ${maxLoss}% max sensory loss${isDiabetic?' + diabetic history':''}. All fields editable.</div>`;
+    updateSummary();
+  }, 100);
+}
+
+// ── ROF ──
+function buildROF() {
+  const fn = v('firstName').value || 'Patient';
+  const ln = v('lastName').value;
+  const ptName = [fn, ln].filter(Boolean).join(' ');
+  const age = v('age').value;
+  const sex = v('sex').value;
+  const examDate = v('examDate').value || new Date().toLocaleDateString();
+  const provider = v('provider').value;
+  const chiefComp = v('chiefComplaint').value || 'Peripheral neuropathy symptoms';
+  const duration = v('duration').value;
+  const progression = v('progression').value;
+  const medHist = getChips('medHistory');
+  const meds = v('medications').value;
+  const balNotes = v('balNotes').value;
+  const thermalNotes = v('thermalNotes').value;
+  const orthoNotes = v('orthoNotes').value;
+
   const limbs = [{k:'lf',l:'left foot'},{k:'rf',l:'right foot'},{k:'lh',l:'left hand'},{k:'rh',l:'right hand'}];
-  const sensResults = limbs.map(lb=>({...lb,r:calcLoss(lb.k)})).filter(x=>x.r);
-  let sensNarrative = '';
-  if(sensResults.length){
-    sensNarrative = sensResults.map(x => {
-      const sev = sevLabel(x.r.loss);
-      return `${x.l}: ${x.r.total}/70 total points preserved, indicating ${x.r.loss}% sensory loss (${sev.label.toLowerCase()})`;
-    }).join('; ') + '.';
-  }
-
-  // ReBuilder narrative
-  const rbEntries = Object.entries(rbScores).filter(([k,v])=>v!==null);
-  let rbNarrative = '';
-  if(rbEntries.length){
-    const rbMap = {lf:'left foot',rf:'right foot',lh:'left hand',rh:'right hand'};
-    rbNarrative = rbEntries.map(([k,v])=>`${rbMap[k]}: ${v}`).join('; ') + '.';
-  }
-
-  // Balance narrative
-  const balEntries = Object.entries(balData);
-  let balNarr = '';
-  if(balEntries.length){
-    const abnormal = balEntries.filter(([k,v])=>!['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(v));
-    balNarr = abnormal.length ? `Balance assessment revealed impairment in ${abnormal.length} area(s) including: ${abnormal.map(([k,v])=>v).join(', ')}.` : 'Balance assessment was within functional limits.';
-  }
-
-  // Thermal narrative
-  const thermalEntries = Object.entries(thermalData).filter(([k,v])=>v&&v!=='Not assessed');
-  let thermalNarr = '';
-  if(thermalEntries.length){
-    const thMap = {lf:'left foot',rf:'right foot',lh:'left hand',rh:'right hand'};
-    thermalNarr = thermalEntries.map(([k,v])=>`${thMap[k]}: ${v}`).join('; ') + '.';
-  }
-
-  // Ortho narrative
-  const posOrtho = Object.entries(orthoData).filter(([k,v])=>v==='Positive').map(([k])=>k);
-  const negOrtho = Object.entries(orthoData).filter(([k,v])=>v==='Negative').map(([k])=>k);
-  let orthoNarr = '';
-  if(posOrtho.length||negOrtho.length){
-    if(posOrtho.length) orthoNarr += `Orthopedic testing was positive for: ${posOrtho.join(', ')}. `;
-    if(negOrtho.length) orthoNarr += `Negative findings: ${negOrtho.join(', ')}.`;
-  }
-
-  // Sensory loss max
-  const maxLoss = sensResults.length ? Math.max(...sensResults.map(x=>x.r.loss)) : 0;
+  const sensResults = limbs.map(lb => ({...lb, r:calcLoss(lb.k)})).filter(x => x.r);
+  const maxLoss = sensResults.length ? Math.max(...sensResults.map(x => x.r.loss)) : 0;
   const severity = maxLoss >= 50 ? 'severe-to-critical' : maxLoss >= 30 ? 'moderate' : maxLoss > 0 ? 'mild' : 'undetermined';
+  const recTier = maxLoss >= 50 ? 3 : maxLoss >= 30 ? 2 : 1;
 
-  const rofSections = [
-    {
-      title:'Patient Information',
-      text:`Patient: ${ptName}${age?`, age ${age}`:''}${sex?`, ${sex}`:''}
-Examination Date: ${examDate}
-Provider: ${provider}
-Visit Type: NeuroPath Initial Examination`
-    },
-    {
-      title:'Chief Complaint',
-      text:chiefComp + (duration?`\n\nDuration: ${duration}.`:'') + (progression?` Symptom course described as ${progression.toLowerCase()}.`:'')
-    },
-    {
-      title:'Relevant Medical History',
-      text:(medHist.length ? medHist.join(', ') : 'No significant contributory medical history reported.') + (meds?`\n\nCurrent medications: ${meds}`:'')+'\n\nNote: The NeuroPath wellness program is a non-diagnostic, supportive care protocol. This documentation reflects functional assessment findings and does not constitute a medical diagnosis.'
-    },
-    {
-      title:'Objective Findings — Sensory Testing',
-      text:sensNarrative || 'Sensory testing not completed at this examination.\n\nThe 7-test sensory battery (Cold Sensation, Pinwheel, 10g Monofilament, Vibration, Cool Sensation, Medi-tip, Hot Sensation) is used to assess peripheral sensory function per limb. Each test is scored 0–10; total per limb is /70. Scores are converted to percent sensory preservation and loss.'+(rbNarrative?`\n\nReBuilder reaction time scores: ${rbNarrative}`:'')
-    },
-    {
-      title:'Objective Findings — Balance Assessment',
-      text:balNarr || 'Balance testing not completed.' + (balNotes?`\n\n${balNotes}`:'')
-    },
-    {
-      title:'Objective Findings — Thermal Imaging',
-      text:thermalNarr || 'Thermal imaging not performed at this visit.' + (thermalNotes?`\n\n${thermalNotes}`:'')
-    },
-    {
-      title:'Orthopedic Differential',
-      text:(orthoNarr || 'Orthopedic differential testing not documented at this visit.') + (orthoNotes?`\n\n${orthoNotes}`:'')
-    },
-    {
-      title:'Clinical Impression',
-      text:`Examination findings are consistent with peripheral sensory nerve dysfunction${severity!=='undetermined'?`, graded as ${severity} based on standardized sensory assessment`:''}. ${posOrtho.length?'Positive orthopedic findings suggest a possible radicular component that warrants further evaluation alongside the neuropathy presentation. ':''}The pattern of findings indicates reduced peripheral nerve signal integrity affecting the patient's ability to perceive sensory input normally.\n\nThe NeuroPath program utilizes a multi-modal approach to support peripheral nerve function, improve local circulation, and enhance proprioceptive input. Goals of care include improved sensory awareness, better balance and gait stability, reduced discomfort, and enhanced quality of life.`
-    },
-    {
-      title:'Plan of Care',
-      text:`Based on examination findings, the patient has been presented with a personalized NeuroPath program. The program is structured as a wellness protocol utilizing electro-neural stimulation, light therapy, and nutritional support as clinically appropriate.\n\nRe-examination is recommended at weeks 4, 8, and 12 to track objective progress using the same standardized sensory testing battery. Findings will be compared to today's baseline to document any changes in peripheral sensory function.\n\nPatient verbalized understanding of findings and agreed to proceed with recommended program.`
-    }
+  const sensNarrative = sensResults.length
+    ? sensResults.map(x => { const sev = sevLabel(x.r.loss); return `${x.l}: ${x.r.total}/70 total points (${x.r.loss}% sensory loss — ${sev.label.toLowerCase()})`; }).join('; ') + '.'
+    : 'Sensory testing not completed at this examination.';
+
+  const rbMap = {lf:'left foot',rf:'right foot',lh:'left hand',rh:'right hand'};
+  const rbEntries = Object.entries(rbScores).filter(([k,vv]) => vv !== null);
+  const rbNarrative = rbEntries.length ? rbEntries.map(([k,vv]) => `${rbMap[k]}: ${vv}`).join('; ') + '.' : '';
+
+  const balEntries = Object.entries(balData);
+  const abnormalBal = balEntries.filter(([k,vv]) => !['Normal','≥10 sec bilat.','No falls','≥10 sec'].includes(vv));
+  const balNarr = balEntries.length
+    ? (abnormalBal.length ? `Balance assessment revealed impairment in ${abnormalBal.length} area(s): ${abnormalBal.map(([k,vv]) => vv).join(', ')}.` : 'Balance assessment was within functional limits.')
+    : 'Balance testing not completed.';
+
+  const thMap = {lf:'left foot',rf:'right foot',lh:'left hand',rh:'right hand'};
+  const thermalNarr = Object.entries(thermalData).filter(([k,vv]) => vv && vv !== 'Not assessed')
+    .map(([k,vv]) => `${thMap[k]}: ${vv}`).join('; ') || 'Thermal imaging not performed at this visit.';
+
+  const posOrtho = Object.entries(orthoData).filter(([k,vv]) => vv === 'Positive').map(([k]) => k);
+  const negOrtho = Object.entries(orthoData).filter(([k,vv]) => vv === 'Negative').map(([k]) => k);
+  const orthoNarr = (posOrtho.length ? `Positive: ${posOrtho.join(', ')}. ` : '') + (negOrtho.length ? `Negative: ${negOrtho.join(', ')}.` : '') || 'Orthopedic differential testing not documented.';
+
+  const tierNames = {1:'NeuroPath Essentials ($5,980)',2:'NeuroPath Advanced ($7,261)',3:'NeuroPath Complete ($8,193)'};
+
+  const sections = [
+    { title:'Patient Information', text:`Patient: ${ptName}${age?`, Age ${age}`:''}${sex?`, ${sex}`:''}\nExamination Date: ${examDate}\nProvider: ${provider}\nVisit Type: NeuroPath Initial Examination` },
+    { title:'Chief Complaint', text:chiefComp+(duration?`\n\nDuration: ${duration}.`:'')+(progression?` Symptom course: ${progression.toLowerCase()}.`:'') },
+    { title:'Relevant Medical History', text:(medHist.length?medHist.join(', '):'No significant contributory medical history reported.')+(meds?`\n\nCurrent medications: ${meds}`:'')+'\n\nNote: NeuroPath is a non-diagnostic, supportive wellness protocol. Documentation reflects functional assessment findings and does not constitute a medical diagnosis.' },
+    { title:'Objective — Sensory Testing', text:sensNarrative+(rbNarrative?`\n\nReaction time scores: ${rbNarrative}`:'') },
+    { title:'Objective — Balance Assessment', text:balNarr+(balNotes?`\n\n${balNotes}`:'') },
+    { title:'Objective — Thermal Imaging', text:thermalNarr+(thermalNotes?`\n\n${thermalNotes}`:'') },
+    { title:'Orthopedic Differential', text:orthoNarr+(orthoNotes?`\n\n${orthoNotes}`:'') },
+    { title:'Clinical Impression', text:`Examination findings are consistent with peripheral sensory nerve dysfunction${severity!=='undetermined'?`, graded as ${severity} based on standardized sensory assessment`:''}. ${posOrtho.length?'Positive orthopedic findings suggest a possible radicular component. ':''}Findings indicate reduced peripheral nerve signal integrity affecting sensory perception.\n\nThe NeuroPath program utilizes a multi-modal approach: electro-neural stimulation, shockwave therapy, red light therapy, compression therapy, and targeted nutritional support. Goals include improved sensory awareness, better balance and gait stability, reduced discomfort, and enhanced quality of life.` },
+    { title:'Program Recommendation', text:`Based on examination findings, the recommended program is: ${tierNames[recTier]}.\n\n${recTier===3?'Full clinical program with Neuro Volt home stimulation device, Ember+ bilateral red light therapy system, and complete 3-phase Thorne supplement protocol (nerve support, gut reset, metabolic optimization).':recTier===2?'Clinical program with Neuro Volt home stimulation device, Ember+ bilateral red light therapy system, and Thorne nerve support supplement stack.':'Clinical program only. Re-assess at Week 4 and consider tier upgrade based on response.'}\n\nRe-examinations at Weeks 4, 8, and 12 using the same standardized sensory battery to document objective progress.` },
+    { title:'Plan of Care', text:`Patient has been presented with the NeuroPath program recommendation. The program is structured as a wellness protocol using electro-neural stimulation (in-office and home), shockwave therapy, photobiomodulation, compression therapy, and nutritional support as clinically appropriate.\n\nPatient verbalized understanding of findings and was given the opportunity to review program options and investment.` },
   ];
 
-  let html = '';
-  rofSections.forEach(s => {
-    html += `<div class="note-block note-sec">
-      <h3>${s.title}</h3>
-      <div class="note-text">${s.text}</div>
-    </div>`;
-  });
-  document.getElementById('rof-output').innerHTML = html;
+  v('rof-output').innerHTML = sections.map(s => `<div class="note-block"><h3>${s.title}</h3><div class="note-text">${s.text}</div></div>`).join('');
 }
 
 function copyROF() {
-  const sections = [...document.querySelectorAll('#rof-output .note-block')];
-  const text = sections.map(s => {
+  const text = [...document.querySelectorAll('#rof-output .note-block')].map(s => {
     const title = s.querySelector('h3').textContent;
     const body = s.querySelector('.note-text').textContent;
     return `${title}\n${'─'.repeat(title.length)}\n${body}`;
   }).join('\n\n');
-  navigator.clipboard.writeText(text).then(()=>{
+  navigator.clipboard.writeText(text).then(() => {
     const btn = event.target;
-    btn.textContent='✅ Copied!';
-    setTimeout(()=>btn.textContent='📋 Copy All',2000);
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy All', 2000);
   });
 }
 
-// ════════════════════════════════
+// ═══════════════════════════════════════════
+// BUILDER
+// ═══════════════════════════════════════════
+let selected = {};
+let selectedTier = 0;
+let builderInitialized = false;
+
+const CATALOG = {
+  'cat-programs': [
+    {id:'prog-t1', name:'NeuroPath Essentials — 12-Week Clinical Program', sub:'All 4 in-office modalities + re-exams · Clinical only', price:5980, cat:'program'},
+    {id:'prog-t2', name:'NeuroPath Advanced — 12-Week Clinical Program', sub:'All 4 in-office modalities + re-exams · Devices not included', price:6680, cat:'program'},
+    {id:'prog-t3', name:'NeuroPath Complete — 12-Week Clinical Program', sub:'All 4 in-office modalities + re-exams · Devices & supps not included', price:7380, cat:'program'},
+  ],
+  'cat-devices': [
+    {id:'dev-neurovolt', name:'Neuro Volt™ — Home Nerve Stimulation System', sub:'EMS + TENS + EPT · FDA Cleared · FSA/HSA eligible · Prescribed by Dr. Rudy', price:149, cat:'device'},
+    {id:'dev-ember-x2', name:'Ember+™ — Home Red Light Therapy System (Bilateral Kit ×2)', sub:'660nm + 850nm · 360 LEDs per unit · Feet + calves coverage', price:258, cat:'device'},
+    {id:'dev-ember-x1', name:'Ember+™ — Home Red Light Therapy System (Single Unit)', sub:'660nm + 850nm · 360 LEDs · For one side', price:129, cat:'device'},
+  ],
+  'cat-nerve': [
+    {id:'sup-nerve', name:'Nerve Support Kit — Month 1 (Thorne)', sub:'ALA 300mg, Methylcobalamin B12, Benfotiamine, Phytoganix Greens, Perfusia-SR (NO Support)', price:174, cat:'supplement'},
+  ],
+  'cat-gut': [
+    {id:'sup-gut-p1', name:'Phase 1 — Nerve + Gut Reset Kit — Weeks 1–4 (Thorne)', sub:'Alpha Lipoic Acid + Benfotiamine + B12 + L-Glutamine + Bio-Gest Enzymes', price:174, cat:'supplement'},
+    {id:'sup-gut-p2', name:'Phase 2 — Microbiome Rebuild Kit — Weeks 5–8 (Thorne)', sub:'FloraSport 20B Probiotic + Prebiotic + Berberine-500 (insulin sensitivity)', price:108, cat:'supplement'},
+    {id:'sup-gut-p3', name:'Phase 3 — Metabolic Optimization Kit — Weeks 9–12 (Thorne)', sub:'Super EPA Omega-3 + Magnesium Bisglycinate + Curcumin Phytosome', price:124, cat:'supplement'},
+  ],
+  'cat-maintenance': [
+    {id:'maint-monthly', name:'Monthly Maintenance Visit', sub:'1 visit · All 4 modalities', price:175, cat:'maintenance'},
+    {id:'maint-addon4', name:'4-Week Extension (Add-On)', sub:'4 additional weekly visits at program rate', price:1660, cat:'maintenance'},
+    {id:'maint-addon8', name:'8-Week Extension (Add-On)', sub:'8 additional weekly visits at program rate', price:3320, cat:'maintenance'},
+    {id:'sup-refill', name:'Monthly Supplement Refill — Nerve Stack (Thorne via Fullscript)', sub:'ALA, B12, Benfotiamine, Greens, NO Support — monthly ongoing', price:174, cat:'supplement'},
+  ],
+};
+
+const TIER_LOADS = {
+  1: ['prog-t1'],
+  2: ['prog-t2','dev-neurovolt','dev-ember-x2','sup-nerve'],
+  3: ['prog-t3','dev-neurovolt','dev-ember-x2','sup-gut-p1','sup-gut-p2','sup-gut-p3'],
+};
+
+function initBuilder() {
+  builderInitialized = true;
+  buildCatalog();
+  v('pt-date').value = new Date().toISOString().split('T')[0];
+  if (!v('pt-clin').value) v('pt-clin').value = 'Dr. Urrutia';
+  updateSummary();
+  // Check for quiz overlay
+  v('quizOverlay').style.display = 'flex';
+  npRender();
+}
+
+function buildCatalog() {
+  Object.entries(CATALOG).forEach(([catId, items]) => {
+    const c = v(catId);
+    if (!c) return;
+    items.forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'product-row';
+      d.id = `pr-${item.id}`;
+      d.innerHTML = `<div class="pr-check" id="prc-${item.id}"></div>
+        <div class="pr-name">${item.name}${item.sub?`<small>${item.sub}</small>`:''}</div>
+        <div class="pr-price">${fmt(item.price)}</div>`;
+      d.onclick = () => toggleProduct(item.id, item.name, item.price, item.cat);
+      c.appendChild(d);
+    });
+  });
+}
+
+function getAllItems() {
+  const all = Object.values(CATALOG).flat();
+  return all;
+}
+
+function toggleProduct(id, name, price, cat) {
+  const row = v(`pr-${id}`), chk = v(`prc-${id}`);
+  if (selected[id]) {
+    delete selected[id];
+    row.classList.remove('added');
+    chk.textContent = '';
+  } else {
+    selected[id] = { name, price, cat };
+    row.classList.add('added');
+    chk.textContent = '✓';
+  }
+  updateSummary();
+}
+
+function removeItem(id) {
+  const r = v(`pr-${id}`);
+  if (r) { r.classList.remove('added'); const c = v(`prc-${id}`); if (c) c.textContent = ''; }
+  delete selected[id];
+  updateSummary();
+}
+
+function loadTier(tier) {
+  // Clear current
+  Object.keys(selected).forEach(id => {
+    const r = v(`pr-${id}`); if (r) r.classList.remove('added');
+    const c = v(`prc-${id}`); if (c) c.textContent = '';
+  });
+  selected = {};
+  selectedTier = tier;
+
+  // Update tier card styles
+  [1,2,3].forEach(t => {
+    const tc = v(`tc-${t}`);
+    if (tc) {
+      tc.classList.remove('sel','sel-t2','sel-t3');
+      if (t === tier) tc.classList.add(t===1?'sel':t===2?'sel-t2':'sel-t3');
+    }
+  });
+
+  // Load items
+  const ids = TIER_LOADS[tier] || [];
+  ids.forEach(id => {
+    const allItems = Object.values(CATALOG).flat();
+    const item = allItems.find(i => i.id === id);
+    if (item) {
+      selected[id] = { name:item.name, price:item.price, cat:item.cat };
+      const r = v(`pr-${id}`); if (r) r.classList.add('added');
+      const c = v(`prc-${id}`); if (c) c.textContent = '✓';
+    }
+  });
+  updateSummary();
+}
+
+function addCustomItem() {
+  const name = v('custom-name').value.trim();
+  const price = parseFloat(v('custom-price').value) || 0;
+  if (!name || !price) return;
+  const id = 'custom-' + Date.now();
+  selected[id] = { name, price, cat:'custom' };
+  v('custom-name').value = '';
+  v('custom-price').value = '';
+  updateSummary();
+}
+
+function updateSummary() {
+  const items = Object.values(selected);
+  const programFee = items.filter(i => i.cat === 'program').reduce((a,b) => a + b.price, 0);
+  const deviceTotal = items.filter(i => i.cat === 'device').reduce((a,b) => a + b.price, 0);
+  const suppTotal = items.filter(i => i.cat === 'supplement').reduce((a,b) => a + b.price, 0);
+  const otherTotal = items.filter(i => !['program','device','supplement'].includes(i.cat)).reduce((a,b) => a + b.price, 0);
+  const sub = programFee + deviceTotal + suppTotal + otherTotal;
+
+  const dp = val('disc-pct');
+  const discAmt = Math.round(sub * (dp/100));
+  const afterDisc = sub - discAmt;
+  const pm = txt('pay-method');
+  const ccM = parseInt(v('cc-months')?.value) || 12;
+  const ihM = parseInt(v('ih-months')?.value) || 12;
+  const monthly = pm === 'carecredit' ? Math.round(afterDisc * 1.065 / ccM) : pm === 'inhouse' ? Math.round(afterDisc / ihM) : 0;
+
+  // Payment breakdowns
+  const pif = Math.round(afterDisc * 0.90);
+  const cc6 = Math.round(afterDisc * 1.065 / 6);
+  const cc12 = Math.round(afterDisc * 1.065 / 12);
+  const cc18 = Math.round(afterDisc * 1.065 / 18);
+
+  // Visit preview
+  const intensive = parseInt(v('vq-intensive')?.value) || 12;
+  const maintenance = parseInt(v('vq-maintenance')?.value) || 0;
+  const addon = parseInt(v('vq-addon')?.value) || 0;
+  const reassess = parseInt(v('vq-reassess')?.value) || 3;
+  const preview = [];
+  if (intensive) preview.push(`${intensive} intensive visits`);
+  if (maintenance) preview.push(`${maintenance} maintenance visits`);
+  if (addon) preview.push(`${addon} add-on weeks`);
+  if (reassess) preview.push(`${reassess} re-assessments`);
+  if (v('visit-preview')) v('visit-preview').innerHTML = preview.length ? `<strong>Visit Structure:</strong> ${preview.join(' · ')}` : '<span style="color:var(--ink-sm)">No visits configured</span>';
+
+  // Update displays
+  const name = txt('pt-name');
+  v('sum-name').textContent = name || 'Patient Program';
+  v('sum-sub').textContent = items.length > 0 ? `${items.length} item${items.length!==1?'s':''} selected` : 'No items selected';
+  v('price-main').textContent = fmt(afterDisc);
+  v('price-lbl').textContent = pm === 'carecredit' ? 'CareCredit Total' : pm === 'inhouse' ? 'Financed Total' : 'Total Investment';
+  v('bd-program').textContent = fmt(programFee);
+  v('bd-devices').textContent = fmt(deviceTotal);
+  v('bd-supps').textContent = fmt(suppTotal);
+  v('bd-total').textContent = fmt(afterDisc);
+  v('bd-disc-row').style.display = dp > 0 ? 'flex' : 'none';
+  if (dp > 0) { v('bd-disc-lbl').textContent = `Discount (${dp}%)`; v('bd-disc').textContent = '-' + fmt(discAmt); }
+  v('finance-opts').style.display = (pm === 'carecredit' || pm === 'inhouse') ? '' : 'none';
+  if (monthly > 0) {
+    v('bd-fin-row').style.display = 'flex';
+    v('bd-fin-lbl').textContent = pm === 'carecredit' ? `CC ${ccM}-mo` : `In-House ${ihM}-mo`;
+    v('bd-fin').textContent = fmt(monthly) + '/mo';
+    v('price-monthly').style.display = '';
+    v('price-monthly').textContent = fmt(monthly) + '/mo';
+  } else {
+    v('bd-fin-row').style.display = 'none';
+    v('price-monthly').style.display = 'none';
+  }
+
+  // Payment quick reference
+  if (v('pif-display')) v('pif-display').textContent = fmt(pif);
+  if (v('cc6-display')) v('cc6-display').textContent = fmt(cc6);
+  if (v('cc12-display')) v('cc12-display').textContent = fmt(cc12);
+  if (v('cc18-display')) v('cc18-display').textContent = fmt(cc18);
+
+  const keys = Object.keys(selected);
+  v('item-count-badge').textContent = keys.length;
+  v('sum-count').textContent = keys.length;
+  v('items-area').innerHTML = keys.length === 0
+    ? '<div style="font-size:.76rem;color:rgba(255,255,255,.28);font-style:italic;">No items added yet</div>'
+    : keys.map(k => `<div class="item-chip"><span class="ic-name">${selected[k].name.length>36?selected[k].name.slice(0,35)+'…':selected[k].name}</span><span class="ic-price">${fmt(selected[k].price)}</span><button class="ic-rm" onclick="removeItem('${k}')">✕</button></div>`).join('');
+}
+
+function generateCard() {
+  const name = txt('pt-name') || 'Patient';
+  const date = v('pt-date').value;
+  const clin = txt('pt-clin') || 'Dr. Urrutia';
+  const items = Object.values(selected);
+  const programFee = items.filter(i => i.cat === 'program').reduce((a,b) => a + b.price, 0);
+  const deviceTotal = items.filter(i => i.cat === 'device').reduce((a,b) => a + b.price, 0);
+  const suppTotal = items.filter(i => i.cat === 'supplement').reduce((a,b) => a + b.price, 0);
+  const otherTotal = items.filter(i => !['program','device','supplement'].includes(i.cat)).reduce((a,b) => a + b.price, 0);
+  const sub = programFee + deviceTotal + suppTotal + otherTotal;
+  const dp = val('disc-pct');
+  const discAmt = Math.round(sub * (dp/100));
+  const total = sub - discAmt;
+  const pm = txt('pay-method');
+  const ccM = parseInt(v('cc-months')?.value) || 12;
+  const ihM = parseInt(v('ih-months')?.value) || 12;
+  const monthly = pm === 'carecredit' ? Math.round(total * 1.065 / ccM) : pm === 'inhouse' ? Math.round(total / ihM) : 0;
+  const pif = Math.round(total * 0.90);
+
+  const fmtDate = date ? new Date(date + 'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+  const tierName = selectedTier ? ['','Essentials','Advanced','Complete'][selectedTier] : '';
+
+  const intensive = parseInt(v('vq-intensive')?.value) || 12;
+  const maintenance = parseInt(v('vq-maintenance')?.value) || 0;
+  const addon = parseInt(v('vq-addon')?.value) || 0;
+  const reassess = parseInt(v('vq-reassess')?.value) || 3;
+  const visitLines = [];
+  if (intensive) visitLines.push(`${intensive} intensive visits — all 4 modalities + Dr. Rudy check-in`);
+  if (maintenance) visitLines.push(`${maintenance} monthly maintenance visits`);
+  if (addon) visitLines.push(`${addon} add-on extension weeks`);
+  if (reassess) visitLines.push(`Re-examinations at Weeks 4, 8, 12 (included)`);
+
+  const payColors = {cash:'var(--green)',credit:'var(--sage)',carecredit:'var(--cc)',inhouse:'var(--gold-dk)'};
+  const payBg = {cash:'var(--green-lt)',credit:'var(--sage-xl)',carecredit:'var(--cc-lt)',inhouse:'var(--gold-lt)'};
+  const payLabel = {cash:'Cash / Check — Paid in Full',credit:'Credit Card — Paid in Full',carecredit:`CareCredit ${ccM}-Month Financing`,inhouse:`In-House ${ihM}-Month Plan`};
+
+  v('patient-card').innerHTML = `
+    <div class="pc-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="pc-logo-box">C</div>
+        <div>
+          <div class="pc-clinic">Colleyville Chiropractic | CVC Spine &amp; Sport</div>
+          <div class="pc-clinic-sub">(817) 420-7696 &nbsp;·&nbsp; 1001 Glade Rd Ste 120, Colleyville TX 76034${fmtDate?' &nbsp;·&nbsp; '+fmtDate:''}</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--ink-md);margin-top:4px;">Patient: <strong>${name}</strong> &nbsp;·&nbsp; Clinician: <strong>${clin}</strong></div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="pc-total">${fmt(total)}</div>
+        <div class="pc-total-lbl">${pm==='carecredit'?'CareCredit Total':pm==='inhouse'?'Financed Total':'Program Investment'}</div>
+        ${monthly>0?`<div class="pc-monthly">≈ ${fmt(monthly)}/mo</div>`:''}
+      </div>
+    </div>
+
+    ${tierName?`<div class="pc-tier-banner"><span style="font-size:1.1rem;">🧠</span><div><div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;">NeuroPath ${tierName} — Peripheral Nerve Wellness Program</div><div style="font-size:.72rem;opacity:.8;margin-top:1px;">Cash-pay wellness protocol · Not submitted to insurance · Scope-compliant language</div></div></div>`:''}
+
+    <div class="pc-body">
+      <div>
+        <div class="pc-sec-title">Program Includes</div>
+        ${items.map(i => `<div class="pc-item">${i.name}</div>`).join('')}
+        ${!items.length?'<div style="font-size:.82rem;color:var(--ink-sm);">No items selected</div>':''}
+      </div>
+      <div>
+        <div class="pc-sec-title">Visit Structure</div>
+        ${visitLines.map(l => `<div class="pc-visit-line">· ${l}</div>`).join('')}
+        <div style="margin-top:12px;">
+          <div class="pc-sec-title">Investment Breakdown</div>
+          <div style="font-size:.81rem;color:var(--ink-md);line-height:1.8;">
+            ${programFee?`Program fee: ${fmt(programFee)}<br>`:''}
+            ${deviceTotal?`Home devices: ${fmt(deviceTotal)}<br>`:''}
+            ${suppTotal?`Supplement protocol: ${fmt(suppTotal)}<br>`:''}
+            ${otherTotal?`Other: ${fmt(otherTotal)}<br>`:''}
+            ${dp>0?`<span style="color:var(--red);">Discount (${dp}%): -${fmt(discAmt)}</span><br>`:''}
+            <strong>Total: ${fmt(total)}</strong>${monthly>0?` · ${fmt(monthly)}/mo`:''}
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="pc-sec-title">Payment Options</div>
+          <div style="font-size:.79rem;color:var(--ink-md);line-height:1.8;">
+            Pay in Full (10% off): <strong>${fmt(pif)}</strong><br>
+            6-mo CareCredit: <strong>${fmt(Math.round(total*1.065/6))}/mo</strong><br>
+            12-mo CareCredit: <strong>${fmt(Math.round(total*1.065/12))}/mo</strong><br>
+            18-mo CareCredit: <strong>${fmt(Math.round(total*1.065/18))}/mo</strong>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:7px 11px;border-radius:8px;background:${payBg[pm]};color:${payColors[pm]};font-size:.8rem;font-weight:600;display:inline-block;">
+          ${payLabel[pm]}
+        </div>
+      </div>
+    </div>
+
+    ${dp>0?`<div style="background:var(--red-lt);border:1px solid rgba(192,57,43,.18);border-radius:8px;padding:8px 12px;font-size:.8rem;color:var(--red);font-weight:600;margin-bottom:14px;">Discount Applied: ${dp}% — saving ${fmt(discAmt)}</div>`:''}
+
+    <div class="pc-sig-grid">
+      <div>
+        <div class="pc-sec-title">Patient Acknowledgment</div>
+        <div style="font-size:.77rem;color:var(--ink-sm);line-height:1.6;">I understand this is a peripheral nerve wellness program and not a diagnosis or treatment of any medical condition. I agree to the program terms and the payment arrangement described above. I understand that nutritional supplements, equipment, and professional protocols are non-refundable. Once equipment is ordered it is my possession.</div>
+        <div class="sig-line">Patient Signature &amp; Date</div>
+      </div>
+      <div>
+        <div class="pc-sec-title">Clinician Confirmation</div>
+        <div style="font-size:.88rem;font-weight:700;color:var(--sage);">${pm==='carecredit'?`CareCredit — ${ccM} months`:pm==='inhouse'?`In-House — ${ihM} months`:pm==='credit'?'Credit Card':'Cash / Check'}</div>
+        <div style="font-size:.78rem;color:var(--ink-sm);margin-top:3px;">Provider: ${clin}</div>
+        <div class="sig-line">Clinician Initials</div>
+      </div>
+    </div>
+
+    <div class="pc-footer">
+      Colleyville Chiropractic | CVC Spine &amp; Sport &nbsp;·&nbsp; 1001 Glade Rd Suite 120, Colleyville TX 76034 &nbsp;·&nbsp; (817) 420-7696<br>
+      Cash-pay wellness program. Not submitted to insurance. NeuroPath is a peripheral nerve wellness protocol only.
+    </div>
+  `;
+
+  v('patient-card-section').style.display = '';
+  v('patient-card-section').scrollIntoView({behavior:'smooth',block:'start'});
+  if (driveReady) {
+    v('card-drive-btn').disabled = false;
+    v('card-drive-btn-2').disabled = false;
+  }
+}
+
+function clearAll() {
+  if (!confirm('Clear all selections and reset?')) return;
+  selected = {};
+  selectedTier = 0;
+  [1,2,3].forEach(t => { const tc = v(`tc-${t}`); if (tc) tc.classList.remove('sel','sel-t2','sel-t3'); });
+  document.querySelectorAll('.product-row.added').forEach(r => {
+    r.classList.remove('added');
+    const c = r.querySelector('.pr-check'); if (c) c.textContent = '';
+  });
+  v('disc-pct').value = 0;
+  v('pay-method').value = 'cash';
+  v('patient-card-section').style.display = 'none';
+  updateSummary();
+}
+
+// ═══════════════════════════════════════════
+// QUIZ (pre-screen)
+// ═══════════════════════════════════════════
+let npSymptoms=[], npVas=null, npOnset=null, npCause=null, npName='', npStep=0;
+
+const NP_SYMS=[
+  {v:'burning',l:'Burning or tingling sensation'},
+  {v:'numbness',l:'Numbness in feet or hands'},
+  {v:'balance',l:'Balance problems / unsteadiness'},
+  {v:'night',l:'Symptoms worse at night'},
+  {v:'cold',l:'Cold or temperature sensitivity'},
+  {v:'weakness',l:'Muscle weakness in extremities'},
+];
+const NP_ONSET=[
+  {v:'acute',l:'Less than 3 months'},
+  {v:'subacute',l:'3 – 6 months'},
+  {v:'chronic',l:'6 – 12 months'},
+  {v:'longstanding',l:'1+ year'},
+];
+const NP_CAUSE=[
+  {v:'diabetic',l:'Diabetic neuropathy'},
+  {v:'chemo',l:'Chemotherapy-related'},
+  {v:'idiopathic',l:'Unknown / idiopathic'},
+  {v:'traumatic',l:'Injury or trauma'},
+  {v:'autoimmune',l:'Autoimmune condition'},
+  {v:'other',l:'Other / not sure'},
+];
+
+function npVasColor(n){return n<=3?'#22c55e':n<=6?'#f59e0b':'#ef4444';}
+function npVasLabel(n){return n<=2?'Minimal':n<=4?'Mild':n<=6?'Moderate':n<=8?'Severe':'Extreme';}
+function npGetRec(){
+  if(npVas===null||!npOnset)return null;
+  const isLong=npOnset==='longstanding'||npOnset==='chronic';
+  const isSev=npVas>=7,isMod=npVas>=4&&npVas<=6;
+  const intensive=isSev&&isLong?24:isSev?18:isMod&&isLong?16:isMod?12:8;
+  const maintenance=isSev&&isLong?24:isSev?12:12;
+  const reassess=isSev&&isLong?6:isSev?4:3;
+  const tier=isSev?3:isMod?2:1;
+  const tierColor=isSev?'#ef4444':isMod?'#f59e0b':'#22c55e';
+  return{intensive,maintenance,reassess,tier,tierColor};
+}
+function npSetProg(){const pct=(npStep/5)*100;v('qzBar').style.width=pct+'%';v('qzStep').textContent='Step '+(npStep+1)+' of 5';}
+function npRender(){
+  npSetProg();
+  const b=v('qzBody');if(!b)return;b.innerHTML='';
+  if(npStep===0)npS0(b);
+  else if(npStep===1)npS1(b);
+  else if(npStep===2)npS2(b);
+  else if(npStep===3)npS3(b);
+  else if(npStep===4)npS4(b);
+  else npResult(b);
+}
+function npS0(b){
+  npMakeQ(b,'What symptoms is the patient experiencing?','Select all that apply');
+  const g=document.createElement('div');g.className='qz-grid col1';b.appendChild(g);
+  NP_SYMS.forEach(s=>{
+    const btn=document.createElement('button');
+    const sel=npSymptoms.indexOf(s.v)>-1;
+    btn.className='qz-opt'+(sel?' sel':'');
+    const chk=document.createElement('span');chk.className='qz-chk';chk.innerHTML=sel?'✓':'';
+    const lbl=document.createElement('span');lbl.textContent=s.l;
+    btn.appendChild(chk);btn.appendChild(lbl);
+    btn.onclick=()=>{
+      const i=npSymptoms.indexOf(s.v);
+      if(i>-1){npSymptoms.splice(i,1);btn.classList.remove('sel');chk.innerHTML='';}
+      else{npSymptoms.push(s.v);btn.classList.add('sel');chk.innerHTML='✓';}
+    };
+    g.appendChild(btn);
+  });
+  npMakeNav(b,false,()=>{npStep++;npRender();},false);
+}
+function npS1(b){
+  npMakeQ(b,'Rate current severity (0–10)','0 = no symptoms · 10 = severe and debilitating');
+  const row=document.createElement('div');row.className='vas-row';b.appendChild(row);
+  for(let n=0;n<=10;n++){
+    const btn=document.createElement('button');btn.className='vas-btn';btn.textContent=n;
+    if(npVas===n){const c=npVasColor(n);btn.style.cssText=`border-color:${c};background:${c}33;color:white;transform:scale(1.12)`;}
+    btn.id='vb'+n;btn.onclick=()=>npSelVas(n);row.appendChild(btn);
+  }
+  const disp=document.createElement('div');disp.className='vas-disp';disp.style.display=npVas!==null?'':'none';
+  if(npVas!==null)disp.innerHTML=`<div class="vas-val" style="color:${npVasColor(npVas)}">${npVas}/10 — ${npVasLabel(npVas)}</div>`;
+  disp.id='vasDisp';b.appendChild(disp);
+  npMakeNav(b,true,()=>{npStep++;npRender();},npVas===null);
+}
+function npSelVas(n){
+  npVas=n;const c=npVasColor(n);
+  for(let i=0;i<=10;i++){const el=v('vb'+i);if(!el)continue;el.style.cssText=i===n?`border-color:${c};background:${c}33;color:white;transform:scale(1.12)`:'border-color:;background:;color:;transform:';}
+  const d=v('vasDisp');if(d){d.style.display='';d.innerHTML=`<div class="vas-val" style="color:${c}">${n}/10 — ${npVasLabel(n)}</div>`;}
+  const nx=v('qzNextBtn');if(nx)nx.disabled=false;
+}
+function npS2(b){
+  npMakeQ(b,'How long has the patient had these symptoms?','Chronicity affects the protocol intensity');
+  const g=document.createElement('div');g.className='qz-grid col1';b.appendChild(g);
+  NP_ONSET.forEach(o=>{
+    const btn=document.createElement('button');btn.className='qz-opt'+(npOnset===o.v?' sel':'');btn.textContent=o.l;
+    btn.onclick=()=>{npOnset=o.v;g.querySelectorAll('.qz-opt').forEach(x=>x.classList.remove('sel'));btn.classList.add('sel');const nx=v('qzNextBtn');if(nx)nx.disabled=false;};
+    g.appendChild(btn);
+  });
+  npMakeNav(b,true,()=>{npStep++;npRender();},!npOnset);
+}
+function npS3(b){
+  npMakeQ(b,'What is the suspected cause?','Helps determine the appropriate protocol variant');
+  const g=document.createElement('div');g.className='qz-grid';b.appendChild(g);
+  NP_CAUSE.forEach(ca=>{
+    const btn=document.createElement('button');btn.className='qz-opt'+(npCause===ca.v?' sel':'');btn.textContent=ca.l;
+    btn.onclick=()=>{npCause=ca.v;g.querySelectorAll('.qz-opt').forEach(x=>x.classList.remove('sel'));btn.classList.add('sel');const nx=v('qzNextBtn');if(nx)nx.disabled=false;};
+    g.appendChild(btn);
+  });
+  npMakeNav(b,true,()=>{npStep++;npRender();},!npCause);
+}
+function npS4(b){
+  npMakeQ(b,'Patient information','Used to personalize the program card');
+  const wrap=document.createElement('div');wrap.style.marginBottom='14px';
+  const lbl=document.createElement('label');lbl.className='qz-field-lbl';lbl.textContent='Patient Name';
+  const inp=document.createElement('input');inp.id='npNameIn';inp.className='qz-input';inp.placeholder='Full name';inp.value=npName;
+  wrap.appendChild(lbl);wrap.appendChild(inp);b.appendChild(wrap);
+  npMakeNav(b,true,()=>{const n=v('npNameIn');if(n)npName=n.value;npStep++;npRender();},false);
+}
+function npResult(b){
+  const rec=npGetRec();if(!rec){npMakeQ(b,'Please complete all steps.','');return;}
+  const badge=document.createElement('div');
+  badge.style.cssText=`display:inline-block;padding:4px 14px;border-radius:999px;background:${rec.tierColor}22;border:1px solid ${rec.tierColor}55;color:${rec.tierColor};font-size:.8rem;font-weight:700;margin-bottom:12px;`;
+  badge.textContent=`Tier ${rec.tier} Recommended · VAS ${npVas}/10`;
+  b.appendChild(badge);
+  const recBox=document.createElement('div');recBox.className='qz-rec';
+  const tierNames=['','Essentials ($5,980)','Advanced ($7,261)','Complete ($8,193)'];
+  recBox.innerHTML=`<div class="qz-rec-eyebrow">Recommended Program</div><div class="qz-rec-big">NeuroPath ${tierNames[rec.tier]}</div><div class="qz-rec-sub">${rec.intensive} intensive + ${rec.maintenance} maintenance · ${rec.reassess} re-assessments</div>`;
+  b.appendChild(recBox);
+  const info=document.createElement('div');info.className='qz-info';
+  info.innerHTML=`<div class="qz-info-lbl">Visit Breakdown</div><div class="qz-info-txt">Intensive: ${rec.intensive} · Maintenance: ${rec.maintenance} · Re-assessments: ${rec.reassess}<br>Total: <strong>${rec.intensive+rec.maintenance+rec.reassess} visits</strong></div>`;
+  b.appendChild(info);
+  const note=document.createElement('div');note.className='qz-note';
+  note.textContent='These counts will pre-fill the builder. All fields remain editable after applying.';
+  b.appendChild(note);
+  const acceptBtn=document.createElement('button');acceptBtn.className='qz-accept';
+  acceptBtn.innerHTML='Apply to Program Builder →';acceptBtn.onclick=npApply;b.appendChild(acceptBtn);
+  const skipBtn=document.createElement('button');skipBtn.className='qz-skip';
+  skipBtn.textContent='Skip — Open Builder Without Pre-fill';skipBtn.onclick=npSkip;b.appendChild(skipBtn);
+}
+function npMakeQ(b,q,d){
+  const qEl=document.createElement('div');qEl.className='qz-q';qEl.textContent=q;b.appendChild(qEl);
+  if(d){const dEl=document.createElement('div');dEl.className='qz-qdesc';dEl.textContent=d;b.appendChild(dEl);}
+}
+function npMakeNav(b,showBack,onNext,disabled){
+  const nav=document.createElement('div');nav.className='qz-nav';
+  if(showBack){const back=document.createElement('button');back.className='qz-back';back.innerHTML='← Back';back.onclick=()=>{npStep--;npRender();};nav.appendChild(back);}
+  else nav.appendChild(document.createElement('span'));
+  const next=document.createElement('button');next.className='qz-next';next.innerHTML='Continue →';
+  next.disabled=!!disabled;next.id='qzNextBtn';if(onNext)next.onclick=onNext;
+  nav.appendChild(next);b.appendChild(nav);
+}
+function npApply(){
+  const rec=npGetRec();
+  v('quizOverlay').style.display='none';
+  if(!rec)return;
+  if(npName){const el=v('pt-name');if(el)el.value=npName;}
+  if(v('vq-intensive'))v('vq-intensive').value=rec.intensive;
+  if(v('vq-maintenance'))v('vq-maintenance').value=rec.maintenance;
+  if(v('vq-reassess'))v('vq-reassess').value=rec.reassess;
+  const isDiabetic=npCause==='diabetic';
+  const finalTier=isDiabetic&&rec.tier<3?3:rec.tier;
+  loadTier(finalTier);
+  const bw=v('prefill-banner-wrap');
+  if(bw)bw.innerHTML=`<div class="prefill-banner" style="max-width:1340px;margin:0 auto;"><span>✅</span>Pre-screen complete — Tier ${finalTier} loaded · ${rec.intensive} intensive + ${rec.maintenance} maintenance · All fields editable.</div>`;
+  updateSummary();
+}
+function npSkip(){v('quizOverlay').style.display='none';}
+
+// ═══════════════════════════════════════════
+// GOOGLE DRIVE
+// ═══════════════════════════════════════════
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+const DRIVE_FOLDER='CVC NeuroPath';
+let driveToken=null, driveReady=false, driveFolderId=null;
+
+function initDriveAuth(){
+  const saved=sessionStorage.getItem('np_drive_token');
+  const exp=sessionStorage.getItem('np_drive_exp');
+  if(saved&&exp&&Date.now()<parseInt(exp)){driveToken=saved;driveReady=true;setDriveReady();return;}
+  if(!window._driveClientId){
+    v('authStatus').innerHTML='<span style="color:var(--red);">Enter your Google OAuth Client ID below.</span>';
+    showClientIdPrompt();return;
+  }
+  launchOAuth();
+}
+function showClientIdPrompt(){
+  const card=v('driveAuthCard');
+  if(document.getElementById('clientIdForm'))return;
+  const form=document.createElement('div');form.id='clientIdForm';form.style.marginTop='9px';
+  const lbl=document.createElement('label');lbl.style.cssText='font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-sm);display:block;margin-bottom:4px;';lbl.textContent='Google OAuth Client ID';
+  const inp=document.createElement('input');inp.placeholder='xxxxxxxx.apps.googleusercontent.com';inp.style.cssText='width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:.84rem;margin:4px 0 8px;';inp.id='clientIdInput';
+  const prevId=sessionStorage.getItem('np_drive_client_id');if(prevId){window._driveClientId=prevId;inp.value=prevId;}
+  const btn=document.createElement('button');btn.className='btn btn-h btn-sm';btn.textContent='Save & Authorize';
+  btn.onclick=()=>{const cid=document.getElementById('clientIdInput').value.trim();if(!cid){alert('Please enter your Client ID.');return;}window._driveClientId=cid;sessionStorage.setItem('np_drive_client_id',cid);launchOAuth();};
+  form.appendChild(lbl);form.appendChild(inp);form.appendChild(btn);card.appendChild(form);
+}
+function launchOAuth(){
+  const clientId=window._driveClientId;if(!clientId){showClientIdPrompt();return;}
+  const redirect=encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+  const scope=encodeURIComponent(DRIVE_SCOPE);
+  const state=Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state',state);
+  const authUrl=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirect}&response_type=token&scope=${scope}&state=${state}&prompt=select_account`;
+  const popup=window.open(authUrl,'driveAuth','width=520,height=600,left=200,top=100');
+  const poll=setInterval(()=>{
+    if(popup.closed){clearInterval(poll);return;}
+    try{
+      const hash=popup.location.hash;
+      if(hash&&hash.includes('access_token')){
+        clearInterval(poll);popup.close();
+        const params=new URLSearchParams(hash.slice(1));
+        driveToken=params.get('access_token');
+        const exp=parseInt(params.get('expires_in'))||3600;
+        sessionStorage.setItem('np_drive_token',driveToken);
+        sessionStorage.setItem('np_drive_exp',Date.now()+(exp-60)*1000);
+        driveReady=true;setDriveReady();
+      }
+    }catch(e){}
+  },500);
+  v('authStatus').textContent='Waiting for Google authorization...';
+}
+function setDriveReady(){
+  v('authStatus').innerHTML='<span style="color:var(--green);">✅ Google Drive connected</span>';
+  v('authBtn').textContent='✅ Connected';v('authBtn').disabled=true;
+  v('tb-drive-btn').disabled=false;
+  const cardVisible=v('patient-card-section').style.display!=='none';
+  if(cardVisible){v('card-drive-btn').disabled=false;v('card-drive-btn-2').disabled=false;}
+}
+function checkOAuthReturn(){
+  const hash=window.location.hash;
+  if(hash&&hash.includes('access_token')){
+    const params=new URLSearchParams(hash.slice(1));
+    if(params.get('state')===sessionStorage.getItem('oauth_state')){
+      driveToken=params.get('access_token');
+      const exp=parseInt(params.get('expires_in'))||3600;
+      sessionStorage.setItem('np_drive_token',driveToken);
+      sessionStorage.setItem('np_drive_exp',Date.now()+(exp-60)*1000);
+      driveReady=true;history.replaceState(null,'',window.location.pathname);setDriveReady();
+    }
+  }
+  const saved=sessionStorage.getItem('np_drive_token');
+  const exp=sessionStorage.getItem('np_drive_exp');
+  if(saved&&exp&&Date.now()<parseInt(exp)){driveToken=saved;driveReady=true;setDriveReady();}
+  const cid=sessionStorage.getItem('np_drive_client_id');if(cid)window._driveClientId=cid;
+}
+async function getOrCreateFolder(){
+  if(driveFolderId)return driveFolderId;
+  const q=encodeURIComponent(`name='${DRIVE_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`,{headers:{Authorization:'Bearer '+driveToken}});
+  const data=await res.json();
+  if(data.files&&data.files.length>0){driveFolderId=data.files[0].id;return driveFolderId;}
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({name:DRIVE_FOLDER,mimeType:'application/vnd.google-apps.folder'})});
+  const folder=await cr.json();driveFolderId=folder.id;return driveFolderId;
+}
+
+function generateROFPdfBlob(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight();
+  const margin=50;let y=margin;
+  const sage=[47,92,67],ink=[24,40,32],inkMd=[59,78,65],inkSm=[103,122,110];
+
+  // Header
+  doc.setFillColor(...sage);doc.rect(0,0,W,72,'F');
+  doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport',margin,28);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(184,216,196);
+  doc.text('1001 Glade Rd Suite 120, Colleyville TX 76034  •  (817) 420-7696',margin,42);
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('NeuroPath Initial Examination — Report of Findings',margin,60);
+  y=88;
+
+  const fn=v('firstName').value||'Patient',ln=v('lastName').value||'';
+  const ptName=[fn,ln].filter(Boolean).join(' ');
+  const examDate=v('examDate').value||new Date().toLocaleDateString();
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);
+  doc.text('PATIENT',margin,y);doc.text('DATE',280,y);doc.text('PROVIDER',420,y);y+=12;
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...ink);
+  doc.text(ptName,margin,y);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);
+  doc.text(examDate,280,y);doc.text(v('provider').value||'Dr. Rudy Urrutia, DC',420,y);
+  y+=10;doc.setDrawColor(200,220,208);doc.setLineWidth(0.5);doc.line(margin,y,W-margin,y);y+=18;
+
+  const sections=document.querySelectorAll('#rof-output .note-block');
+  sections.forEach(s=>{
+    const title=s.querySelector('h3').textContent;
+    const body=s.querySelector('.note-text').textContent;
+    if(y>H-80){doc.addPage();y=margin;}
+    doc.setFillColor(234,244,238);doc.rect(margin,y-10,W-margin*2,16,'F');
+    doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...sage);
+    doc.text(title.toUpperCase(),margin+4,y);y+=12;
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);
+    const lines=doc.splitTextToSize(body,W-margin*2);
+    lines.forEach(line=>{
+      if(y>H-60){doc.addPage();y=margin;}
+      doc.text(line,margin,y);y+=12;
+    });
+    y+=8;
+  });
+
+  y=H-30;doc.setDrawColor(200,220,208);doc.line(margin,y-6,W-margin,y-6);
+  doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...inkSm);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport  •  Peripheral nerve wellness documentation  •  Not a medical diagnosis',W/2,y,'center');
+  return doc.output('blob');
+}
+
+function generateProgramPdfBlob(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight();
+  const margin=50;let y=margin;
+  const sage=[47,92,67],ink=[24,40,32],inkMd=[59,78,65],inkSm=[103,122,110];
+  const gold=[192,138,50],teal=[13,115,119],green=[26,107,58];
+
+  const name=txt('pt-name')||'Patient';
+  const date=v('pt-date').value;
+  const clin=txt('pt-clin')||'Dr. Urrutia';
+  const items=Object.values(selected);
+  const programFee=items.filter(i=>i.cat==='program').reduce((a,b)=>a+b.price,0);
+  const deviceTotal=items.filter(i=>i.cat==='device').reduce((a,b)=>a+b.price,0);
+  const suppTotal=items.filter(i=>i.cat==='supplement').reduce((a,b)=>a+b.price,0);
+  const otherTotal=items.filter(i=>!['program','device','supplement'].includes(i.cat)).reduce((a,b)=>a+b.price,0);
+  const sub=programFee+deviceTotal+suppTotal+otherTotal;
+  const dp=val('disc-pct');
+  const discAmt=Math.round(sub*(dp/100));
+  const total=sub-discAmt;
+  const pm=txt('pay-method');
+  const ccM=parseInt(v('cc-months')?.value)||12;
+  const ihM=parseInt(v('ih-months')?.value)||12;
+  const monthly=pm==='carecredit'?Math.round(total*1.065/ccM):pm==='inhouse'?Math.round(total/ihM):0;
+  const fmtDate=date?new Date(date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const tierName=selectedTier?['','Essentials','Advanced','Complete'][selectedTier]:'';
+
+  // Header
+  doc.setFillColor(...sage);doc.rect(0,0,W,72,'F');
+  doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport',margin,28);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(184,216,196);
+  doc.text('1001 Glade Rd Suite 120, Colleyville TX 76034  •  (817) 420-7696',margin,42);
+  if(tierName){doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...gold);doc.text(`NeuroPath ${tierName} — Peripheral Nerve Wellness Program`,margin,60);}
+  y=90;
+
+  // Patient info
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);
+  doc.text('PATIENT',margin,y);doc.text('DATE',280,y);doc.text('CLINICIAN',420,y);y+=12;
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...ink);
+  doc.text(name,margin,y);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);
+  doc.text(fmtDate||'—',280,y);doc.text(clin,420,y);y+=8;
+  doc.setDrawColor(200,220,208);doc.line(margin,y,W-margin,y);y+=16;
+
+  // Price block
+  doc.setFillColor(...sage);doc.roundedRect(margin,y,W-margin*2,56,4,4,'F');
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(184,216,196);
+  doc.text('TOTAL PROGRAM INVESTMENT',margin+12,y+16);
+  doc.setFontSize(28);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text(fmt(total),margin+12,y+46);
+  if(monthly>0){doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(184,216,196);doc.text('≈ '+fmt(monthly)+'/mo',W-margin-12,y+46,'right');}
+  y+=70;
+
+  // Items
+  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);
+  doc.text('PROGRAM INCLUDES',margin,y);y+=13;
+  items.forEach(item=>{
+    if(y>H-120){doc.addPage();y=margin;}
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);
+    const lines=doc.splitTextToSize('·  '+item.name,W/2-margin-10);
+    doc.text(lines,margin,y);
+    doc.setFont('helvetica','bold');doc.setTextColor(...sage);
+    doc.text(fmt(item.price),W/2-10,y,'right');
+    y+=lines.length*13;
+  });
+
+  y+=8;doc.setDrawColor(200,220,208);doc.line(margin,y,W-margin,y);y+=14;
+
+  // Financial summary
+  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);doc.text('FINANCIAL SUMMARY',margin,y);y+=13;
+  if(programFee){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);doc.text('Program fee:',margin,y);doc.setFont('helvetica','bold');doc.setTextColor(...ink);doc.text(fmt(programFee),W-margin,y,'right');y+=13;}
+  if(deviceTotal){doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);doc.text('Home devices:',margin,y);doc.setFont('helvetica','bold');doc.setTextColor(...ink);doc.text(fmt(deviceTotal),W-margin,y,'right');y+=13;}
+  if(suppTotal){doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);doc.text('Supplement protocol:',margin,y);doc.setFont('helvetica','bold');doc.setTextColor(...ink);doc.text(fmt(suppTotal),W-margin,y,'right');y+=13;}
+  if(dp>0){doc.setFont('helvetica','normal');doc.setTextColor(192,57,43);doc.text(`Discount (${dp}%):`,margin,y);doc.setFont('helvetica','bold');doc.text('-'+fmt(discAmt),W-margin,y,'right');y+=13;}
+  doc.setFillColor(...sage);doc.rect(margin,y-2,W-margin*2,18,'F');
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('Total Investment:',margin+8,y+10);doc.text(fmt(total),W-margin-8,y+10,'right');y+=26;
+
+  // Payment options
+  const pif=Math.round(total*0.90);
+  const cc6=Math.round(total*1.065/6);
+  const cc12=Math.round(total*1.065/12);
+  const cc18=Math.round(total*1.065/18);
+  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);doc.text('PAYMENT OPTIONS',margin,y);y+=12;
+  doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(...inkMd);
+  doc.text(`Pay in Full (10% off): ${fmt(pif)}`,margin,y);y+=12;
+  doc.text(`6-Month CareCredit: ${fmt(cc6)}/mo  |  12-Month: ${fmt(cc12)}/mo  |  18-Month: ${fmt(cc18)}/mo`,margin,y);y+=18;
+
+  // Signature
+  doc.setDrawColor(200,220,208);doc.line(margin,y,W-margin,y);y+=16;
+  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...inkSm);doc.text('PATIENT ACKNOWLEDGMENT',margin,y);y+=12;
+  doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...inkSm);
+  const ack=doc.splitTextToSize('I understand this is a peripheral nerve wellness program and not a diagnosis or treatment of any medical condition. I agree to the program terms and payment arrangement. Supplements, equipment, and professional protocols are non-refundable.',W-margin*2);
+  doc.text(ack,margin,y);y+=ack.length*11+18;
+  doc.setDrawColor(150,150,150);doc.line(margin,y,margin+200,y);doc.line(W/2+20,y,W/2+180,y);y+=5;
+  doc.setFontSize(7);doc.setTextColor(...inkSm);doc.text('Patient Signature & Date',margin,y);doc.text('Clinician Initials',W/2+20,y);
+
+  // Footer
+  const fy=H-26;doc.setDrawColor(200,220,208);doc.line(margin,fy-6,W-margin,fy-6);
+  doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...inkSm);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport  •  Cash-pay wellness program  •  Not submitted to insurance  •  NeuroPath is a peripheral nerve wellness protocol only.',W/2,fy,'center');
+
+  return doc.output('blob');
+}
+
+async function uploadToDrive(blob, fileName){
+  setDriveStatus('loading','Finding Drive folder...');
+  const folderId=await getOrCreateFolder();
+  setDriveStatus('loading','Uploading: '+fileName+'...');
+  const meta={name:fileName,mimeType:'application/pdf',parents:[folderId]};
+  const boundary='np_bound_'+Date.now();
+  const body=new Blob(['--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n','--'+boundary+'\r\nContent-Type: application/pdf\r\n\r\n',blob,'\r\n--'+boundary+'--'],{type:'multipart/related; boundary='+boundary});
+  const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'multipart/related; boundary='+boundary},body:body});
+  if(!res.ok){
+    const err=await res.json();
+    if(res.status===401){driveReady=false;driveToken=null;sessionStorage.removeItem('np_drive_token');throw new Error('Session expired. Please reconnect Drive.');}
+    throw new Error(err.error?.message||'Upload failed');
+  }
+  return await res.json();
+}
+
+async function saveROFToDrive(){
+  if(!driveReady){initDriveAuth();return;}
+  setDriveStatus('loading','Generating ROF PDF...');
+  try{
+    const blob=generateROFPdfBlob();
+    const name=([v('firstName').value,v('lastName').value].filter(Boolean).join('_')||'Patient').replace(/[^a-zA-Z0-9_\-]/g,'');
+    const date=new Date().toISOString().slice(0,10);
+    const file=await uploadToDrive(blob,`NeuroPath_ROF_${name}_${date}.pdf`);
+    setDriveStatus('success',`✅ ROF saved: <a href="${file.webViewLink}" target="_blank" style="color:var(--green);font-weight:600;">${file.name}</a>`);
+  }catch(e){setDriveStatus('error','Error: '+e.message);}
+}
+
+async function saveProgramToDrive(){
+  if(!driveReady){initDriveAuth();return;}
+  if(v('patient-card-section').style.display==='none'){alert('Generate the program card first.');return;}
+  setDriveStatus('loading','Generating program PDF...');
+  try{
+    const blob=generateProgramPdfBlob();
+    const name=(txt('pt-name')||'Patient').replace(/[^a-zA-Z0-9 \-_]/g,'');
+    const date=new Date().toISOString().slice(0,10);
+    const file=await uploadToDrive(blob,`NeuroPath_Program_${name}_${date}.pdf`);
+    setDriveStatus('success',`✅ Program saved: <a href="${file.webViewLink}" target="_blank" style="color:var(--green);font-weight:600;">${file.name}</a>`);
+  }catch(e){setDriveStatus('error','Error: '+e.message);}
+}
+
+async function saveToDrive(){
+  if(currentMode==='exam')await saveROFToDrive();
+  else await saveProgramToDrive();
+}
+
+function setDriveStatus(type,msg){
+  const el=v('driveStatus');if(!el)return;
+  el.className='drive-status show '+type;
+  el.innerHTML=(type==='loading'?'<div class="spinner"></div>':'')+msg;
+}
+
+// ═══════════════════════════════════════════
 // INIT
-// ════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  // Set today's date
-  document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
-
-  // Build ReBuilder panel
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  v('examDate').value=new Date().toISOString().split('T')[0];
   buildRBPanel();
-
-  // Build sensory panel
   renderSensoryPanel();
-
-  // Navigation init
   goTo(0);
+  checkOAuthReturn();
 });
 </script>
 </body>

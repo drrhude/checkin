@@ -13,9 +13,11 @@
   --ink:#182820;--ink-md:#3b4e41;--ink-sm:#677a6e;
   --cream:#f6faf7;--white:#ffffff;
   --border:#c8dcd0;--border-lt:#e2ede7;
-  --gold:#c08a32;--gold-lt:#fdf3e3;
+  --gold:#c08a32;--gold-lt:#fdf3e3;--gold-dk:#8a6020;
   --red:#c0392b;--red-lt:#fdf0ee;
   --blue:#2563a8;--blue-lt:#eaf1fc;
+  --purple:#6a4a8f;--purple-lt:#f0eaf7;
+  --teal:#2a8a8e;--teal-lt:#e5f4f5;
   --radius:13px;--radius-sm:8px;
   --shadow:0 2px 10px rgba(0,0,0,.06);
   --shadow-md:0 6px 24px rgba(0,0,0,.1);
@@ -39,6 +41,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);l
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .settings-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.8rem;cursor:pointer;color:var(--ink-sm);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .settings-btn:hover{border-color:var(--sage);color:var(--sage-dk);}
+
+/* SERVICE BADGES IN TOPBAR */
+.svc-pills{display:flex;gap:5px;flex-wrap:wrap;}
+.svc-pill{font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:100px;letter-spacing:.04em;}
+.svc-pill.chiro{background:var(--sage-xl);color:var(--sage-dk);border:1px solid var(--sage-lt);}
+.svc-pill.sw{background:var(--gold-lt);color:var(--gold-dk);border:1px solid #e8c97a;}
+.svc-pill.wl{background:var(--teal-lt);color:var(--teal);border:1px solid #a8d4d6;}
+.svc-pill.np{background:var(--purple-lt);color:var(--purple);border:1px solid #d0bae0;}
 
 /* PROGRESS */
 .progress-strip{background:var(--white);border-bottom:1px solid var(--border-lt);padding:10px 20px 12px;}
@@ -66,16 +76,19 @@ h2{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--ink);margin
 .card.gold{background:var(--gold-lt);border-color:#e8c97a;}
 .card.red{background:var(--red-lt);border-color:#e8b4ad;}
 .card.blue{background:var(--blue-lt);border-color:#b5cef0;}
+.card.teal{background:var(--teal-lt);border-color:#a8d4d6;}
 .clabel{font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-dk);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
 .clabel::after{content:'';flex:1;height:1px;background:var(--border-lt);}
 .clabel.red{color:var(--red);}
 .clabel.gold{color:var(--gold);}
 .clabel.blue{color:var(--blue);}
+.clabel.teal{color:var(--teal);}
+.clabel.purple{color:var(--purple);}
 
 /* FORM */
 .fg{margin-bottom:14px;}
 label.fl{font-size:.86rem;font-weight:600;color:var(--ink-md);display:block;margin-bottom:7px;}
-input[type=text],input[type=date],input[type=password],textarea,select{
+input[type=text],input[type=number],input[type=date],input[type=password],textarea,select{
   width:100%;background:var(--cream);border:1.5px solid var(--border);
   border-radius:var(--radius-sm);padding:11px 14px;
   font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);
@@ -102,6 +115,35 @@ textarea{resize:vertical;min-height:70px;}
 .chips.lg label{font-size:.98rem;padding:13px 22px;}
 .chips.red input:checked+label{background:var(--red);border-color:var(--red);color:white;}
 .chips.gold input:checked+label{background:var(--gold);border-color:var(--gold);color:white;}
+.chips.teal input:checked+label{background:var(--teal);border-color:var(--teal);color:white;}
+
+/* ═══ SERVICE SELECTION CARDS (Welcome Page) ═══ */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:580px){.svc-grid{grid-template-columns:1fr;}}
+.svc-card{
+  position:relative;background:var(--white);border:2.5px solid var(--border);
+  border-radius:var(--radius);padding:22px 18px;cursor:pointer;transition:all .2s;
+  text-align:left;font-family:'DM Sans',sans-serif;
+}
+.svc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.svc-card.sel{border-width:2.5px;box-shadow:var(--shadow-md);}
+.svc-card .svc-icon{font-size:2rem;display:block;margin-bottom:10px;}
+.svc-card .svc-name{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);margin-bottom:4px;line-height:1.2;}
+.svc-card .svc-desc{font-size:.78rem;color:var(--ink-sm);line-height:1.5;}
+.svc-card .svc-check{
+  position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:50%;
+  background:var(--border);display:flex;align-items:center;justify-content:center;
+  color:var(--white);font-size:.9rem;font-weight:700;transition:all .2s;opacity:0;
+}
+.svc-card.sel .svc-check{opacity:1;}
+.svc-card.chiro.sel{border-color:var(--sage-dk);background:var(--sage-xl);}
+.svc-card.chiro.sel .svc-check{background:var(--sage-dk);}
+.svc-card.sw.sel{border-color:var(--gold);background:var(--gold-lt);}
+.svc-card.sw.sel .svc-check{background:var(--gold);}
+.svc-card.wl.sel{border-color:var(--teal);background:var(--teal-lt);}
+.svc-card.wl.sel .svc-check{background:var(--teal);}
+.svc-card.np.sel{border-color:var(--purple);background:var(--purple-lt);}
+.svc-card.np.sel .svc-check{background:var(--purple);}
 
 /* PAIN SLIDER */
 .pain-row{display:flex;align-items:center;gap:12px;margin:10px 0;}
@@ -130,6 +172,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 .btn-blue:hover{background:#1a4f8a;transform:translateY(-1px);}
 .btn-full{width:100%;padding:16px;font-size:1rem;border-radius:12px;}
 .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.btn-lg{padding:16px 30px;font-size:1.05rem;}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 
 /* ONE-TAP */
 .onetap{background:linear-gradient(135deg,var(--sage-dk),#1e4530);color:white;border-radius:15px;padding:22px 20px;text-align:center;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;margin-bottom:12px;box-shadow:0 6px 22px rgba(47,92,67,.3);transition:all .2s;position:relative;overflow:hidden;}
@@ -181,6 +225,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 .prow{display:flex;gap:8px;margin-bottom:4px;font-size:.86rem;}
 .pkey{font-weight:700;color:var(--ink-sm);min-width:110px;font-size:.8rem;flex-shrink:0;}
 
+/* WELCOME LARGE SCREEN HEADER */
+.welcome-hero{text-align:center;padding:12px 6px 22px;}
+.welcome-hero h1{font-size:clamp(1.7rem,4.5vw,2.3rem);margin-bottom:10px;}
+.welcome-hero p{color:var(--ink-sm);font-size:.95rem;max-width:480px;margin:0 auto;line-height:1.6;}
+.svc-count-pill{display:inline-flex;align-items:center;gap:6px;background:var(--sage-xl);border:1px solid var(--sage-lt);color:var(--sage-dk);padding:6px 14px;border-radius:100px;font-size:.82rem;font-weight:600;margin-top:12px;opacity:0;transition:opacity .3s;}
+.svc-count-pill.show{opacity:1;}
+
 /* RESPONSIVE */
 @media(max-width:580px){
   .field-row-2{grid-template-columns:1fr;}
@@ -188,7 +239,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   .topbar{padding:11px 14px;}
 }
 
-/* PRINT (invisible on screen, used for PDF) */
 @media screen{#print-tgt{display:none;}}
 </style>
 </head>
@@ -225,10 +275,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 <div class="app">
   <div class="topbar">
     <div>
-      <div class="brand" id="brand-name">CVC Spine & Sport <em>Check-In</em></div>
+      <div class="brand" id="brand-name">CVC Spine &amp; Sport <em>Check-In</em></div>
       <div class="brand-sub">Patient Intake</div>
     </div>
     <div class="topbar-right">
+      <div id="svc-pills-container" class="svc-pills"></div>
       <div id="drive-indicator" style="display:none;font-size:.74rem;font-weight:600;color:var(--blue);background:var(--blue-lt);padding:4px 10px;border-radius:100px;border:1px solid #b5cef0;">📁 Drive</div>
       <button class="settings-btn" onclick="openSettings()">⚙</button>
     </div>
@@ -236,18 +287,68 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
   <div class="progress-strip">
     <div class="psteps">
-      <div class="ps active" id="ps0"></div><div class="ps" id="ps1"></div><div class="ps" id="ps2"></div>
+      <div class="ps active" id="ps0"></div>
+      <div class="ps" id="ps1"></div>
+      <div class="ps" id="ps2"></div>
+      <div class="ps" id="ps3"></div>
     </div>
-    <div class="phase-lbl">Patient Check-In</div>
+    <div class="phase-lbl" id="phase-lbl">Select Service</div>
   </div>
 
-  <!-- STEP 0: LOOKUP -->
+  <!-- ═══ STEP 0: SERVICE SELECTION ═══ -->
   <div class="step active" id="step-0">
     <div class="inner">
-      <h1>Welcome!</h1>
+      <div class="welcome-hero">
+        <h1>Welcome!</h1>
+        <p>What are you here for today? Select all that apply — you can pick more than one.</p>
+      </div>
+
+      <div class="svc-grid" style="margin-bottom:14px;">
+        <button type="button" class="svc-card chiro" id="svc-chiro" onclick="toggleSvc('chiro')">
+          <div class="svc-check">✓</div>
+          <span class="svc-icon">🦴</span>
+          <div class="svc-name">Chiropractic</div>
+          <div class="svc-desc">Adjustment, spine &amp; joint care</div>
+        </button>
+        <button type="button" class="svc-card sw" id="svc-sw" onclick="toggleSvc('sw')">
+          <div class="svc-check">✓</div>
+          <span class="svc-icon">⚡</span>
+          <div class="svc-name">Shockwave</div>
+          <div class="svc-desc">ESWT soft-tissue therapy</div>
+        </button>
+        <button type="button" class="svc-card wl" id="svc-wl" onclick="toggleSvc('wl')">
+          <div class="svc-check">✓</div>
+          <span class="svc-icon">⚖️</span>
+          <div class="svc-name">Weight Loss</div>
+          <div class="svc-desc">Nutrition &amp; body composition</div>
+        </button>
+        <button type="button" class="svc-card np" id="svc-np" onclick="toggleSvc('np')">
+          <div class="svc-check">✓</div>
+          <span class="svc-icon">🧠</span>
+          <div class="svc-name">NeuroPath</div>
+          <div class="svc-desc">Peripheral nerve wellness</div>
+        </button>
+      </div>
+
+      <div style="text-align:center;">
+        <div class="svc-count-pill" id="svc-count-pill">
+          <span id="svc-count-text">0 services selected</span>
+        </div>
+      </div>
+
+      <div class="btn-row" style="justify-content:center;margin-top:22px;">
+        <button class="btn btn-green btn-lg" id="svc-continue-btn" onclick="goStep(1)" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 1: PATIENT LOOKUP ═══ -->
+  <div class="step" id="step-1">
+    <div class="inner">
+      <h1>Find Your Record</h1>
       <p class="sec-desc">Type your name below. If you've been here before, we'll load your last visit automatically.</p>
       <div class="card">
-        <div class="clabel">Find Your Record</div>
+        <div class="clabel">Patient Lookup</div>
         <div class="fg">
           <label class="fl" style="font-size:1rem;">Your Full Name</label>
           <input type="text" id="lookup-name" placeholder="First Last" style="font-size:1.05rem;padding:13px 15px;" oninput="searchPt(this.value)" autocomplete="name">
@@ -258,25 +359,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div class="clabel blue">Last Visit</div>
         <div id="last-visit-summary"></div>
         <div style="margin-top:14px;">
-          <button class="onetap" onclick="oneTap()">
+          <button class="onetap" id="onetap-btn" onclick="oneTap()">
             <span class="ot-icon">⚡</span>
             <span class="ot-title">No Changes Since Last Visit</span>
-            <span class="ot-sub">Everything the same? Tap here — just sign & submit</span>
+            <span class="ot-sub">Everything the same? Tap here — just sign &amp; submit</span>
           </button>
           <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="continueWithUpdates()">Update My Answers Today →</button>
         </div>
       </div>
-      <div class="btn-row" style="justify-content:flex-start;margin-top:8px;">
+      <div class="btn-row" style="justify-content:space-between;">
+        <button class="btn btn-ghost" onclick="goStep(0)">← Back</button>
         <button class="btn btn-ghost" onclick="startFresh()">New Patient / Start Fresh →</button>
       </div>
     </div>
   </div>
 
-  <!-- STEP 1: SUBJECTIVE -->
-  <div class="step" id="step-1">
+  <!-- ═══ STEP 2: SUBJECTIVE (dynamic based on services selected) ═══ -->
+  <div class="step" id="step-2">
     <div class="inner">
-      <h1>How are you feeling?</h1>
-      <p class="sec-desc">Tap your answers — most patients finish in under 60 seconds.</p>
+      <h1 id="step2-title">How are you feeling?</h1>
+      <p class="sec-desc" id="step2-desc">Tap your answers — most patients finish in under 60 seconds.</p>
 
       <div class="card">
         <div class="clabel">Visit Info</div>
@@ -284,106 +386,183 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div class="fg"><label class="fl">Today's Date</label><input type="date" id="pt-date"></div>
       </div>
 
-      <div class="card">
-        <div class="clabel">Overall — Compared to Last Visit</div>
-        <div class="chips lg">
-          <input type="radio" name="overall" id="ov-b" value="Better"><label for="ov-b">😊 Better</label>
-          <input type="radio" name="overall" id="ov-s" value="Same"><label for="ov-s">😐 Same</label>
-          <input type="radio" name="overall" id="ov-w" value="Worse"><label for="ov-w">😟 Worse</label>
-          <input type="radio" name="overall" id="ov-f" value="First Visit"><label for="ov-f">🆕 First Visit</label>
-        </div>
-      </div>
+      <!-- ═══ CLINICAL SUBJECTIVE (Chiro, Shockwave, NeuroPath) ═══ -->
+      <div id="clinical-subjective">
 
-      <div class="card">
-        <div class="clabel">Pain Level Right Now <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(0 = none · 10 = worst)</span></div>
-        <div class="pain-row">
-          <span>0<br>None</span>
-          <input type="range" min="0" max="10" value="0" id="pain-slider" oninput="updatePain(this.value)">
-          <span>10<br>Worst</span>
-          <div class="pain-val" id="pain-val">0</div>
-        </div>
-        <div class="pq">
-          <button onclick="setPain(0)">0</button><button onclick="setPain(2)">2</button>
-          <button onclick="setPain(4)">4</button><button onclick="setPain(6)">6</button>
-          <button onclick="setPain(8)">8</button><button onclick="setPain(10)">10</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="clabel">Primary Region(s) — Select All That Apply</div>
-        <div class="chips">
-          <input type="checkbox" id="r-neck" value="Neck"><label for="r-neck">Neck</label>
-          <input type="checkbox" id="r-mid" value="Mid-Back"><label for="r-mid">Mid-Back</label>
-          <input type="checkbox" id="r-low" value="Low Back"><label for="r-low">Low Back</label>
-          <input type="checkbox" id="r-si" value="SI/Pelvis"><label for="r-si">SI/Pelvis</label>
-          <input type="checkbox" id="r-hip" value="Hip"><label for="r-hip">Hip</label>
-          <input type="checkbox" id="r-shldr" value="Shoulder"><label for="r-shldr">Shoulder</label>
-          <input type="checkbox" id="r-elbow" value="Elbow"><label for="r-elbow">Elbow</label>
-          <input type="checkbox" id="r-wrist" value="Wrist/Hand"><label for="r-wrist">Wrist/Hand</label>
-          <input type="checkbox" id="r-knee" value="Knee"><label for="r-knee">Knee</label>
-          <input type="checkbox" id="r-ankle" value="Ankle/Foot"><label for="r-ankle">Ankle/Foot</label>
-          <input type="checkbox" id="r-head" value="Headache/TMJ"><label for="r-head">Headache/TMJ</label>
-          <input type="checkbox" id="r-none" value="None" onchange="regNone(this)"><label for="r-none">No Pain Today</label>
-          <input type="checkbox" id="r-other" value="Other" onchange="regOther(this)"><label for="r-other">Other</label>
-        </div>
-        <div id="other-reg-area" style="display:none;margin-top:11px;">
-          <input type="text" id="other-reg-txt" placeholder="Describe region" maxlength="40">
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="clabel">Current Symptoms — Select All That Apply</div>
-        <div class="chips">
-          <input type="checkbox" id="sy-tight" value="tightness/stiffness"><label for="sy-tight">Tightness/Stiffness</label>
-          <input type="checkbox" id="sy-ache" value="dull ache"><label for="sy-ache">Dull Ache</label>
-          <input type="checkbox" id="sy-sharp" value="sharp pain"><label for="sy-sharp">Sharp Pain</label>
-          <input type="checkbox" id="sy-numb" value="numbness/tingling"><label for="sy-numb">Numb/Tingling</label>
-          <input type="checkbox" id="sy-burn" value="burning"><label for="sy-burn">Burning</label>
-          <input type="checkbox" id="sy-weak" value="weakness"><label for="sy-weak">Weakness</label>
-          <input type="checkbox" id="sy-bal" value="balance issues"><label for="sy-bal">Balance Issues</label>
-          <input type="checkbox" id="sy-sleep" value="sleep disturbance"><label for="sy-sleep">Sleep Disturbance</label>
-          <input type="checkbox" id="sy-none" value="none" onchange="sympNone(this)"><label for="sy-none">None</label>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="clabel">Functional Status Today</div>
-        <div class="fg">
-          <label class="fl">Overall Functional Impact:</label>
-          <div class="chips">
-            <input type="radio" name="funci" id="fi-n" value="None"><label for="fi-n">None</label>
-            <input type="radio" name="funci" id="fi-m" value="Mild"><label for="fi-m">Mild</label>
-            <input type="radio" name="funci" id="fi-mo" value="Moderate"><label for="fi-mo">Moderate</label>
-            <input type="radio" name="funci" id="fi-s" value="Severe"><label for="fi-s">Severe</label>
+        <div class="card">
+          <div class="clabel">Overall — Compared to Last Visit</div>
+          <div class="chips lg">
+            <input type="radio" name="overall" id="ov-b" value="Better"><label for="ov-b">😊 Better</label>
+            <input type="radio" name="overall" id="ov-s" value="Same"><label for="ov-s">😐 Same</label>
+            <input type="radio" name="overall" id="ov-w" value="Worse"><label for="ov-w">😟 Worse</label>
+            <input type="radio" name="overall" id="ov-f" value="First Visit"><label for="ov-f">🆕 First Visit</label>
           </div>
         </div>
-        <div class="fg">
-          <label class="fl">Movement / ROM Today:</label>
-          <div class="chips">
-            <input type="radio" name="rom" id="rm-n" value="Normal"><label for="rm-n">Normal</label>
-            <input type="radio" name="rom" id="rm-sl" value="Slightly Limited"><label for="rm-sl">Slightly Limited</label>
-            <input type="radio" name="rom" id="rm-l" value="Limited"><label for="rm-l">Limited</label>
+
+        <div class="card">
+          <div class="clabel">Pain Level Right Now <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(0 = none · 10 = worst)</span></div>
+          <div class="pain-row">
+            <span>0<br>None</span>
+            <input type="range" min="0" max="10" value="0" id="pain-slider" oninput="updatePain(this.value)">
+            <span>10<br>Worst</span>
+            <div class="pain-val" id="pain-val">0</div>
+          </div>
+          <div class="pq">
+            <button onclick="setPain(0)">0</button><button onclick="setPain(2)">2</button>
+            <button onclick="setPain(4)">4</button><button onclick="setPain(6)">6</button>
+            <button onclick="setPain(8)">8</button><button onclick="setPain(10)">10</button>
           </div>
         </div>
-        <div class="fg">
-          <label class="fl">Work / Daily Activities Today:</label>
+
+        <div class="card">
+          <div class="clabel">Primary Region(s) — Select All That Apply</div>
           <div class="chips">
-            <input type="radio" name="adl" id="ad-n" value="Normal"><label for="ad-n">Normal</label>
-            <input type="radio" name="adl" id="ad-s" value="Some Limitation"><label for="ad-s">Some Limitation</label>
-            <input type="radio" name="adl" id="ad-h" value="Difficult to Perform"><label for="ad-h">Difficult</label>
+            <input type="checkbox" id="r-neck" value="Neck"><label for="r-neck">Neck</label>
+            <input type="checkbox" id="r-mid" value="Mid-Back"><label for="r-mid">Mid-Back</label>
+            <input type="checkbox" id="r-low" value="Low Back"><label for="r-low">Low Back</label>
+            <input type="checkbox" id="r-si" value="SI/Pelvis"><label for="r-si">SI/Pelvis</label>
+            <input type="checkbox" id="r-hip" value="Hip"><label for="r-hip">Hip</label>
+            <input type="checkbox" id="r-shldr" value="Shoulder"><label for="r-shldr">Shoulder</label>
+            <input type="checkbox" id="r-elbow" value="Elbow"><label for="r-elbow">Elbow</label>
+            <input type="checkbox" id="r-wrist" value="Wrist/Hand"><label for="r-wrist">Wrist/Hand</label>
+            <input type="checkbox" id="r-knee" value="Knee"><label for="r-knee">Knee</label>
+            <input type="checkbox" id="r-ankle" value="Ankle/Foot"><label for="r-ankle">Ankle/Foot</label>
+            <input type="checkbox" id="r-feet" value="Feet/Hands (Neuropathy)"><label for="r-feet">Feet/Hands (Neuropathy)</label>
+            <input type="checkbox" id="r-head" value="Headache/TMJ"><label for="r-head">Headache/TMJ</label>
+            <input type="checkbox" id="r-none" value="None" onchange="regNone(this)"><label for="r-none">No Pain Today</label>
+            <input type="checkbox" id="r-other" value="Other" onchange="regOther(this)"><label for="r-other">Other</label>
+          </div>
+          <div id="other-reg-area" style="display:none;margin-top:11px;">
+            <input type="text" id="other-reg-txt" placeholder="Describe region" maxlength="40">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="clabel">Current Symptoms — Select All That Apply</div>
+          <div class="chips">
+            <input type="checkbox" id="sy-tight" value="tightness/stiffness"><label for="sy-tight">Tightness/Stiffness</label>
+            <input type="checkbox" id="sy-ache" value="dull ache"><label for="sy-ache">Dull Ache</label>
+            <input type="checkbox" id="sy-sharp" value="sharp pain"><label for="sy-sharp">Sharp Pain</label>
+            <input type="checkbox" id="sy-numb" value="numbness/tingling"><label for="sy-numb">Numb/Tingling</label>
+            <input type="checkbox" id="sy-burn" value="burning"><label for="sy-burn">Burning</label>
+            <input type="checkbox" id="sy-weak" value="weakness"><label for="sy-weak">Weakness</label>
+            <input type="checkbox" id="sy-bal" value="balance issues"><label for="sy-bal">Balance Issues</label>
+            <input type="checkbox" id="sy-sleep" value="sleep disturbance"><label for="sy-sleep">Sleep Disturbance</label>
+            <input type="checkbox" id="sy-none" value="none" onchange="sympNone(this)"><label for="sy-none">None</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="clabel">Functional Status Today</div>
+          <div class="fg">
+            <label class="fl">Overall Functional Impact:</label>
+            <div class="chips">
+              <input type="radio" name="funci" id="fi-n" value="None"><label for="fi-n">None</label>
+              <input type="radio" name="funci" id="fi-m" value="Mild"><label for="fi-m">Mild</label>
+              <input type="radio" name="funci" id="fi-mo" value="Moderate"><label for="fi-mo">Moderate</label>
+              <input type="radio" name="funci" id="fi-s" value="Severe"><label for="fi-s">Severe</label>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Movement / ROM Today:</label>
+            <div class="chips">
+              <input type="radio" name="rom" id="rm-n" value="Normal"><label for="rm-n">Normal</label>
+              <input type="radio" name="rom" id="rm-sl" value="Slightly Limited"><label for="rm-sl">Slightly Limited</label>
+              <input type="radio" name="rom" id="rm-l" value="Limited"><label for="rm-l">Limited</label>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Work / Daily Activities Today:</label>
+            <div class="chips">
+              <input type="radio" name="adl" id="ad-n" value="Normal"><label for="ad-n">Normal</label>
+              <input type="radio" name="adl" id="ad-s" value="Some Limitation"><label for="ad-s">Some Limitation</label>
+              <input type="radio" name="adl" id="ad-h" value="Difficult to Perform"><label for="ad-h">Difficult</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ WEIGHT LOSS SUBJECTIVE (only when WL selected AND no clinical services) ═══ -->
+      <div id="wl-subjective" style="display:none;">
+        <div class="card teal">
+          <div class="clabel teal">Weight Today</div>
+          <div class="field-row-2">
+            <div class="fg"><label class="fl">Current Weight (lbs)</label><input type="number" id="wl-weight" placeholder="e.g. 185" min="50" max="600" step="0.1"></div>
+            <div class="fg"><label class="fl">Goal Weight (lbs) <span style="font-weight:400;color:var(--ink-sm)">(optional)</span></label><input type="number" id="wl-goal-weight" placeholder="e.g. 165" min="50" max="600" step="0.1"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="clabel">Progress Since Last Visit</div>
+          <div class="chips lg">
+            <input type="radio" name="wl-progress" id="wlp-g" value="Great"><label for="wlp-g">🎉 Great</label>
+            <input type="radio" name="wl-progress" id="wlp-o" value="On Track"><label for="wlp-o">👍 On Track</label>
+            <input type="radio" name="wl-progress" id="wlp-s" value="Struggling"><label for="wlp-s">😐 Struggling</label>
+            <input type="radio" name="wl-progress" id="wlp-f" value="First Visit"><label for="wlp-f">🆕 First Visit</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="clabel">Plan Compliance This Week</div>
+          <div class="fg">
+            <label class="fl">Nutrition Plan:</label>
+            <div class="chips">
+              <input type="radio" name="wl-nutr" id="wln-100" value="100%"><label for="wln-100">100%</label>
+              <input type="radio" name="wl-nutr" id="wln-75" value="75%+"><label for="wln-75">75%+</label>
+              <input type="radio" name="wl-nutr" id="wln-50" value="50%"><label for="wln-50">~50%</label>
+              <input type="radio" name="wl-nutr" id="wln-lt" value="<50%"><label for="wln-lt">&lt;50%</label>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Exercise / Movement:</label>
+            <div class="chips">
+              <input type="radio" name="wl-exer" id="wle-daily" value="Daily"><label for="wle-daily">Daily</label>
+              <input type="radio" name="wl-exer" id="wle-3-5" value="3-5x/week"><label for="wle-3-5">3-5x/week</label>
+              <input type="radio" name="wl-exer" id="wle-1-2" value="1-2x/week"><label for="wle-1-2">1-2x/week</label>
+              <input type="radio" name="wl-exer" id="wle-none" value="None this week"><label for="wle-none">None</label>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Water Intake:</label>
+            <div class="chips">
+              <input type="radio" name="wl-water" id="wlw-g" value="Meeting goal"><label for="wlw-g">Meeting goal</label>
+              <input type="radio" name="wl-water" id="wlw-c" value="Close"><label for="wlw-c">Close</label>
+              <input type="radio" name="wl-water" id="wlw-l" value="Low"><label for="wlw-l">Low</label>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Sleep Quality:</label>
+            <div class="chips">
+              <input type="radio" name="wl-sleep" id="wls-g" value="Good"><label for="wls-g">Good</label>
+              <input type="radio" name="wl-sleep" id="wls-f" value="Fair"><label for="wls-f">Fair</label>
+              <input type="radio" name="wl-sleep" id="wls-p" value="Poor"><label for="wls-p">Poor</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="clabel">Biggest Struggle This Week <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(select all)</span></div>
+          <div class="chips">
+            <input type="checkbox" id="wls-crave" value="Cravings"><label for="wls-crave">Cravings</label>
+            <input type="checkbox" id="wls-time" value="Time / Prep"><label for="wls-time">Time / Prep</label>
+            <input type="checkbox" id="wls-social" value="Social eating"><label for="wls-social">Social eating</label>
+            <input type="checkbox" id="wls-stress" value="Stress eating"><label for="wls-stress">Stress eating</label>
+            <input type="checkbox" id="wls-energy" value="Low energy"><label for="wls-energy">Low energy</label>
+            <input type="checkbox" id="wls-plat" value="Plateau"><label for="wls-plat">Plateau</label>
+            <input type="checkbox" id="wls-none2" value="None this week"><label for="wls-none2">None this week</label>
           </div>
         </div>
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-ghost" onclick="goStep(0)">← Back</button>
-        <button class="btn btn-green btn-full" style="flex:1;" onclick="goStep(2)">Next →</button>
+        <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-green btn-full" style="flex:1;" onclick="goStep(3)">Next →</button>
       </div>
     </div>
   </div>
 
-  <!-- STEP 2: FLAGS, GOALS, CONSENT, SIGNATURE -->
-  <div class="step" id="step-2">
+  <!-- ═══ STEP 3: FLAGS, CONSENT, SIGNATURE ═══ -->
+  <div class="step" id="step-3">
     <div class="inner">
       <h1>Almost done!</h1>
       <p class="sec-desc">A few quick safety questions, then sign below.</p>
@@ -400,7 +579,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <input type="text" id="injury-txt" placeholder="Briefly describe what happened" maxlength="120">
           </div>
         </div>
-        <div class="fg">
+        <div class="fg" id="redflag-row">
           <label class="fl" style="color:var(--red);">⚠ New or worsening numbness, weakness, or bowel/bladder changes?</label>
           <div class="chips red">
             <input type="radio" name="redflags" id="rf-n" value="No" onclick="toggleRF(false)"><label for="rf-n">No</label>
@@ -433,7 +612,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="goals-card">
         <div class="clabel">Goal for Today's Visit <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(optional)</span></div>
         <div class="chips">
           <input type="checkbox" id="g-rel" value="Pain Relief"><label for="g-rel">Pain Relief</label>
@@ -446,17 +625,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
       </div>
 
-      <!-- BONUS: Program interest - use this as warm lead generator -->
+      <!-- Cross-sell / warm-lead capture -->
       <div class="card gold">
-        <div class="clabel gold">Tell Us What You'd Like to Learn About <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(optional — no pressure!)</span></div>
-        <p style="font-size:.82rem;color:var(--ink-sm);margin-bottom:10px;">Curious about any of our specialty programs? Check anything you'd like info on — we'll have someone reach out (or you can ask today).</p>
-        <div class="chips gold">
-          <input type="checkbox" id="int-sw" value="Shockwave Therapy"><label for="int-sw">Shockwave Therapy</label>
-          <input type="checkbox" id="int-np" value="NeuroPath (Neuropathy)"><label for="int-np">NeuroPath (Neuropathy)</label>
-          <input type="checkbox" id="int-wl" value="Weight Loss"><label for="int-wl">Weight Loss</label>
-          <input type="checkbox" id="int-rr" value="Remote Rehab"><label for="int-rr">Remote Rehab</label>
-          <input type="checkbox" id="int-mt" value="Massage Therapy"><label for="int-mt">Massage Therapy</label>
-          <input type="checkbox" id="int-mem" value="Membership Plans"><label for="int-mem">Membership Plans</label>
+        <div class="clabel gold">Interested in Learning About Another Program? <span style="font-weight:400;font-size:.85em;letter-spacing:0;text-transform:none;">(optional)</span></div>
+        <p style="font-size:.82rem;color:var(--ink-sm);margin-bottom:10px;">Check anything you'd like info on — we'll have someone reach out (or you can ask today).</p>
+        <div class="chips gold" id="interests-chips">
+          <!-- populated dynamically to exclude services already selected -->
         </div>
       </div>
 
@@ -466,10 +640,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
 
       <div class="card">
-        <div class="clabel">Patient Attestation & Consent</div>
+        <div class="clabel">Patient Attestation &amp; Consent</div>
         <div class="consent-box">
           <strong>Notice of Privacy Practices:</strong> By signing below you acknowledge receipt of this practice's Notice of Privacy Practices and consent to the use and disclosure of your protected health information as described therein.<br><br>
-          <strong>Informed Consent for Chiropractic Care:</strong> I voluntarily consent to chiropractic evaluation and treatment. I understand the nature, benefits, and risks of chiropractic care including spinal manipulation, and that no guarantee of results has been made.<br><br>
+          <strong>Informed Consent:</strong> I voluntarily consent to the services listed above (including chiropractic evaluation and treatment where applicable). I understand the nature, benefits, and risks of the care I am receiving, and that no guarantee of results has been made.<br><br>
           <strong>Accuracy Attestation:</strong> I attest that the information I have provided in this check-in is true, accurate, and complete to the best of my knowledge.<br><br>
           <span style="font-size:.78rem;color:var(--ink-sm);">Timestamp: <strong id="consent-ts">—</strong></span>
         </div>
@@ -487,7 +661,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
         <button class="btn btn-green" style="flex:1;" onclick="submitCheckin()">Submit Check-In →</button>
       </div>
     </div>
@@ -510,20 +684,39 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 // ────────────────────────────────────────────────
 // CONFIG & STATE
 // ────────────────────────────────────────────────
-const CFG_KEY='cvc_checkin_cfg_v1';
-const DB_KEY='cvc_checkin_local_v1';
+const CFG_KEY='cvc_checkin_cfg_v2';
+const DB_KEY='cvc_checkin_local_v2';
 const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
 const SHEETS_API='https://sheets.googleapis.com/v4/spreadsheets';
-const SHEET_HEADERS=['savedAt','patientName','ptDate','overall','pain','regions','otherReg','symptoms','funcImpact','rom','adl','newInjury','injuryTxt','redFlags','medChg','medTxt','newCond','condTxt','goals','interests','ptNotes','driveFileId','driveFileUrl'];
 
-let S={ptName:'',ptLastName:'',ptDate:'',overall:'',pain:0,regions:[],otherReg:'',symptoms:[],
-  funcImpact:'',rom:'',adl:'',newInjury:'',injuryTxt:'',redFlags:'',medChg:'',medTxt:'',
-  newCond:'',condTxt:'',goals:[],interests:[],ptNotes:'',ptSig:null,ptSigTime:'',
-  isOneTap:false,loadedPt:null};
+// NOTE: new services column added at position 3 (after ptDate)
+const SHEET_HEADERS=['savedAt','patientName','ptDate','services','overall','pain','regions','otherReg','symptoms','funcImpact','rom','adl','wlWeight','wlGoalWeight','wlProgress','wlNutrition','wlExercise','wlWater','wlSleep','wlStruggles','newInjury','injuryTxt','redFlags','medChg','medTxt','newCond','condTxt','goals','interests','ptNotes','driveFileId','driveFileUrl'];
+
+const SERVICE_META={
+  chiro:{name:'Chiropractic',color:'#2f5c43',colorLt:'#eaf4ee',icon:'🦴',pillClass:'chiro'},
+  sw:{name:'Shockwave',color:'#c08a32',colorLt:'#fdf3e3',icon:'⚡',pillClass:'sw'},
+  wl:{name:'Weight Loss',color:'#2a8a8e',colorLt:'#e5f4f5',icon:'⚖️',pillClass:'wl'},
+  np:{name:'NeuroPath',color:'#6a4a8f',colorLt:'#f0eaf7',icon:'🧠',pillClass:'np'}
+};
+
+let S={
+  services:[],
+  ptName:'',ptLastName:'',ptDate:'',
+  overall:'',pain:0,regions:[],otherReg:'',symptoms:[],funcImpact:'',rom:'',adl:'',
+  wlWeight:'',wlGoalWeight:'',wlProgress:'',wlNutrition:'',wlExercise:'',wlWater:'',wlSleep:'',wlStruggles:[],
+  newInjury:'',injuryTxt:'',redFlags:'',medChg:'',medTxt:'',newCond:'',condTxt:'',
+  goals:[],interests:[],ptNotes:'',
+  ptSig:null,ptSigTime:'',
+  isOneTap:false,loadedPt:null
+};
 let cfg={};
 let driveToken=null,gapiReady=false,gisReady=false,tokenClient=null;
 let SHEET_ID='';
 let _noteHTMLForDrive='';
+
+// Helper: does this visit include any clinical service?
+function hasClinical(){return S.services.some(s=>['chiro','sw','np'].includes(s));}
+function hasOnlyWL(){return S.services.length===1&&S.services[0]==='wl';}
 
 // ────────────────────────────────────────────────
 // INIT
@@ -570,7 +763,43 @@ function saveSettings(){
 }
 
 // ────────────────────────────────────────────────
-// GOOGLE AUTH
+// SERVICE SELECTION (Welcome Page)
+// ────────────────────────────────────────────────
+function toggleSvc(svc){
+  const card=document.getElementById('svc-'+svc);
+  const idx=S.services.indexOf(svc);
+  if(idx===-1){S.services.push(svc);card.classList.add('sel');}
+  else{S.services.splice(idx,1);card.classList.remove('sel');}
+  updateSvcUI();
+}
+
+function updateSvcUI(){
+  const n=S.services.length;
+  const pill=document.getElementById('svc-count-pill');
+  const txt=document.getElementById('svc-count-text');
+  const btn=document.getElementById('svc-continue-btn');
+
+  if(n===0){
+    pill.classList.remove('show');
+    btn.disabled=true;
+  } else {
+    pill.classList.add('show');
+    txt.textContent=n===1?'1 service selected':`${n} services selected`;
+    btn.disabled=false;
+  }
+  renderSvcPills();
+}
+
+function renderSvcPills(){
+  const container=document.getElementById('svc-pills-container');
+  container.innerHTML=S.services.map(s=>{
+    const m=SERVICE_META[s];
+    return `<span class="svc-pill ${m.pillClass}">${m.icon} ${m.name}</span>`;
+  }).join('');
+}
+
+// ────────────────────────────────────────────────
+// GOOGLE AUTH (unchanged from v1)
 // ────────────────────────────────────────────────
 function gapiLoaded(){
   gapi.load('client',async()=>{
@@ -665,11 +894,12 @@ function initDriveAuth(){
 async function sheetsEnsureHeader(){
   if(!driveToken||!SHEET_ID)return;
   try{
-    const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:Z1`,{headers:{Authorization:'Bearer '+driveToken}});
+    const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:AZ1`,{headers:{Authorization:'Bearer '+driveToken}});
     const d=await r.json();
-    if(!d.values||!d.values[0]||d.values[0][0]!=='savedAt'){
-      await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:append?valueInputOption=RAW`,{
-        method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+    // If headers missing OR don't include 'services' col, write/overwrite them
+    if(!d.values||!d.values[0]||!d.values[0].includes('services')){
+      await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1?valueInputOption=RAW`,{
+        method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
         body:JSON.stringify({values:[SHEET_HEADERS]})
       });
     }
@@ -695,7 +925,7 @@ async function sheetsWriteVisit(visitData){
 async function sheetsReadAllVisits(){
   if(!driveToken||!SHEET_ID)return null;
   try{
-    const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:Z10000`,{headers:{Authorization:'Bearer '+driveToken}});
+    const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:AZ10000`,{headers:{Authorization:'Bearer '+driveToken}});
     const d=await r.json();
     if(!d.values||d.values.length<2)return {};
     const headers=d.values[0];
@@ -704,7 +934,7 @@ async function sheetsReadAllVisits(){
     rows.forEach(row=>{
       const obj={};
       headers.forEach((h,i)=>{obj[h]=row[i]||'';});
-      ['regions','symptoms','goals','interests'].forEach(k=>{if(obj[k])obj[k]=obj[k].split(', ').filter(Boolean);});
+      ['regions','symptoms','goals','interests','services','wlStruggles'].forEach(k=>{if(obj[k])obj[k]=obj[k].split(', ').filter(Boolean);});
       if(obj.pain)obj.pain=parseInt(obj.pain)||0;
       const name=obj.patientName||'';
       if(!name)return;
@@ -766,16 +996,22 @@ function loadPt(key){
   </div>`;
   document.getElementById('pt-name').value=pt.name;
   S.ptName=pt.name;
+  // Hide one-tap button if this visit includes weight loss (comparison to "last visit" doesn't cleanly fit)
+  const otb=document.getElementById('onetap-btn');
+  if(otb){otb.style.display=hasOnlyWL()?'none':'';}
 }
 
 function oneTap(){
   if(!S.loadedPt)return;
   const last=S.loadedPt.visits[0];
   const name=S.ptName||last.patientName||last.ptName||'';
+  // Preserve services from welcome page
+  const savedServices=S.services.slice();
   S={...S,
     ptName:name,
     isOneTap:true,
     ptDate:new Date().toISOString().split('T')[0],
+    services:savedServices,
     overall:'Same',
     pain:parseInt(last.pain)||0,
     regions:Array.isArray(last.regions)?last.regions:(last.regions?last.regions.split(', ').filter(Boolean):[]),
@@ -790,52 +1026,128 @@ function oneTap(){
     newCond:'No',condTxt:'',
     goals:Array.isArray(last.goals)?last.goals:(last.goals?last.goals.split(', ').filter(Boolean):[]),
     interests:[],ptNotes:'',
+    wlWeight:'',wlGoalWeight:'',wlProgress:'',wlNutrition:'',wlExercise:'',wlWater:'',wlSleep:'',wlStruggles:[],
     ptSig:null,ptSigTime:'',
     loadedPt:S.loadedPt
   };
   document.getElementById('pt-name').value=name;
   document.getElementById('consent-ts').textContent=new Date().toLocaleString();
-  goStep(2);
+  // Skip Step 2 (subjective) entirely for one-tap and jump to signature
+  goStep(3);
   setTimeout(setupSig,100);
 }
 
 function continueWithUpdates(){
   if(S.loadedPt)prefillFromLast(S.loadedPt.visits[0]);
-  goStep(1);
+  goStep(2);
 }
-function startFresh(){S.loadedPt=null;S.isOneTap=false;goStep(1);}
+function startFresh(){S.loadedPt=null;S.isOneTap=false;goStep(2);}
 
 function prefillFromLast(last){
   if(!last)return;
   const regions=Array.isArray(last.regions)?last.regions:(last.regions?last.regions.split(', ').filter(Boolean):[]);
   const symptoms=Array.isArray(last.symptoms)?last.symptoms:(last.symptoms?last.symptoms.split(', ').filter(Boolean):[]);
-  setPain(parseInt(last.pain)||0);
-  document.querySelectorAll('#step-1 [id^="r-"]').forEach(cb=>{cb.checked=regions.includes(cb.value);});
-  document.querySelectorAll('#step-1 [id^="sy-"]').forEach(cb=>{cb.checked=symptoms.includes(cb.value);});
-  ['overall','rom','adl'].forEach(name=>{
-    const val=last[name];
-    if(val){const el=document.querySelector(`input[name="${name}"][value="${val}"]`);if(el)el.checked=true;}
-  });
-  if(last.funcImpact){const el=document.querySelector(`input[name="funci"][value="${last.funcImpact}"]`);if(el)el.checked=true;}
+  if(hasClinical()){
+    setPain(parseInt(last.pain)||0);
+    document.querySelectorAll('#step-2 [id^="r-"]').forEach(cb=>{cb.checked=regions.includes(cb.value);});
+    document.querySelectorAll('#step-2 [id^="sy-"]').forEach(cb=>{cb.checked=symptoms.includes(cb.value);});
+    ['overall','rom','adl'].forEach(name=>{
+      const val=last[name];
+      if(val){const el=document.querySelector(`input[name="${name}"][value="${val}"]`);if(el)el.checked=true;}
+    });
+    if(last.funcImpact){const el=document.querySelector(`input[name="funci"][value="${last.funcImpact}"]`);if(el)el.checked=true;}
+  }
+  if(hasOnlyWL()){
+    // Pre-fill goal weight from last visit (helpful continuity)
+    if(last.wlGoalWeight&&document.getElementById('wl-goal-weight'))document.getElementById('wl-goal-weight').value=last.wlGoalWeight;
+  }
   if(last.ptNotes){document.getElementById('pt-notes').value=last.ptNotes;}
 }
 
 // ────────────────────────────────────────────────
-// FORM HELPERS
+// STEP NAVIGATION
 // ────────────────────────────────────────────────
 function goStep(n){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('wait-screen').classList.remove('on');
   const el=document.getElementById('step-'+n);
   if(el)el.classList.add('active');
-  for(let i=0;i<=2;i++){const ps=document.getElementById('ps'+i);if(!ps)continue;ps.className='ps '+(i<n?'done':i===n?'active':'');}
+
+  for(let i=0;i<=3;i++){
+    const ps=document.getElementById('ps'+i);
+    if(!ps)continue;
+    ps.className='ps '+(i<n?'done':i===n?'active':'');
+  }
+
+  const lbls={0:'Select Service',1:'Find Record',2:'Your Check-In',3:'Sign & Submit'};
+  document.getElementById('phase-lbl').textContent=lbls[n]||'';
+
+  // When entering Step 2, configure the right subjective view
+  if(n===2){
+    configureStep2ForServices();
+  }
+  // When entering Step 3, configure the interests chips (exclude already-selected services)
+  if(n===3){
+    configureInterestsChips();
+  }
+
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+function configureStep2ForServices(){
+  const clinicalDiv=document.getElementById('clinical-subjective');
+  const wlDiv=document.getElementById('wl-subjective');
+  const title=document.getElementById('step2-title');
+  const desc=document.getElementById('step2-desc');
+
+  if(hasOnlyWL()){
+    clinicalDiv.style.display='none';
+    wlDiv.style.display='block';
+    title.textContent='How are you doing this week?';
+    desc.textContent='Quick check-in on your progress, nutrition, and how you\'re feeling.';
+  } else {
+    clinicalDiv.style.display='block';
+    wlDiv.style.display='none';
+    title.textContent='How are you feeling?';
+    desc.textContent='Tap your answers — most patients finish in under 60 seconds.';
+    // If weight loss is ALSO selected alongside clinical, show BOTH
+    if(S.services.includes('wl')){
+      wlDiv.style.display='block';
+    }
+  }
+}
+
+function configureInterestsChips(){
+  const container=document.getElementById('interests-chips');
+  // Available cross-sell options based on what the patient did NOT select
+  const allOptions=[
+    {id:'int-chiro',val:'Chiropractic',svc:'chiro'},
+    {id:'int-sw',val:'Shockwave Therapy',svc:'sw'},
+    {id:'int-np',val:'NeuroPath (Neuropathy)',svc:'np'},
+    {id:'int-wl',val:'Weight Loss',svc:'wl'},
+    {id:'int-mt',val:'Massage Therapy',svc:'mt'},
+    {id:'int-rr',val:'Remote Rehab',svc:'rr'},
+    {id:'int-mem',val:'Membership Plans',svc:'mem'}
+  ];
+  // Filter out services already being received today
+  const available=allOptions.filter(o=>!S.services.includes(o.svc));
+  container.innerHTML=available.map(o=>`<input type="checkbox" id="${o.id}" value="${o.val}"><label for="${o.id}">${o.val}</label>`).join('');
+  // If the patient is doing ONLY weight loss, hide the red-flag neuro question (not relevant)
+  const rfRow=document.getElementById('redflag-row');
+  if(rfRow){
+    rfRow.style.display=hasOnlyWL()?'none':'block';
+  }
+  // Auto-set redflags to "No" if hidden so validation passes
+  if(hasOnlyWL()){
+    const rfN=document.getElementById('rf-n');if(rfN)rfN.checked=true;
+  }
+}
+
 function tog(id,show){document.getElementById(id).style.display=show?'block':'none';}
 function toggleRF(show){document.getElementById('rf-alert').className='rf-alert'+(show?' show':'');}
-function regNone(cb){if(cb.checked)document.querySelectorAll('#step-1 [id^="r-"]:not(#r-none)').forEach(c=>c.checked=false);}
+function regNone(cb){if(cb.checked)document.querySelectorAll('#step-2 [id^="r-"]:not(#r-none)').forEach(c=>c.checked=false);}
 function regOther(cb){document.getElementById('other-reg-area').style.display=cb.checked?'block':'none';}
-function sympNone(cb){if(cb.checked)document.querySelectorAll('#step-1 [id^="sy-"]:not(#sy-none)').forEach(c=>c.checked=false);}
+function sympNone(cb){if(cb.checked)document.querySelectorAll('#step-2 [id^="sy-"]:not(#sy-none)').forEach(c=>c.checked=false);}
 function updatePain(v){
   const n=parseInt(v);const pv=document.getElementById('pain-val');
   pv.textContent=n;pv.className='pain-val'+(n>=7?' hi':'');
@@ -878,48 +1190,78 @@ function sigEmpty(){
 async function submitCheckin(){
   if(!document.getElementById('consent-chk').checked){alert('Please check the consent box before submitting.');return;}
   if(sigEmpty()){alert('Please sign the form before submitting.');return;}
-  const overall=document.querySelector('input[name="overall"]:checked');
-  if(!overall&&!S.isOneTap){alert('Please indicate how you feel compared to your last visit.');return;}
-  const rf=document.querySelector('input[name="redflags"]:checked');
-  if(!rf){alert('Please answer the red flag question.');return;}
 
-  // Collect data
+  // Validations depend on which subjective was shown
+  if(!S.isOneTap){
+    if(hasClinical()){
+      const overall=document.querySelector('input[name="overall"]:checked');
+      if(!overall){alert('Please indicate how you feel compared to your last visit.');return;}
+    }
+    if(!hasOnlyWL()){
+      const rf=document.querySelector('input[name="redflags"]:checked');
+      if(!rf){alert('Please answer the safety question about neurological symptoms.');return;}
+    }
+  }
+
+  // Collect data — common fields
   S.ptName=document.getElementById('pt-name').value||'Patient';
   S.ptDate=document.getElementById('pt-date').value;
   const parts=S.ptName.trim().split(/\s+/);
   S.ptLastName=parts.length>1?parts[parts.length-1]:parts[0];
-  S.overall=overall?.value||(S.isOneTap?'Same (No Changes)':'—');
-  S.pain=parseInt(document.getElementById('pain-slider').value||0);
-  S.regions=[...document.querySelectorAll('#step-1 [id^="r-"]:checked')].map(c=>c.value);
-  S.otherReg=document.getElementById('other-reg-txt')?.value||'';
-  S.symptoms=[...document.querySelectorAll('#step-1 [id^="sy-"]:checked')].map(c=>c.value);
-  S.funcImpact=document.querySelector('input[name="funci"]:checked')?.value||'—';
-  S.rom=document.querySelector('input[name="rom"]:checked')?.value||'—';
-  S.adl=document.querySelector('input[name="adl"]:checked')?.value||'—';
+
+  // Clinical fields (only collect if clinical was shown)
+  if(hasClinical()||!S.isOneTap){
+    S.overall=document.querySelector('input[name="overall"]:checked')?.value||S.overall||'—';
+    S.pain=parseInt(document.getElementById('pain-slider').value||0);
+    S.regions=[...document.querySelectorAll('#step-2 [id^="r-"]:checked')].map(c=>c.value);
+    S.otherReg=document.getElementById('other-reg-txt')?.value||'';
+    S.symptoms=[...document.querySelectorAll('#step-2 [id^="sy-"]:checked')].map(c=>c.value);
+    S.funcImpact=document.querySelector('input[name="funci"]:checked')?.value||'—';
+    S.rom=document.querySelector('input[name="rom"]:checked')?.value||'—';
+    S.adl=document.querySelector('input[name="adl"]:checked')?.value||'—';
+  }
+
+  // Weight loss fields (if WL selected)
+  if(S.services.includes('wl')&&!S.isOneTap){
+    S.wlWeight=document.getElementById('wl-weight')?.value||'';
+    S.wlGoalWeight=document.getElementById('wl-goal-weight')?.value||'';
+    S.wlProgress=document.querySelector('input[name="wl-progress"]:checked')?.value||'';
+    S.wlNutrition=document.querySelector('input[name="wl-nutr"]:checked')?.value||'';
+    S.wlExercise=document.querySelector('input[name="wl-exer"]:checked')?.value||'';
+    S.wlWater=document.querySelector('input[name="wl-water"]:checked')?.value||'';
+    S.wlSleep=document.querySelector('input[name="wl-sleep"]:checked')?.value||'';
+    S.wlStruggles=[...document.querySelectorAll('[id^="wls-"]:checked')].map(c=>c.value);
+  }
+
+  // Safety + admin
   S.newInjury=document.querySelector('input[name="newinjury"]:checked')?.value||'No';
   S.injuryTxt=document.getElementById('injury-txt')?.value||'';
-  S.redFlags=rf?.value||'No';
+  S.redFlags=document.querySelector('input[name="redflags"]:checked')?.value||'No';
   S.medChg=document.querySelector('input[name="medchg"]:checked')?.value||'No';
   S.medTxt=document.getElementById('med-txt')?.value||'';
   S.newCond=document.querySelector('input[name="newcond"]:checked')?.value||'No';
   S.condTxt=document.getElementById('cond-txt')?.value||'';
-  S.goals=[...document.querySelectorAll('[id^="g-"]:checked')].map(c=>c.value);
-  S.interests=[...document.querySelectorAll('[id^="int-"]:checked')].map(c=>c.value);
+  S.goals=[...document.querySelectorAll('#goals-card [id^="g-"]:checked')].map(c=>c.value);
+  S.interests=[...document.querySelectorAll('#interests-chips input:checked')].map(c=>c.value);
   S.ptNotes=document.getElementById('pt-notes')?.value||'';
   S.ptSig=document.getElementById('pt-sig').toDataURL();
   S.ptSigTime=new Date().toLocaleString();
 
-  // Save to localStorage immediately
+  // Save locally
   saveLocalVisit(S.ptName,{...S,savedAt:new Date().toISOString()});
 
-  // Show success screen
+  // Success screen
   document.getElementById('wait-name').textContent=S.ptName.split(' ')[0];
-  document.getElementById('wait-pill').textContent=`${S.ptName} · ${S.ptDate} · Pain ${S.pain}/10 · ${S.overall}`;
+  const svcNames=S.services.map(s=>SERVICE_META[s].name).join(' + ');
+  const summary=hasOnlyWL()
+    ? `${S.ptName} · ${S.ptDate} · ${svcNames}`
+    : `${S.ptName} · ${S.ptDate} · ${svcNames} · Pain ${S.pain}/10`;
+  document.getElementById('wait-pill').textContent=summary;
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('wait-screen').classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
 
-  // Upload to Drive + Sheets in background
+  // Upload
   if(driveToken){
     uploadAndSave();
   } else {
@@ -959,7 +1301,6 @@ async function uploadAndSave(){
     if(!res.ok)throw new Error('Upload failed: '+res.status);
     const data=await res.json();
 
-    // Write to Sheets with file ID
     if(SHEET_ID){
       sheetsWriteVisit({
         ...S,
@@ -986,7 +1327,8 @@ function buildFilename(){
   const parts=(S.ptName||'').trim().split(/\s+/);
   const first=parts.length>1?parts.slice(0,-1).join('-'):'';
   const date=S.ptDate||new Date().toISOString().split('T')[0];
-  return `${last}${first?'_'+first:''}_${date}.pdf`;
+  const svcTag=S.services.length?'_'+S.services.join('-').toUpperCase():'';
+  return `${last}${first?'_'+first:''}_${date}${svcTag}.pdf`;
 }
 
 function renderNoteToPDF(htmlContent){
@@ -1041,10 +1383,19 @@ function renderNoteToPDF(htmlContent){
 // ────────────────────────────────────────────────
 function buildPrintHTML(){
   const rf=S.redFlags==='Yes';
-  const clinicName=cfg.clinic||'Colleyville Chiropractic | CVC Spine & Sport';
+  const clinicName=cfg.clinic||'Colleyville Chiropractic | CVC Spine &amp; Sport';
   const addr=[cfg.address,cfg.phone?'Tel: '+cfg.phone:''].filter(Boolean).join('  ·  ');
   const overallBadge=S.overall==='Better'?'#2f5c43':S.overall==='Worse'?'#c0392b':'#c08a32';
+
+  // Service ribbon HTML
+  const svcRibbon=S.services.map(s=>{
+    const m=SERVICE_META[s];
+    return `<span style="background:${m.colorLt};color:${m.color};border:1px solid ${m.color}40;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;">${m.icon} ${m.name}</span>`;
+  }).join(' ');
+
   const narrative=buildNarrative();
+  const clinicalBlock=hasClinical()||S.isOneTap?buildClinicalBlock():'';
+  const wlBlock=S.services.includes('wl')?buildWLBlock():'';
 
   return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
@@ -1057,6 +1408,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#1a2e22;fo
 .clinic-addr{font-size:9px;color:rgba(255,255,255,.55);margin-top:4px;}
 .note-type{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;text-align:right;}
 .note-date{font-size:15px;font-weight:700;color:#fff;margin-top:2px;text-align:right;}
+.svc-ribbon{background:#fafbfa;border-bottom:1px solid #d4e8da;padding:9px 28px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.svc-ribbon-label{font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#4a7060;margin-right:4px;}
 .pt-banner{background:#eef6f0;border-left:4px solid #3a7a52;padding:10px 28px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #cde3d4;}
 .pt-banner-name{font-family:'DM Serif Display',serif;font-size:16px;color:#1a2e22;}
 .pt-banner-meta{font-size:9.5px;color:#4a7060;}
@@ -1067,6 +1420,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#fff;color:#1a2e22;fo
 .sec{margin-bottom:16px;}
 .sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:9px;padding-bottom:5px;border-bottom:1.5px solid #d4e8da;}
 .sec-label{font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#3a7a52;}
+.sec-label.wl{color:#2a8a8e;}
 table.dt{width:100%;border-collapse:collapse;}
 table.dt td{vertical-align:top;padding:4px 0;border-bottom:1px solid #f0f5f1;}
 table.dt tr:last-child td{border-bottom:none;}
@@ -1087,7 +1441,11 @@ table.dt td.v{color:#1a2e22;font-size:10.5px;}
 .attest strong{color:#1a2e22;}
 hr.sec-div{border:none;border-top:1px solid #d4e8da;margin:14px 0;}
 .interest-highlight{background:#fdf3e3;border:1px solid #e8c97a;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:10.5px;color:#6b4d18;font-weight:600;}
-@media print{.hd{background:#1e3d2a!important;}.pt-banner{background:#eef6f0!important;}.narr{background:#f4faf6!important;}.sig-box{background:#f8fcf9!important;}.interest-highlight{background:#fdf3e3!important;}}
+.wl-metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.wl-metric{background:#e5f4f5;border:1px solid #a8d4d6;border-radius:6px;padding:8px 10px;}
+.wl-metric-label{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a8a8e;margin-bottom:3px;}
+.wl-metric-val{font-size:14px;font-weight:700;color:#1a2e22;}
+@media print{.hd{background:#1e3d2a!important;}.pt-banner{background:#eef6f0!important;}.narr{background:#f4faf6!important;}.sig-box{background:#f8fcf9!important;}.interest-highlight{background:#fdf3e3!important;}.svc-ribbon{background:#fafbfa!important;}.wl-metric{background:#e5f4f5!important;}}
 </style></head><body>
 <div class="hd">
   <div>
@@ -1099,25 +1457,27 @@ hr.sec-div{border:none;border-top:1px solid #d4e8da;margin:14px 0;}
     <div class="note-date">${S.ptDate}</div>
   </div>
 </div>
+<div class="svc-ribbon">
+  <span class="svc-ribbon-label">Services Today:</span>
+  ${svcRibbon}
+</div>
 <div class="pt-banner">
   <div class="pt-banner-name">${S.ptName||'—'}</div>
   <div class="pt-banner-meta">Date &nbsp;<strong>${S.ptDate||'—'}</strong></div>
-  <div class="pt-banner-meta">Overall &nbsp;<span class="overall-badge" style="background:${overallBadge};">${S.overall||'—'}</span></div>
-  <div class="pt-banner-meta">Pain &nbsp;<span class="pain-box${S.pain>=7?' hi':''}">${S.pain}/10</span></div>
+  ${hasClinical()?`<div class="pt-banner-meta">Overall &nbsp;<span class="overall-badge" style="background:${overallBadge};">${S.overall||'—'}</span></div>
+  <div class="pt-banner-meta">Pain &nbsp;<span class="pain-box${S.pain>=7?' hi':''}">${S.pain}/10</span></div>`:''}
   ${S.isOneTap?'<span class="onetap-pill">✓ One-Tap — No Changes</span>':''}
 </div>
 ${rf?'<div class="rf-bar">⚠️  RED FLAG: Patient reports new or worsening neurological symptoms — urgent evaluation required</div>':''}
 <div class="body">
+  ${clinicalBlock}
+  ${wlBlock}
+  <hr class="sec-div">
   <div class="sec">
-    <div class="sec-hdr"><span class="sec-label">Patient-Reported Subjective</span></div>
+    <div class="sec-hdr"><span class="sec-label">Administrative</span></div>
     <table class="dt">
-      <tr><td class="k">Region(s)</td><td class="v">${S.regions.join(', ')||'—'}${S.otherReg?' ('+S.otherReg+')':''}</td></tr>
-      <tr><td class="k">Symptoms</td><td class="v">${S.symptoms.join(', ')||'—'}</td></tr>
-      <tr><td class="k">Functional Impact</td><td class="v">${S.funcImpact||'—'}</td></tr>
-      <tr><td class="k">ROM / Movement</td><td class="v">${S.rom||'—'}</td></tr>
-      <tr><td class="k">Work / ADLs</td><td class="v">${S.adl||'—'}</td></tr>
       <tr><td class="k">New Injury</td><td class="v">${S.newInjury||'No'}${S.injuryTxt?' — '+S.injuryTxt:''}</td></tr>
-      <tr><td class="k">Red Flags</td><td class="v">${rf?'<strong style="color:#c0392b;">⚠️ YES — Evaluate urgently</strong>':'None reported'}</td></tr>
+      ${!hasOnlyWL()?`<tr><td class="k">Red Flags</td><td class="v">${rf?'<strong style="color:#c0392b;">⚠️ YES — Evaluate urgently</strong>':'None reported'}</td></tr>`:''}
       <tr><td class="k">Med Changes</td><td class="v">${S.medChg||'No'}${S.medTxt?' — '+S.medTxt:''}</td></tr>
       <tr><td class="k">New Conditions</td><td class="v">${S.newCond||'No'}${S.condTxt?' — '+S.condTxt:''}</td></tr>
       <tr><td class="k">Goals Today</td><td class="v">${S.goals.join(', ')||'—'}</td></tr>
@@ -1125,13 +1485,13 @@ ${rf?'<div class="rf-bar">⚠️  RED FLAG: Patient reports new or worsening neu
     </table>
     <div class="narr-lbl" style="margin-top:12px;">Clinical Narrative</div>
     <div class="narr">${narrative}</div>
-    ${S.interests.length?`<div class="interest-highlight">💡 Patient expressed interest in: ${S.interests.join(', ')}</div>`:''}
+    ${S.interests.length?`<div class="interest-highlight">💡 <strong>Warm Lead:</strong> Patient expressed interest in learning about — ${S.interests.join(', ')}</div>`:''}
   </div>
   <hr class="sec-div">
   <div class="sec">
-    <div class="sec-hdr"><span class="sec-label">Patient Attestation & Signature</span></div>
+    <div class="sec-hdr"><span class="sec-label">Patient Attestation &amp; Signature</span></div>
     <div class="attest">
-      <strong>Patient attests:</strong> I voluntarily consent to chiropractic evaluation and treatment. I acknowledge receipt of the Notice of Privacy Practices. I confirm the information provided above is true, accurate, and complete to the best of my knowledge.
+      <strong>Patient attests:</strong> I voluntarily consent to the services listed above (including chiropractic evaluation and treatment where applicable). I acknowledge receipt of the Notice of Privacy Practices. I confirm the information provided above is true, accurate, and complete to the best of my knowledge.
     </div>
     ${S.ptSig?`<div class="sig-block"><div class="sig-box"><img src="${S.ptSig}"></div><div class="sig-meta"><div class="sig-label">Patient Signature</div><strong>${S.ptName}</strong><br>Signed: ${S.ptSigTime}</div></div>`:''}
   </div>
@@ -1139,14 +1499,59 @@ ${rf?'<div class="rf-bar">⚠️  RED FLAG: Patient reports new or worsening neu
 </body></html>`;
 }
 
+function buildClinicalBlock(){
+  return `<div class="sec">
+    <div class="sec-hdr"><span class="sec-label">Clinical Subjective</span></div>
+    <table class="dt">
+      <tr><td class="k">Region(s)</td><td class="v">${S.regions.join(', ')||'—'}${S.otherReg?' ('+S.otherReg+')':''}</td></tr>
+      <tr><td class="k">Symptoms</td><td class="v">${S.symptoms.join(', ')||'—'}</td></tr>
+      <tr><td class="k">Functional Impact</td><td class="v">${S.funcImpact||'—'}</td></tr>
+      <tr><td class="k">ROM / Movement</td><td class="v">${S.rom||'—'}</td></tr>
+      <tr><td class="k">Work / ADLs</td><td class="v">${S.adl||'—'}</td></tr>
+    </table>
+  </div>`;
+}
+
+function buildWLBlock(){
+  const progColor=S.wlProgress==='Great'?'#2a8a8e':S.wlProgress==='Struggling'?'#c08a32':'#2f5c43';
+  return `<div class="sec">
+    <div class="sec-hdr"><span class="sec-label wl">Weight Loss Check-In</span></div>
+    <div class="wl-metric-grid">
+      <div class="wl-metric"><div class="wl-metric-label">Current Weight</div><div class="wl-metric-val">${S.wlWeight?S.wlWeight+' lbs':'—'}</div></div>
+      <div class="wl-metric"><div class="wl-metric-label">Goal Weight</div><div class="wl-metric-val">${S.wlGoalWeight?S.wlGoalWeight+' lbs':'—'}</div></div>
+    </div>
+    <table class="dt" style="margin-top:10px;">
+      <tr><td class="k">Progress</td><td class="v"><span style="background:${progColor};color:#fff;padding:2px 10px;border-radius:100px;font-weight:700;font-size:10px;">${S.wlProgress||'—'}</span></td></tr>
+      <tr><td class="k">Nutrition Compliance</td><td class="v">${S.wlNutrition||'—'}</td></tr>
+      <tr><td class="k">Exercise This Week</td><td class="v">${S.wlExercise||'—'}</td></tr>
+      <tr><td class="k">Water Intake</td><td class="v">${S.wlWater||'—'}</td></tr>
+      <tr><td class="k">Sleep Quality</td><td class="v">${S.wlSleep||'—'}</td></tr>
+      <tr><td class="k">Struggles This Week</td><td class="v">${S.wlStruggles.join(', ')||'None reported'}</td></tr>
+    </table>
+  </div>`;
+}
+
 function buildNarrative(){
-  const regs=S.regions.length?S.regions.join(', ')+(S.otherReg?' ('+S.otherReg+')':''):'no specific region noted';
-  const syms=S.symptoms.length&&!S.symptoms.includes('none')?S.symptoms.join(', '):'none';
-  const rf=S.redFlags==='Yes'?'REPORTS new/worsening neurological symptoms — RED FLAG requires urgent evaluation.':'Denies new neurological symptoms or bowel/bladder changes.';
+  const svcList=S.services.map(s=>SERVICE_META[s].name).join(' + ');
+  let para=`Patient presents for ${svcList} visit${S.isOneTap?' (confirmed no changes via one-tap)':''}. `;
+
+  if(hasClinical()||S.isOneTap){
+    const regs=S.regions.length?S.regions.join(', ')+(S.otherReg?' ('+S.otherReg+')':''):'no specific region noted';
+    const syms=S.symptoms.length&&!S.symptoms.includes('none')?S.symptoms.join(', '):'none';
+    const rf=S.redFlags==='Yes'?'REPORTS new/worsening neurological symptoms — RED FLAG requires urgent evaluation.':'Denies new neurological symptoms or bowel/bladder changes.';
+    para+=`Reports ${S.overall} compared to last visit. Pain rated ${S.pain}/10 (NRS) in ${regs}. Symptoms include: ${syms}. Functional impact: ${S.funcImpact}; ROM ${S.rom}; ADLs ${S.adl}. ${rf} `;
+  }
+
+  if(S.services.includes('wl')&&!S.isOneTap){
+    para+=`Weight loss check-in: current weight ${S.wlWeight?S.wlWeight+' lbs':'not recorded'}, goal ${S.wlGoalWeight?S.wlGoalWeight+' lbs':'not set'}. Progress: ${S.wlProgress||'not reported'}. Nutrition compliance: ${S.wlNutrition||'—'}. Exercise: ${S.wlExercise||'—'}. Water: ${S.wlWater||'—'}. Sleep: ${S.wlSleep||'—'}. ${S.wlStruggles.length?'Struggles this week: '+S.wlStruggles.join(', ')+'. ':''}`;
+  }
+
   const inj=S.newInjury==='Yes'?`Reports new injury/incident: "${S.injuryTxt}".`:'Denies new injury since last visit.';
   const med=S.medChg==='Yes'?`Medication change: ${S.medTxt}.`:'No medication changes.';
   const cond=S.newCond==='Yes'?`New condition: ${S.condTxt}.`:'No new conditions reported.';
-  return `Patient presents for chiropractic repeat visit${S.isOneTap?' (confirmed no changes via one-tap)':''}. Reports ${S.overall} compared to last visit. Pain rated ${S.pain}/10 (NRS) in ${regs}. Symptoms include: ${syms}. Functional impact: ${S.funcImpact}; ROM ${S.rom}; ADLs ${S.adl}. ${inj} ${rf} ${med} ${cond} Goals: ${S.goals.join(', ')||'not specified'}. ${S.ptNotes?`Patient note: "${S.ptNotes}" `:''}Patient attested to accuracy and provided consent at ${S.ptSigTime}.`;
+  para+=`${inj} ${med} ${cond} Goals: ${S.goals.join(', ')||'not specified'}. ${S.ptNotes?`Patient note: "${S.ptNotes}" `:''}Patient attested to accuracy and provided consent at ${S.ptSigTime}.`;
+
+  return para;
 }
 
 // ────────────────────────────────────────────────
@@ -1164,16 +1569,26 @@ function startCountdown(){
     if(n<=0){clearInterval(_countdownTimer);resetToHome();}
   },1000);
 }
+
 function resetToHome(){
   clearInterval(_countdownTimer);
-  // Preserve Drive token, reset everything else
-  S={ptName:'',ptLastName:'',ptDate:new Date().toISOString().split('T')[0],overall:'',pain:0,
-    regions:[],otherReg:'',symptoms:[],funcImpact:'',rom:'',adl:'',newInjury:'',injuryTxt:'',
-    redFlags:'',medChg:'',medTxt:'',newCond:'',condTxt:'',goals:[],interests:[],ptNotes:'',
-    ptSig:null,ptSigTime:'',isOneTap:false,loadedPt:null};
+  // Reset state but preserve Drive token
+  S={
+    services:[],
+    ptName:'',ptLastName:'',ptDate:new Date().toISOString().split('T')[0],
+    overall:'',pain:0,regions:[],otherReg:'',symptoms:[],funcImpact:'',rom:'',adl:'',
+    wlWeight:'',wlGoalWeight:'',wlProgress:'',wlNutrition:'',wlExercise:'',wlWater:'',wlSleep:'',wlStruggles:[],
+    newInjury:'',injuryTxt:'',redFlags:'',medChg:'',medTxt:'',newCond:'',condTxt:'',
+    goals:[],interests:[],ptNotes:'',
+    ptSig:null,ptSigTime:'',
+    isOneTap:false,loadedPt:null
+  };
   _noteHTMLForDrive='';
-  // Clear form fields
-  document.querySelectorAll('input[type=text],input[type=date],textarea').forEach(el=>{
+  // Clear service selections
+  document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));
+  updateSvcUI();
+  // Clear form
+  document.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(el=>{
     if(el.id==='pt-date')el.value=S.ptDate;
     else if(!el.id.startsWith('cfg-'))el.value='';
   });
@@ -1193,7 +1608,6 @@ function resetToHome(){
   document.getElementById('countdown-area').style.display='none';
   document.getElementById('consent-ts').textContent=new Date().toLocaleString();
   goStep(0);
-  setTimeout(()=>document.getElementById('lookup-name').focus(),200);
 }
 </script>
 </body>

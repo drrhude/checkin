@@ -982,6 +982,143 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 .palp-region-header.expanded::before{content:'▾ ';}
 
 /* ═════════════════════════════════════════════════
+   ICD-10 ENGINE — ASSESSMENT UI
+   ═════════════════════════════════════════════════ */
+
+/* Clinical reasoning summary */
+#icd-reasoning-summary{
+  font-size:.85rem;line-height:1.7;color:var(--ink-md);
+}
+.icd-reasoning-pill{
+  display:inline-block;padding:3px 10px;border-radius:12px;font-size:.76rem;
+  font-weight:600;margin:3px 4px 3px 0;
+}
+.icd-reasoning-pill.region{background:var(--sage-xl);color:var(--sage);}
+.icd-reasoning-pill.neuro{background:#f3ecf7;color:#6a4a8f;}
+.icd-reasoning-pill.positive{background:var(--red-lt);color:var(--red);}
+.icd-reasoning-pill.finding{background:var(--gold-lt);color:var(--gold-dk);}
+.icd-reasoning-empty{color:var(--ink-sm);font-style:italic;font-size:.84rem;}
+
+/* ICD suggestion cards */
+#icd-suggestions-top, #icd-suggestions-more{
+  display:flex;flex-direction:column;gap:8px;
+}
+.icd-card{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border:1.5px solid var(--border);
+  border-radius:var(--rs);background:var(--cream);
+  cursor:pointer;transition:all .15s;
+}
+.icd-card:hover{border-color:var(--sage-md);}
+.icd-card.selected{
+  background:var(--sage-xl);border-color:var(--sage);
+  box-shadow:0 0 0 2px rgba(47,92,67,.15);
+}
+.icd-card.selected::after{
+  content:'✓';
+  position:absolute;right:14px;top:14px;
+  color:var(--sage);font-size:1.2rem;font-weight:700;
+}
+.icd-card{position:relative;}
+.icd-score-bubble{
+  flex-shrink:0;width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:1.05rem;font-weight:700;color:white;
+  line-height:1;
+}
+.icd-score-bubble.high{background:var(--red);}
+.icd-score-bubble.mod{background:var(--amber);}
+.icd-score-bubble.low{background:var(--border);color:var(--ink-sm);}
+.icd-body{flex:1;min-width:0;}
+.icd-top-row{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;
+}
+.icd-code{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:.92rem;color:var(--sage-dk);
+  letter-spacing:.02em;
+}
+.icd-lat-badge{
+  font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:700;
+  background:var(--cream-dk);color:var(--ink-sm);letter-spacing:.05em;
+}
+.icd-lat-badge.laterality-r{background:#fdeae6;color:#c05454;}
+.icd-lat-badge.laterality-l{background:#e6f0fd;color:#2563a8;}
+.icd-lat-badge.laterality-b{background:var(--sage-xl);color:var(--sage);}
+.icd-name{
+  font-size:.87rem;color:var(--ink);font-weight:500;line-height:1.4;
+}
+.icd-why{
+  margin-top:6px;padding-top:6px;border-top:1px solid var(--border-lt);
+  font-size:.76rem;color:var(--ink-sm);line-height:1.55;
+}
+.icd-why-label{
+  font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.06em;
+  font-size:.68rem;margin-right:6px;
+}
+.icd-why-item{
+  display:inline-block;padding:2px 7px;background:white;border:1px solid var(--border-lt);
+  border-radius:10px;font-size:.72rem;margin:2px 3px 2px 0;color:var(--ink-md);
+}
+
+.icd-show-more-row{
+  margin-top:10px;text-align:center;
+}
+
+/* Search library */
+#icd-search-results{
+  max-height:320px;overflow-y:auto;margin-top:10px;
+}
+#icd-search-results:empty{margin-top:0;}
+.icd-search-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 11px;border-bottom:1px solid var(--cream-dk);cursor:pointer;
+  transition:background .1s;
+}
+.icd-search-item:hover{background:var(--sage-xl);}
+.icd-search-item.selected{background:var(--sage-xl);}
+.icd-search-code{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;
+  color:var(--sage-dk);min-width:80px;flex-shrink:0;
+}
+.icd-search-name{flex:1;font-size:.82rem;color:var(--ink);}
+.icd-search-add{
+  font-size:.72rem;color:var(--sage);font-weight:700;flex-shrink:0;
+  padding:2px 10px;border:1.5px solid var(--sage);border-radius:12px;
+}
+.icd-search-item.selected .icd-search-add{
+  background:var(--sage);color:white;
+}
+
+/* Selected diagnoses list */
+#icd-selected-list{
+  display:flex;flex-direction:column;gap:7px;
+}
+.icd-empty-selected{
+  font-size:.84rem;color:var(--ink-sm);font-style:italic;padding:10px 4px;
+}
+.icd-selected-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;background:var(--sage-xl);border:1.5px solid var(--sage);
+  border-radius:var(--rs);
+}
+.icd-selected-item .icd-code{color:var(--sage-dk);}
+.icd-selected-body{flex:1;min-width:0;}
+.icd-selected-item button{
+  background:none;border:1.5px solid var(--border);border-radius:5px;
+  padding:5px 9px;font-size:.72rem;color:var(--ink-sm);cursor:pointer;
+  font-weight:600;
+}
+.icd-selected-item button:hover{border-color:var(--red);color:var(--red);background:var(--red-lt);}
+.icd-selected-primary-toggle{
+  padding:3px 10px;border-radius:10px;font-size:.65rem;font-weight:700;
+  letter-spacing:.04em;cursor:pointer;border:1.5px solid var(--border);
+  background:white;color:var(--ink-sm);transition:all .13s;
+}
+.icd-selected-primary-toggle.active{
+  background:var(--gold);border-color:var(--gold);color:white;
+}
+
+/* ═════════════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════════════ */
 @media (max-width:640px){
@@ -2173,11 +2310,55 @@ body[data-role="provider"] .lang-toggle{display:none;}
       <div class="phase-hdr">
         <div class="phase-lbl">Assessment &amp; Plan</div>
         <div class="phase-title">Diagnosis &amp; Treatment Plan</div>
+        <div class="phase-desc">The engine analyzed your exam findings and ranked ICD-10 codes. Select diagnoses to apply.</div>
       </div>
-      <div class="callout">
-        <div class="callout-icon">🚧</div>
-        <div>ICD-10 auto-suggest engine + treatment plan builder ships in Part 3B.</div>
+
+      <!-- Clinical reasoning summary card -->
+      <div class="card">
+        <div class="card-title">📋 Clinical Reasoning Summary <span class="sub">What the engine sees</span></div>
+        <div id="icd-reasoning-summary"></div>
       </div>
+
+      <!-- Suggested ICD codes — Top 5 + Show more -->
+      <div class="card">
+        <div class="card-title">🎯 Suggested Diagnoses <span class="sub">Ranked by evidence from your exam</span></div>
+        <div id="icd-suggestions-top"></div>
+        <div class="icd-show-more-row">
+          <button class="btn btn-h btn-sm" onclick="toggleICDShowMore()" id="icd-show-more-btn">Show More Codes</button>
+        </div>
+        <div id="icd-suggestions-more" style="display:none;"></div>
+        <div id="icd-empty" style="display:none;" class="callout">
+          <div class="callout-icon">💡</div>
+          <div>No strong ICD suggestions from the exam data. Search the full library below or add free-text notes.</div>
+        </div>
+      </div>
+
+      <!-- Search full ICD library -->
+      <div class="card">
+        <div class="card-title">🔍 Search ICD-10 Library <span class="sub">Type a code, body part, or diagnosis term</span></div>
+        <div class="field">
+          <input id="icd-search-input" placeholder='e.g., "M54", "radiculopathy", "cervical", "facet"' oninput="searchICDLibrary(this.value)">
+        </div>
+        <div id="icd-search-results"></div>
+      </div>
+
+      <!-- Selected diagnoses -->
+      <div class="card">
+        <div class="card-title">✓ Working Diagnoses <span class="sub">Locked in for this visit</span></div>
+        <div id="icd-selected-list">
+          <div class="icd-empty-selected">No diagnoses selected yet. Tap any suggested code above or search the library.</div>
+        </div>
+      </div>
+
+      <!-- Treatment plan — placeholder for next response chunk -->
+      <div class="card" id="plan-builder-placeholder" style="border-left:4px solid var(--amber);">
+        <div class="card-title" style="color:var(--amber);">📅 Treatment Plan Builder</div>
+        <div class="callout gold">
+          <div class="callout-icon">🚧</div>
+          <div><strong>Treatment plan builder ships in Part 3B-2</strong> (next response). Diagnoses you select here will feed directly into the CPT/visit builder.</div>
+        </div>
+      </div>
+
       <div class="brow">
         <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
         <div class="spacer"></div>
@@ -5503,6 +5684,662 @@ const MUSCLE_GROUPS = [
   },
 ];
 
+// ═══════════════════════════════════════════════════════
+// ICD-10 LIBRARY — 30 codes covering ~85% of chiro/MSK cases
+// Each entry has:
+//   code:      ICD-10 code
+//   name:      full description
+//   category:  cervical|thoracic|lumbar|shoulder|elbow|wrist|hip|knee|ankle|headache|generalized
+//   laterality: 'L'|'R'|'B'|null (null = no laterality needed)
+//   triggers:  array of trigger objects, each with:
+//     - source:  'region'|'neuro'|'ortho'|'mechanism'|'onset'|'palp'|'age-over-45'|etc.
+//     - match:   value to match
+//     - weight:  points added if match is true
+// ═══════════════════════════════════════════════════════
+const ICD_LIBRARY = [
+  // ═════ LUMBAR / LOW BACK ═════
+  { code:'M54.50', name:'Low back pain, unspecified', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:30},
+      {source:'onset',  match:['today','this-week','2-4-wk'], weight:5},
+    ]},
+  { code:'M54.51', name:'Vertebrogenic low back pain', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:20},
+      {source:'onset',  match:['3-plus-mo','chronic'], weight:15},
+      {source:'palpspine-lumbar', match:true, weight:20},
+    ]},
+  { code:'M54.16', name:'Radiculopathy, lumbar region', category:'lumbar', laterality:'B',
+    triggers:[
+      {source:'region', match:'low-back', weight:20},
+      {source:'neuro',  match:['neuro-num','neuro-tingle','neuro-shoot','neuro-burn','neuro-weak'], weight:20},
+      {source:'ortho',  match:['slr','crossed-slr','slump'], weight:25},
+      {source:'neuro-finding', match:'dermatome-decreased', weight:15},
+      {source:'neuro-finding', match:'reflex-diminished', weight:10},
+    ]},
+  { code:'M54.17', name:'Radiculopathy, lumbosacral region', category:'lumbar', laterality:'B',
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'neuro',  match:['neuro-shoot','neuro-num'], weight:15},
+      {source:'ortho',  match:['slr','slump'], weight:20},
+      {source:'neuro-finding', match:'dermatome-s1', weight:20},
+    ]},
+  { code:'M54.41', name:'Lumbago with sciatica, right side', category:'lumbar', laterality:'R',
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'region-side', match:'R', weight:15},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:20},
+      {source:'ortho-side', match:{test:'slr', side:'R'}, weight:20},
+    ]},
+  { code:'M54.42', name:'Lumbago with sciatica, left side', category:'lumbar', laterality:'L',
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'region-side', match:'L', weight:15},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:20},
+      {source:'ortho-side', match:{test:'slr', side:'L'}, weight:20},
+    ]},
+  { code:'M47.816', name:'Spondylosis without myelopathy/radiculopathy, lumbar', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:20},
+      {source:'age-over-45', match:true, weight:15},
+    ]},
+  { code:'M47.816-facet', name:'Lumbar facet syndrome (M47.816)', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'ortho',  match:['kemp'], weight:30},
+      {source:'agg',    match:['standing','bending'], weight:10},
+      {source:'rel',    match:['sitting'], weight:5},
+    ]},
+  { code:'M51.36', name:'Other intervertebral disc degeneration, lumbar region', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:15},
+      {source:'ortho',  match:['slr','slump'], weight:15},
+    ]},
+  { code:'M53.3', name:'Sacrococcygeal disorders (SI dysfunction)', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:['low-back','hip'], weight:15},
+      {source:'ortho',  match:['faber','gaenslen','thigh-thrust','si-compress','si-distract'], weight:25, minMatches:2},
+    ]},
+
+  // ═════ CERVICAL / NECK ═════
+  { code:'M54.2', name:'Cervicalgia', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:30},
+    ]},
+  { code:'M54.12', name:'Radiculopathy, cervical region', category:'cervical', laterality:'B',
+    triggers:[
+      {source:'region', match:'neck', weight:20},
+      {source:'neuro',  match:['neuro-num','neuro-tingle','neuro-shoot','neuro-burn','neuro-weak'], weight:20},
+      {source:'ortho',  match:['spurlings','cerv-distraction','ult'], weight:25},
+      {source:'neuro-finding', match:'dermatome-decreased', weight:15},
+    ]},
+  { code:'M47.812', name:'Spondylosis without myelopathy/radiculopathy, cervical region', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:15},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:20},
+      {source:'age-over-45', match:true, weight:10},
+    ]},
+  { code:'S13.4XXA', name:'Cervical sprain, initial encounter', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:15},
+      {source:'mechanism', match:['mva','sports','fall','sudden'], weight:30},
+      {source:'onset', match:['today','this-week','2-4-wk'], weight:10},
+    ]},
+  { code:'M50.30', name:'Other cervical disc degeneration, unspecified', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:15},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:15},
+      {source:'ortho',  match:['spurlings','cerv-distraction'], weight:15},
+    ]},
+  { code:'M53.0', name:'Cervicocranial syndrome (cervicogenic headache)', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:['neck','head'], weight:20, requiresBoth:['neck','head']},
+      {source:'onset',  match:['2-4-wk','1-3-mo','3-plus-mo','chronic'], weight:10},
+    ]},
+
+  // ═════ THORACIC ═════
+  { code:'M54.6', name:'Pain in thoracic spine', category:'thoracic', laterality:null,
+    triggers:[
+      {source:'region', match:['upper-back','mid-back'], weight:30},
+    ]},
+  { code:'M54.14', name:'Radiculopathy, thoracic region', category:'thoracic', laterality:'B',
+    triggers:[
+      {source:'region', match:['upper-back','mid-back'], weight:15},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:20},
+    ]},
+
+  // ═════ SHOULDER ═════
+  { code:'M25.511', name:'Pain in right shoulder', category:'shoulder', laterality:'R',
+    triggers:[
+      {source:'region', match:'shoulder', weight:20},
+      {source:'region-side', match:'R', weight:15},
+    ]},
+  { code:'M25.512', name:'Pain in left shoulder', category:'shoulder', laterality:'L',
+    triggers:[
+      {source:'region', match:'shoulder', weight:20},
+      {source:'region-side', match:'L', weight:15},
+    ]},
+  { code:'M75.30', name:'Calcific tendinitis of shoulder, unspecified', category:'shoulder', laterality:null,
+    triggers:[
+      {source:'region', match:'shoulder', weight:15},
+      {source:'ortho',  match:['neer','hawkins','empty-can'], weight:20, minMatches:2},
+      {source:'onset',  match:['3-plus-mo','chronic'], weight:10},
+    ]},
+  { code:'M75.100', name:'Unspecified rotator cuff tear, unspecified shoulder', category:'shoulder', laterality:null,
+    triggers:[
+      {source:'region', match:'shoulder', weight:15},
+      {source:'ortho',  match:['empty-can','drop-arm'], weight:25},
+    ]},
+  { code:'M75.40', name:'Impingement syndrome of shoulder, unspecified', category:'shoulder', laterality:null,
+    triggers:[
+      {source:'region', match:'shoulder', weight:15},
+      {source:'ortho',  match:['neer','hawkins'], weight:25},
+    ]},
+
+  // ═════ ELBOW / WRIST ═════
+  { code:'M77.11', name:'Lateral epicondylitis, right elbow (tennis elbow)', category:'elbow', laterality:'R',
+    triggers:[
+      {source:'region', match:'elbow', weight:15},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho',  match:['cozen','mills'], weight:25},
+    ]},
+  { code:'M77.12', name:'Lateral epicondylitis, left elbow (tennis elbow)', category:'elbow', laterality:'L',
+    triggers:[
+      {source:'region', match:'elbow', weight:15},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho',  match:['cozen','mills'], weight:25},
+    ]},
+  { code:'G56.00', name:'Carpal tunnel syndrome, unspecified upper limb', category:'wrist', laterality:null,
+    triggers:[
+      {source:'region', match:'wrist', weight:15},
+      {source:'neuro',  match:['neuro-num','neuro-tingle'], weight:15},
+      {source:'ortho',  match:['phalen','tinel-wrist'], weight:30},
+    ]},
+
+  // ═════ HIP / KNEE / ANKLE ═════
+  { code:'M25.551', name:'Pain in right hip', category:'hip', laterality:'R',
+    triggers:[
+      {source:'region', match:'hip', weight:25},
+      {source:'region-side', match:'R', weight:10},
+    ]},
+  { code:'M25.552', name:'Pain in left hip', category:'hip', laterality:'L',
+    triggers:[
+      {source:'region', match:'hip', weight:25},
+      {source:'region-side', match:'L', weight:10},
+    ]},
+  { code:'M23.205', name:'Derangement of meniscus, unspecified', category:'knee', laterality:null,
+    triggers:[
+      {source:'region', match:'knee', weight:15},
+      {source:'ortho',  match:['mcmurray'], weight:30},
+      {source:'mechanism', match:['sports','sudden','lifting'], weight:10},
+    ]},
+  { code:'M77.31', name:'Calcaneal spur, right foot (plantar fasciitis)', category:'ankle', laterality:'R',
+    triggers:[
+      {source:'region', match:'ankle', weight:15},
+      {source:'ortho',  match:['windlass'], weight:30},
+      {source:'agg',    match:['walking','mornings'], weight:10},
+    ]},
+
+  // ═════ GENERAL ═════
+  { code:'M79.18', name:'Myalgia, other site (muscle pain)', category:'generalized', laterality:null,
+    triggers:[
+      {source:'palpmuscle-hyper', match:true, weight:25, minMatches:2},
+      {source:'onset', match:['today','this-week','2-4-wk'], weight:10},
+    ]},
+];
+
+// ═══════════════════════════════════════════════════════
+// ICD-10 SCORING ENGINE
+// ═══════════════════════════════════════════════════════
+function scoreICDCode(code, ctx){
+  const reasons = [];
+  let totalScore = 0;
+
+  code.triggers.forEach(t => {
+    let matched = false;
+    let matchDetail = '';
+
+    switch(t.source){
+      case 'region': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        if(t.requiresBoth){
+          const allIn = t.requiresBoth.every(r => ctx.regions.includes(r));
+          if(allIn){ matched = true; matchDetail = 'reported ' + t.requiresBoth.join(' + '); }
+        } else {
+          const hit = wanted.find(r => ctx.regions.includes(r));
+          if(hit){ matched = true; matchDetail = 'reported ' + hit.replace('-',' '); }
+        }
+        break;
+      }
+      case 'region-side': {
+        if(ctx.regionSides.includes(t.match)){
+          matched = true;
+          matchDetail = (t.match === 'R' ? 'Right' : t.match === 'L' ? 'Left' : 'Bilateral') + ' side';
+        }
+        break;
+      }
+      case 'neuro': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        const hit = wanted.find(n => ctx.neuroSymptoms.includes(n));
+        if(hit){
+          matched = true;
+          matchDetail = 'reported ' + hit.replace('neuro-', '');
+        }
+        break;
+      }
+      case 'ortho': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        const hits = wanted.filter(k => ctx.positiveOrthoTests.includes(k));
+        const min = t.minMatches || 1;
+        if(hits.length >= min){
+          matched = true;
+          const testNames = hits.map(k => ORTHO_TESTS[k] ? ORTHO_TESTS[k].name : k).join(', ');
+          matchDetail = '+ ' + testNames;
+        }
+        break;
+      }
+      case 'ortho-side': {
+        if(ctx.positiveOrthoTests.includes(t.match.test) && ctx.regionSides.includes(t.match.side)){
+          matched = true;
+          const name = ORTHO_TESTS[t.match.test] ? ORTHO_TESTS[t.match.test].name : t.match.test;
+          matchDetail = '+ ' + name + ' (' + t.match.side + ')';
+        }
+        break;
+      }
+      case 'onset': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        if(wanted.includes(ctx.onset)){
+          matched = true;
+          matchDetail = 'onset: ' + ctx.onset;
+        }
+        break;
+      }
+      case 'mechanism': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        if(wanted.includes(ctx.mechanism)){
+          matched = true;
+          matchDetail = 'mechanism: ' + ctx.mechanism;
+        }
+        break;
+      }
+      case 'agg': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        const hit = wanted.find(a => ctx.aggravating.includes(a));
+        if(hit){ matched = true; matchDetail = 'worse with ' + hit; }
+        break;
+      }
+      case 'rel': {
+        const wanted = Array.isArray(t.match) ? t.match : [t.match];
+        const hit = wanted.find(r => ctx.relieving.includes(r));
+        if(hit){ matched = true; matchDetail = 'better with ' + hit; }
+        break;
+      }
+      case 'neuro-finding': {
+        if(t.match === 'dermatome-decreased' && ctx.hasDermatomeDecreased){
+          matched = true; matchDetail = 'dermatomal sensory deficit';
+        } else if(t.match === 'reflex-diminished' && ctx.hasReflexDiminished){
+          matched = true; matchDetail = 'diminished reflex';
+        } else if(t.match === 'dermatome-s1' && ctx.dermatomesDecreased.includes('derm-s1')){
+          matched = true; matchDetail = 'S1 dermatome affected';
+        }
+        break;
+      }
+      case 'palpspine-lumbar': {
+        const lumbarSegs = Object.keys(ctx.palpSpine).filter(s =>
+          /^L\d\/L\d/.test(s) || /^L\d\/S1/.test(s) || /^T12\/L1/.test(s)
+        );
+        if(lumbarSegs.length > 0){
+          matched = true;
+          matchDetail = 'lumbar restriction (' + lumbarSegs.length + ' seg' + (lumbarSegs.length > 1 ? 's' : '') + ')';
+        }
+        break;
+      }
+      case 'palpmuscle-hyper': {
+        const count = Object.values(ctx.palpMuscles || {}).filter(f =>
+          f.findings && f.findings.includes('hyper')
+        ).length;
+        const min = t.minMatches || 1;
+        if(count >= min){
+          matched = true;
+          matchDetail = count + ' hypertonic muscle' + (count > 1 ? 's' : '');
+        }
+        break;
+      }
+      case 'age-over-45': {
+        if(ctx.patientAge !== null && ctx.patientAge >= 45){
+          matched = true;
+          matchDetail = 'age ' + ctx.patientAge;
+        }
+        break;
+      }
+    }
+
+    if(matched){
+      totalScore += t.weight;
+      reasons.push(matchDetail);
+    }
+  });
+
+  return { totalScore, reasons };
+}
+
+function buildICDContext(){
+  const patient = S.exam.patient;
+  if(!patient) return null;
+  const payload = patient.payload || {};
+  const complaint = payload.complaint || {};
+  const health = payload.health || {};
+
+  let patientAge = null;
+  if(patient.dob){
+    const dobDate = new Date(patient.dob);
+    if(!isNaN(dobDate.getTime())){
+      const t = new Date();
+      patientAge = t.getFullYear() - dobDate.getFullYear();
+      const m = t.getMonth() - dobDate.getMonth();
+      if(m < 0 || (m === 0 && t.getDate() < dobDate.getDate())) patientAge--;
+    }
+  }
+
+  const regions = Object.keys(complaint.regions || {});
+  const regionSides = [...new Set(Object.values(complaint.regions || {}).map(d => d.side).filter(Boolean))];
+
+  const positiveOrthoTests = Object.keys(S.exam.chiro.orthoTests || {})
+    .filter(k => S.exam.chiro.orthoTests[k].result === 'positive');
+
+  const dermatomesDecreased = Object.keys(S.exam.chiro.neuroDerm || {})
+    .filter(k => ['decreased','absent','hyperesthesia'].includes(S.exam.chiro.neuroDerm[k]));
+  const hasDermatomeDecreased = dermatomesDecreased.length > 0;
+  const hasReflexDiminished = Object.values(S.exam.chiro.neuroReflexes || {})
+    .some(v => ['0','1+'].includes(v));
+
+  return {
+    patientAge,
+    regions,
+    regionSides,
+    neuroSymptoms: health.neuroSymptoms || [],
+    onset: complaint.onset,
+    mechanism: complaint.mechanism,
+    aggravating: complaint.aggravating || [],
+    relieving: complaint.relieving || [],
+    positiveOrthoTests,
+    dermatomesDecreased,
+    hasDermatomeDecreased,
+    hasReflexDiminished,
+    palpSpine: S.exam.chiro.palpSpine || {},
+    palpMuscles: S.exam.chiro.palpMuscles || {},
+    redFlagCritical: health.redFlagCritical || false,
+  };
+}
+
+function getRankedICDSuggestions(){
+  const ctx = buildICDContext();
+  if(!ctx) return [];
+
+  const scored = ICD_LIBRARY.map(code => {
+    const r = scoreICDCode(code, ctx);
+    return { code, score: r.totalScore, reasons: r.reasons };
+  }).filter(x => x.score > 0);
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored;
+}
+
+// ═══════════════════════════════════════════════════════
+// ICD ENGINE UI — RENDER + INTERACTIONS
+// ═══════════════════════════════════════════════════════
+let _icdShowMore = false;
+
+function renderICDAssessment(){
+  renderICDReasoning();
+  renderICDSuggestions();
+  renderICDSelected();
+  // Clear any stale search
+  const searchInput = document.getElementById('icd-search-input');
+  if(searchInput) searchInput.value = '';
+  const searchResults = document.getElementById('icd-search-results');
+  if(searchResults) searchResults.innerHTML = '';
+}
+
+function renderICDReasoning(){
+  const el = document.getElementById('icd-reasoning-summary');
+  if(!el) return;
+  const ctx = buildICDContext();
+  if(!ctx){ el.innerHTML = '<div class="icd-reasoning-empty">No patient loaded.</div>'; return; }
+
+  const parts = [];
+
+  // Regions
+  if(ctx.regions.length){
+    const REGION_LABELS = {
+      'neck':'Neck','head':'Head','shoulder':'Shoulder','upper-back':'Upper Back','mid-back':'Mid Back',
+      'low-back':'Low Back','hip':'Hip','elbow':'Elbow','wrist':'Wrist','knee':'Knee','ankle':'Ankle',
+      'arm':'Arm','leg':'Leg','jaw':'Jaw'
+    };
+    const pills = ctx.regions.map(r => `<span class="icd-reasoning-pill region">${escapeHtml(REGION_LABELS[r] || r)}</span>`).join('');
+    parts.push('<div style="margin-bottom:6px;"><strong>Regions:</strong> ' + pills + '</div>');
+  }
+
+  // Neuro symptoms reported
+  const realNeuros = (ctx.neuroSymptoms || []).filter(s => s !== 'neuro-none');
+  if(realNeuros.length){
+    const NEURO_LABELS = {
+      'neuro-num':'Numbness','neuro-tingle':'Tingling','neuro-burn':'Burning',
+      'neuro-shoot':'Shooting pain','neuro-weak':'Weakness','neuro-drop':'Dropping things',
+      'neuro-cramp':'Cramps','neuro-cold':'Thermal sensitivity'
+    };
+    const pills = realNeuros.map(n => `<span class="icd-reasoning-pill neuro">${escapeHtml(NEURO_LABELS[n] || n)}</span>`).join('');
+    parts.push('<div style="margin-bottom:6px;"><strong>Neuro sx:</strong> ' + pills + '</div>');
+  }
+
+  // Positive ortho tests
+  if(ctx.positiveOrthoTests.length){
+    const pills = ctx.positiveOrthoTests.map(k => {
+      const n = ORTHO_TESTS[k] ? ORTHO_TESTS[k].name : k;
+      return `<span class="icd-reasoning-pill positive">+ ${escapeHtml(n)}</span>`;
+    }).join('');
+    parts.push('<div style="margin-bottom:6px;"><strong>Positive ortho tests:</strong> ' + pills + '</div>');
+  }
+
+  // Exam findings
+  const findings = [];
+  if(ctx.hasDermatomeDecreased) findings.push('Dermatomal sensory deficit');
+  if(ctx.hasReflexDiminished) findings.push('Diminished reflex');
+  const spineSegCount = Object.keys(ctx.palpSpine).length;
+  if(spineSegCount > 0) findings.push(spineSegCount + ' spinal segment restriction' + (spineSegCount > 1 ? 's' : ''));
+  const hyperCount = Object.values(ctx.palpMuscles).filter(f => f.findings && f.findings.includes('hyper')).length;
+  if(hyperCount > 0) findings.push(hyperCount + ' hypertonic muscle' + (hyperCount > 1 ? 's' : ''));
+  if(findings.length){
+    const pills = findings.map(f => `<span class="icd-reasoning-pill finding">${escapeHtml(f)}</span>`).join('');
+    parts.push('<div><strong>Exam findings:</strong> ' + pills + '</div>');
+  }
+
+  if(parts.length === 0){
+    el.innerHTML = '<div class="icd-reasoning-empty">No findings yet. The engine will show suggestions once you\'ve documented the exam.</div>';
+  } else {
+    el.innerHTML = parts.join('');
+  }
+}
+
+function renderICDSuggestions(){
+  const topEl = document.getElementById('icd-suggestions-top');
+  const moreEl = document.getElementById('icd-suggestions-more');
+  const moreBtn = document.getElementById('icd-show-more-btn');
+  const emptyEl = document.getElementById('icd-empty');
+  if(!topEl || !moreEl) return;
+
+  const ranked = getRankedICDSuggestions();
+  if(ranked.length === 0){
+    topEl.innerHTML = '';
+    moreEl.innerHTML = '';
+    moreEl.style.display = 'none';
+    if(moreBtn) moreBtn.style.display = 'none';
+    if(emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  const top5 = ranked.slice(0, 5);
+  const rest = ranked.slice(5);
+
+  topEl.innerHTML = top5.map(renderICDCard).join('');
+
+  if(rest.length > 0){
+    moreEl.innerHTML = rest.map(renderICDCard).join('');
+    if(moreBtn){
+      moreBtn.style.display = '';
+      moreBtn.textContent = _icdShowMore ? `Hide ${rest.length} more` : `Show ${rest.length} more code${rest.length > 1 ? 's' : ''}`;
+    }
+    moreEl.style.display = _icdShowMore ? '' : 'none';
+  } else {
+    moreEl.innerHTML = '';
+    moreEl.style.display = 'none';
+    if(moreBtn) moreBtn.style.display = 'none';
+  }
+}
+
+function renderICDCard(entry){
+  const { code, score, reasons } = entry;
+  const scoreClass = score >= 60 ? 'high' : score >= 35 ? 'mod' : 'low';
+  const latBadge = code.laterality === 'R' ? '<span class="icd-lat-badge laterality-r">RIGHT</span>'
+                 : code.laterality === 'L' ? '<span class="icd-lat-badge laterality-l">LEFT</span>'
+                 : code.laterality === 'B' ? '<span class="icd-lat-badge laterality-b">LATERALITY: SELECT</span>'
+                 : '';
+  const isSelected = (S.exam.chiro.selectedICD || []).some(d => d.code === code.code);
+  const reasonItems = reasons.slice(0, 4).map(r => `<span class="icd-why-item">${escapeHtml(r)}</span>`).join('');
+
+  return `
+    <div class="icd-card${isSelected ? ' selected' : ''}" onclick="toggleICDSelect('${code.code}')">
+      <div class="icd-score-bubble ${scoreClass}">${score}</div>
+      <div class="icd-body">
+        <div class="icd-top-row">
+          <span class="icd-code">${escapeHtml(code.code)}</span>
+          ${latBadge}
+        </div>
+        <div class="icd-name">${escapeHtml(code.name)}</div>
+        ${reasons.length ? `<div class="icd-why"><span class="icd-why-label">Why:</span> ${reasonItems}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function toggleICDShowMore(){
+  _icdShowMore = !_icdShowMore;
+  renderICDSuggestions();
+}
+
+function toggleICDSelect(code){
+  if(!S.exam.chiro.selectedICD) S.exam.chiro.selectedICD = [];
+  const idx = S.exam.chiro.selectedICD.findIndex(d => d.code === code);
+  if(idx >= 0){
+    S.exam.chiro.selectedICD.splice(idx, 1);
+  } else {
+    const libEntry = ICD_LIBRARY.find(c => c.code === code);
+    if(!libEntry) return;
+    // If bilateral code needs laterality, default to 'B' (user can change)
+    const latChoice = libEntry.laterality === 'B' ? 'B' : libEntry.laterality;
+    // First-added is auto-marked primary
+    const isPrimary = S.exam.chiro.selectedICD.length === 0;
+    S.exam.chiro.selectedICD.push({
+      code: libEntry.code,
+      name: libEntry.name,
+      laterality: latChoice,
+      primary: isPrimary,
+    });
+  }
+  renderICDSuggestions();
+  renderICDSelected();
+  // Re-render search items too
+  const searchInput = document.getElementById('icd-search-input');
+  if(searchInput && searchInput.value) searchICDLibrary(searchInput.value);
+}
+
+function renderICDSelected(){
+  const el = document.getElementById('icd-selected-list');
+  if(!el) return;
+  const list = S.exam.chiro.selectedICD || [];
+  if(list.length === 0){
+    el.innerHTML = '<div class="icd-empty-selected">No diagnoses selected yet. Tap any suggested code above or search the library.</div>';
+    return;
+  }
+  el.innerHTML = list.map(d => {
+    const lat = d.laterality === 'R' ? 'RIGHT' : d.laterality === 'L' ? 'LEFT' : d.laterality === 'B' ? 'BILATERAL' : '';
+    const latSwitch = ['L','R','B'].includes(d.laterality)
+      ? `<select onclick="event.stopPropagation()" onchange="updateICDLaterality('${d.code}', this.value)" style="font-size:.72rem;padding:3px 6px;border-radius:5px;border:1px solid var(--border);margin-right:6px;">
+           <option value="L"${d.laterality==='L'?' selected':''}>Left</option>
+           <option value="R"${d.laterality==='R'?' selected':''}>Right</option>
+           <option value="B"${d.laterality==='B'?' selected':''}>Bilateral</option>
+         </select>`
+      : '';
+    return `
+      <div class="icd-selected-item">
+        <button class="icd-selected-primary-toggle${d.primary ? ' active' : ''}" onclick="setICDPrimary('${d.code}')" title="Mark as primary diagnosis">${d.primary ? '★ PRIMARY' : 'Set Primary'}</button>
+        <div class="icd-selected-body">
+          <div><span class="icd-code">${escapeHtml(d.code)}</span> ${lat ? `<span class="icd-lat-badge laterality-${(d.laterality||'').toLowerCase()}">${lat}</span>` : ''}</div>
+          <div style="font-size:.84rem;color:var(--ink);margin-top:2px;">${escapeHtml(d.name)}</div>
+        </div>
+        ${latSwitch}
+        <button onclick="removeICD('${d.code}')">Remove</button>
+      </div>`;
+  }).join('');
+}
+
+function setICDPrimary(code){
+  if(!S.exam.chiro.selectedICD) return;
+  S.exam.chiro.selectedICD.forEach(d => { d.primary = (d.code === code); });
+  renderICDSelected();
+}
+
+function updateICDLaterality(code, newLat){
+  if(!S.exam.chiro.selectedICD) return;
+  const d = S.exam.chiro.selectedICD.find(x => x.code === code);
+  if(d) d.laterality = newLat;
+  renderICDSelected();
+}
+
+function removeICD(code){
+  if(!S.exam.chiro.selectedICD) return;
+  const removed = S.exam.chiro.selectedICD.find(d => d.code === code);
+  S.exam.chiro.selectedICD = S.exam.chiro.selectedICD.filter(d => d.code !== code);
+  // If removed was primary, promote first remaining
+  if(removed && removed.primary && S.exam.chiro.selectedICD.length > 0){
+    S.exam.chiro.selectedICD[0].primary = true;
+  }
+  renderICDSuggestions();
+  renderICDSelected();
+  const searchInput = document.getElementById('icd-search-input');
+  if(searchInput && searchInput.value) searchICDLibrary(searchInput.value);
+}
+
+function searchICDLibrary(query){
+  const resultsEl = document.getElementById('icd-search-results');
+  if(!resultsEl) return;
+  const q = (query || '').trim().toLowerCase();
+  if(q.length < 2){
+    resultsEl.innerHTML = '';
+    return;
+  }
+  const matches = ICD_LIBRARY.filter(c =>
+    c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q)
+  ).slice(0, 20);
+
+  if(matches.length === 0){
+    resultsEl.innerHTML = `<div style="padding:12px;color:var(--ink-sm);font-size:.82rem;font-style:italic;">No matches for "${escapeHtml(q)}".</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(c => {
+    const isSel = (S.exam.chiro.selectedICD || []).some(d => d.code === c.code);
+    return `
+      <div class="icd-search-item${isSel ? ' selected' : ''}" onclick="toggleICDSelect('${c.code}')">
+        <div class="icd-search-code">${escapeHtml(c.code)}</div>
+        <div class="icd-search-name">${escapeHtml(c.name)}</div>
+        <div class="icd-search-add">${isSel ? '✓ Added' : '+ Add'}</div>
+      </div>`;
+  }).join('');
+}
+
 // Dermatomes + myotomes + reflexes reference
 const NEURO_DERMATOMES = [
   {key:'derm-c5', label:'C5 (lateral arm / deltoid)'},
@@ -5566,6 +6403,8 @@ S.exam = {
     palpSpineShowAll: false,
     palpMuscleShowAll: false,
     palpNotes: '',
+    // ICD-10 diagnoses selected (Part 3B-1)
+    selectedICD: [],    // array of { code, name, laterality, primary }
   },
 };
 
@@ -5671,8 +6510,11 @@ function abandonExam(){
       palpSpineShowAll: false,
       palpMuscleShowAll: false,
       palpNotes: '',
+      selectedICD: [],
     },
   };
+  // Reset ICD show-more flag
+  _icdShowMore = false;
   // Clear all exam form fields
   document.querySelectorAll('#exam-app input, #exam-app textarea, #exam-app select').forEach(el => {
     if(el.type === 'checkbox') el.checked = false;
@@ -5681,6 +6523,12 @@ function abandonExam(){
   document.querySelectorAll('#exam-app .chip.sel').forEach(el => el.classList.remove('sel'));
   document.querySelectorAll('.ortho-result-btn').forEach(el => el.classList.remove('neg-sel','pos-sel','np-sel'));
   document.querySelectorAll('.ortho-test-item').forEach(el => el.classList.remove('positive','negative','not-performed'));
+  // Clear ICD UI elements
+  const icdContainers = ['icd-suggestions-top','icd-suggestions-more','icd-reasoning-summary','icd-search-results','icd-selected-list'];
+  icdContainers.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = '';
+  });
   document.getElementById('exam-app').style.display = 'none';
   document.getElementById('provider-app').style.display = '';
   startWaitingRoomPolling();
@@ -5777,6 +6625,10 @@ function examGoStep(idx){
     if(i < idx) p.classList.add('done');
     else if(i === idx) p.classList.add('active');
   });
+  // When entering the Plan step, fire the ICD engine to render live suggestions
+  if(key === 'plan'){
+    renderICDAssessment();
+  }
   window.scrollTo({top:0, behavior:'smooth'});
 }
 function examNextStep(){ examGoStep(S.exam.currentStep + 1); }

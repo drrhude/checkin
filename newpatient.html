@@ -884,6 +884,104 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 .ex-neuro-item-input:focus{outline:none;border-color:var(--sage);}
 
 /* ═════════════════════════════════════════════════
+   PALPATION — Spine segments + Muscle buttons
+   ═════════════════════════════════════════════════ */
+.palp-intro{
+  font-size:.78rem;color:var(--ink-sm);font-style:italic;
+  margin-bottom:10px;line-height:1.5;
+}
+.palp-spine-controls,.palp-muscle-controls,.ortho-addon-controls{
+  margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.palp-region-header{
+  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-sm);margin:12px 0 6px;
+}
+.palp-region-header:first-child{margin-top:0;}
+.spine-grid{
+  display:grid;gap:4px;margin-bottom:6px;
+  grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
+}
+.spine-seg{
+  padding:6px 4px;text-align:center;font-size:.72rem;font-weight:700;
+  background:var(--cream);border:1.5px solid var(--border);border-radius:5px;
+  cursor:pointer;transition:all .13s;color:var(--ink-md);
+  min-height:32px;display:flex;align-items:center;justify-content:center;
+}
+.spine-seg:hover{border-color:var(--sage-md);color:var(--sage);}
+.spine-seg.marked{
+  background:var(--amber);border-color:var(--amber);color:white;
+  box-shadow:0 1px 6px rgba(212,134,10,.3);
+}
+.spine-seg.marked:hover{background:var(--amber);border-color:var(--amber);color:white;}
+
+.muscle-region-block{
+  margin-bottom:14px;
+}
+.muscle-grid{
+  display:grid;gap:5px;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+}
+.muscle-btn{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:8px 11px;
+  background:var(--cream);border:1.5px solid var(--border);border-radius:6px;
+  cursor:pointer;transition:all .13s;text-align:left;
+  font-size:.8rem;font-weight:600;color:var(--ink-md);
+  font-family:'DM Sans',sans-serif;
+}
+.muscle-btn:hover{border-color:var(--sage-md);color:var(--sage);}
+.muscle-btn.marked{
+  background:var(--sage-xl);border-color:var(--sage);color:var(--sage-dk);
+}
+.muscle-btn-side{
+  font-size:.66rem;padding:2px 7px;border-radius:10px;font-weight:700;
+  background:rgba(47,92,67,.15);color:var(--sage);
+  letter-spacing:.05em;
+}
+.muscle-btn.marked .muscle-btn-side{background:var(--sage);color:white;}
+
+/* Findings summary list */
+.palp-findings-list{
+  margin-top:12px;padding:10px 13px;
+  background:var(--sage-xl);border-left:3px solid var(--sage);
+  border-radius:var(--rs);
+}
+.palp-findings-label{
+  font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--sage);margin-bottom:6px;
+}
+.palp-finding-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;background:white;border:1px solid var(--sage-md);
+  border-radius:12px;font-size:.77rem;color:var(--sage-dk);
+  margin:3px 4px 3px 0;font-weight:500;
+}
+.palp-finding-tag strong{font-weight:700;}
+.palp-finding-tag button{
+  border:none;background:none;color:var(--ink-sm);cursor:pointer;
+  padding:0 0 0 4px;font-size:1rem;line-height:1;
+}
+.palp-finding-tag button:hover{color:var(--red);}
+
+/* Restriction selection grid in spine modal */
+.palp-restriction-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0;
+}
+.palp-restriction-grid .chip{
+  text-align:center;padding:9px 8px;font-size:.78rem;
+}
+.palp-restriction-grid .chip.sel{background:var(--amber);border-color:var(--amber);color:white;}
+
+/* Modal chip selections in muscle modal */
+#palp-muscle-side-chips .chip.sel{background:var(--sage);border-color:var(--sage);color:white;}
+#palp-muscle-finding-chips .chip.sel{background:var(--sage);border-color:var(--sage);color:white;}
+
+/* Show-all collapsed regions label */
+.palp-region-header.collapsed::before{content:'▸ ';}
+.palp-region-header.expanded::before{content:'▾ ';}
+
+/* ═════════════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════════════ */
 @media (max-width:640px){
@@ -1847,12 +1945,37 @@ body[data-role="provider"] .lang-toggle{display:none;}
       <!-- Conditional Ortho Tests -->
       <div class="card">
         <div class="card-title">Orthopedic Tests <span class="sub">Suggested from patient complaint pattern</span></div>
+
         <div id="ex-ortho-suggestions" class="ex-ortho-suggestions">
           <!-- populated by buildOrthoSuggestions() -->
         </div>
         <div id="ex-ortho-empty" style="display:none;color:var(--ink-sm);font-style:italic;font-size:.85rem;padding:10px;">
           No specific ortho tests auto-suggested. Document any tests performed in the notes below.
         </div>
+
+        <!-- Add tests from other regions (for when patient reports additional complaints mid-exam) -->
+        <div class="ortho-addon-controls">
+          <button class="btn btn-h btn-sm" onclick="toggleOrthoAddOn()" id="ortho-addon-toggle">+ Add Tests from Other Regions</button>
+        </div>
+        <div id="ex-ortho-addon" style="display:none;">
+          <div class="callout" style="margin:10px 0 12px;font-size:.82rem;">
+            <div class="callout-icon">💡</div>
+            <div>Patient revealing additional complaints during exam? Pick the region and the relevant tests will be added to your exam above.</div>
+          </div>
+          <div class="sec-lbl">Region</div>
+          <div class="chips" id="ortho-addon-regions">
+            <button class="chip" data-region="cervical">Cervical</button>
+            <button class="chip" data-region="shoulder">Shoulder</button>
+            <button class="chip" data-region="elbow">Elbow</button>
+            <button class="chip" data-region="wrist">Wrist/Hand</button>
+            <button class="chip" data-region="lumbar">Lumbar</button>
+            <button class="chip" data-region="si-hip">SI / Hip</button>
+            <button class="chip" data-region="knee">Knee</button>
+            <button class="chip" data-region="ankle">Ankle/Foot</button>
+            <button class="chip" data-region="general">General (Valsalva)</button>
+          </div>
+        </div>
+
         <div class="row r1" style="margin-top:10px;">
           <div class="field">
             <label>Additional Ortho / Special Tests (free-form)</label>
@@ -1898,17 +2021,94 @@ body[data-role="provider"] .lang-toggle{display:none;}
 
       <!-- Palpation + Motion Palpation -->
       <div class="card">
-        <div class="card-title">Palpation &amp; Motion Palpation</div>
-        <div class="row r1">
+        <div class="card-title">Palpation Findings <span class="sub">Tap to mark findings — L/R/B supported</span></div>
+
+        <!-- SPINAL MOTION PALPATION -->
+        <div class="sec-lbl">Spinal Motion Palpation</div>
+        <div class="palp-intro" data-en="" data-es="">Tap a vertebral segment to mark a motion restriction. Region filter matches patient's reported complaints.</div>
+        <div class="palp-spine-controls">
+          <button class="btn btn-h btn-sm" onclick="togglePalpSpineShowAll()" id="palp-spine-toggle">+ Show All Spinal Regions</button>
+        </div>
+        <div id="palp-spine-container"></div>
+
+        <!-- Current spinal findings list -->
+        <div id="palp-spine-findings-list" class="palp-findings-list" style="display:none;">
+          <div class="palp-findings-label">Motion restrictions marked:</div>
+          <div id="palp-spine-findings"></div>
+        </div>
+
+        <!-- MUSCLE PALPATION -->
+        <div class="sec-lbl" style="margin-top:18px;">Muscle Palpation <span style="color:var(--ink-sm);font-weight:400;font-size:.72rem;font-style:italic;">· Hypertonic / TrP / Tender</span></div>
+        <div class="palp-muscle-controls">
+          <button class="btn btn-h btn-sm" onclick="togglePalpMuscleShowAll()" id="palp-muscle-toggle">+ Show All Muscles</button>
+        </div>
+        <div id="palp-muscle-container"></div>
+
+        <!-- Current muscle findings list -->
+        <div id="palp-muscle-findings-list" class="palp-findings-list" style="display:none;">
+          <div class="palp-findings-label">Muscle findings marked:</div>
+          <div id="palp-muscle-findings"></div>
+        </div>
+
+        <!-- FREE-FORM NOTES -->
+        <div class="row r1" style="margin-top:16px;">
           <div class="field">
-            <label>Hypertonicity / Trigger Points / Tender Points</label>
-            <textarea id="ex-palp-soft" placeholder="e.g., bilateral upper trapezius hypertonic, TrPs in R piriformis"></textarea>
+            <label>Additional Palpation Notes (free-form)</label>
+            <textarea id="ex-palp-notes" placeholder="Anything the buttons above don't capture — scar tissue, swelling, crepitus, tender rib articulations, etc."></textarea>
           </div>
         </div>
-        <div class="row r1">
-          <div class="field">
-            <label>Motion Palpation Findings (restrictions, fixations)</label>
-            <textarea id="ex-palp-joint" placeholder="e.g., R/P restriction at L4/L5, C5/C6 hypomobility in right rotation"></textarea>
+      </div>
+
+      <!-- Modal for picking restriction type on a spinal segment -->
+      <div class="modal-ov" id="palp-spine-modal">
+        <div class="modal" style="max-width:440px;">
+          <div class="modal-title" id="palp-spine-modal-title">Segment</div>
+          <div class="modal-sub">Select restriction pattern(s). Multiple allowed.</div>
+          <div class="palp-restriction-grid" id="palp-restriction-grid">
+            <button class="chip" data-restriction="flex">Flexion restriction</button>
+            <button class="chip" data-restriction="ext">Extension restriction</button>
+            <button class="chip" data-restriction="lat-l">L lateral flex restriction</button>
+            <button class="chip" data-restriction="lat-r">R lateral flex restriction</button>
+            <button class="chip" data-restriction="rot-l">L rotation restriction</button>
+            <button class="chip" data-restriction="rot-r">R rotation restriction</button>
+            <button class="chip" data-restriction="hypomobile">Hypomobile (non-specific)</button>
+            <button class="chip" data-restriction="hypermobile">Hypermobile</button>
+            <button class="chip" data-restriction="tender">Segmentally tender</button>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-red btn-sm" onclick="clearSpineSegment()" id="palp-spine-clear-btn" style="display:none;">Clear Segment</button>
+            <div style="flex:1;"></div>
+            <button class="btn btn-h btn-sm" onclick="closePalpSpineModal()">Cancel</button>
+            <button class="btn btn-p btn-sm" onclick="savePalpSpineModal()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for picking L/R + finding types on a muscle -->
+      <div class="modal-ov" id="palp-muscle-modal">
+        <div class="modal" style="max-width:440px;">
+          <div class="modal-title" id="palp-muscle-modal-title">Muscle</div>
+          <div class="modal-sub">Select side(s) and finding(s).</div>
+
+          <div class="sec-lbl" style="margin-top:8px;">Side</div>
+          <div class="chips" id="palp-muscle-side-chips">
+            <button class="chip" data-side="L">L (Left)</button>
+            <button class="chip" data-side="R">R (Right)</button>
+            <button class="chip" data-side="B">Bilateral</button>
+          </div>
+
+          <div class="sec-lbl" style="margin-top:12px;">Finding Type(s)</div>
+          <div class="chips" id="palp-muscle-finding-chips">
+            <button class="chip" data-finding="hyper">Hypertonic</button>
+            <button class="chip" data-finding="trp">Trigger Point (TrP)</button>
+            <button class="chip" data-finding="tender">Tender</button>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-red btn-sm" onclick="clearMuscleFinding()" id="palp-muscle-clear-btn" style="display:none;">Clear Muscle</button>
+            <div style="flex:1;"></div>
+            <button class="btn btn-h btn-sm" onclick="closePalpMuscleModal()">Cancel</button>
+            <button class="btn btn-p btn-sm" onclick="savePalpMuscleModal()">Save</button>
           </div>
         </div>
       </div>
@@ -5178,6 +5378,131 @@ const ORTHO_TESTS = {
   },
 };
 
+// Spinal segments for motion palpation — grouped by region
+// (Used in the spine palpation grid with smart filter)
+const SPINE_SEGMENTS = {
+  cervical: {
+    label:'Cervical',
+    segments:['Occ-C1','C1/C2','C2/C3','C3/C4','C4/C5','C5/C6','C6/C7','C7/T1']
+  },
+  thoracic: {
+    label:'Thoracic',
+    segments:['T1/T2','T2/T3','T3/T4','T4/T5','T5/T6','T6/T7','T7/T8','T8/T9','T9/T10','T10/T11','T11/T12','T12/L1']
+  },
+  lumbar: {
+    label:'Lumbar',
+    segments:['L1/L2','L2/L3','L3/L4','L4/L5','L5/S1']
+  },
+  pelvis: {
+    label:'Pelvis',
+    segments:['R SI','L SI','Sacrum','Coccyx']
+  },
+};
+
+// Map intake body regions → which spinal regions are relevant
+const REGION_TO_SPINE = {
+  'neck':       ['cervical'],
+  'upper-back': ['cervical','thoracic'],
+  'mid-back':   ['thoracic'],
+  'low-back':   ['lumbar','pelvis'],
+  'hip':        ['lumbar','pelvis'],
+  'head':       ['cervical'],
+  'jaw':        ['cervical'],
+  'shoulder':   ['cervical','thoracic'],
+  'leg':        ['lumbar','pelvis'],
+};
+
+// Muscle catalog — grouped by anatomical region
+const MUSCLE_GROUPS = [
+  {
+    id:'cerv-upper',
+    label:'Cervical / Upper',
+    showForRegions:['neck','head','upper-back','jaw','shoulder'],
+    muscles:[
+      {id:'utrap',      name:'Upper Trapezius'},
+      {id:'levator',    name:'Levator Scapulae'},
+      {id:'scm',        name:'SCM'},
+      {id:'scalenes',   name:'Scalenes'},
+      {id:'suboccip',   name:'Suboccipitals'},
+      {id:'splenius',   name:'Splenius Capitis/Cervicis'},
+      {id:'masseter',   name:'Masseter'},
+      {id:'temporalis', name:'Temporalis'},
+    ]
+  },
+  {
+    id:'shoulder-arm',
+    label:'Shoulder / Arm',
+    showForRegions:['shoulder','upper-back','arm','elbow','wrist'],
+    muscles:[
+      {id:'supraspin',  name:'Supraspinatus'},
+      {id:'infraspin',  name:'Infraspinatus'},
+      {id:'subscap',    name:'Subscapularis'},
+      {id:'teres-min',  name:'Teres Minor'},
+      {id:'teres-maj',  name:'Teres Major'},
+      {id:'rhomboids',  name:'Rhomboids'},
+      {id:'mtrap',      name:'Middle/Lower Trapezius'},
+      {id:'pec-major',  name:'Pectoralis Major'},
+      {id:'pec-minor',  name:'Pectoralis Minor'},
+      {id:'lats',       name:'Latissimus Dorsi'},
+      {id:'deltoid',    name:'Deltoid (A/M/P)'},
+      {id:'biceps',     name:'Biceps Brachii'},
+      {id:'triceps',    name:'Triceps'},
+    ]
+  },
+  {
+    id:'forearm',
+    label:'Forearm / Hand',
+    showForRegions:['elbow','wrist','arm'],
+    muscles:[
+      {id:'wrist-ext',  name:'Wrist/Finger Extensors'},
+      {id:'wrist-flex', name:'Wrist/Finger Flexors'},
+      {id:'pronators',  name:'Pronator Teres/Quadratus'},
+      {id:'brachiorad', name:'Brachioradialis'},
+    ]
+  },
+  {
+    id:'low-back',
+    label:'Low Back / Pelvis',
+    showForRegions:['low-back','mid-back','hip','leg'],
+    muscles:[
+      {id:'ql',         name:'Quadratus Lumborum'},
+      {id:'erectors',   name:'Erector Spinae'},
+      {id:'multifidus', name:'Multifidus'},
+      {id:'psoas',      name:'Psoas / Iliopsoas'},
+      {id:'piriformis', name:'Piriformis'},
+      {id:'glute-max',  name:'Gluteus Maximus'},
+      {id:'glute-med',  name:'Gluteus Medius'},
+      {id:'glute-min',  name:'Gluteus Minimus'},
+      {id:'tfl',        name:'TFL'},
+    ]
+  },
+  {
+    id:'thigh',
+    label:'Thigh',
+    showForRegions:['hip','knee','leg','low-back'],
+    muscles:[
+      {id:'quads',      name:'Quadriceps (Rectus/Vasti)'},
+      {id:'hams',       name:'Hamstrings'},
+      {id:'adductors',  name:'Adductor Group'},
+      {id:'itb',        name:'IT Band'},
+      {id:'sartorius',  name:'Sartorius'},
+    ]
+  },
+  {
+    id:'calf-foot',
+    label:'Lower Leg / Foot',
+    showForRegions:['knee','ankle','leg'],
+    muscles:[
+      {id:'gastroc',    name:'Gastrocnemius'},
+      {id:'soleus',     name:'Soleus'},
+      {id:'tib-ant',    name:'Tibialis Anterior'},
+      {id:'tib-post',   name:'Tibialis Posterior'},
+      {id:'peroneals',  name:'Peroneals'},
+      {id:'plantar-f',  name:'Plantar Fascia'},
+    ]
+  },
+];
+
 // Dermatomes + myotomes + reflexes reference
 const NEURO_DERMATOMES = [
   {key:'derm-c5', label:'C5 (lateral arm / deltoid)'},
@@ -5229,13 +5554,18 @@ S.exam = {
     romNotes: '',
     orthoTests: {},     // keyed by test key: { result: 'positive'|'negative'|'not-performed' }
     orthoNotes: '',
+    orthoAddOnRegions: [], // region IDs the provider manually added mid-exam
     neuroDerm: {},      // keyed by dermatome key: normal|decreased|absent|hyperesthesia
     neuroMyo: {},       // keyed by myotome key: 0-5
     neuroReflexes: {},  // keyed by reflex key: 0-4
     neuroSpecial: [],   // chip values selected
     neuroNotes: '',
-    palpSoft: '',
-    palpJoint: '',
+    // Structured palpation findings (new in this iteration)
+    palpSpine: {},      // keyed by segment name ('L4/L5'): ['flex','rot-l','hypomobile']
+    palpMuscles: {},    // keyed by muscle id: { sides: ['L'|'R'|'B'], findings: ['hyper','trp','tender'] }
+    palpSpineShowAll: false,
+    palpMuscleShowAll: false,
+    palpNotes: '',
   },
 };
 
@@ -5276,6 +5606,12 @@ function enterExamView(patient){
 
   // Wire neuro special tests chips
   wireNeuroSpecialChips();
+
+  // Build palpation: spine segments + muscle buttons
+  buildPalpSpine();
+  buildPalpMuscles();
+  renderSpineFindingsList();
+  renderMuscleFindingsList();
 
   // Show/hide neuro exam card based on whether patient reported symptoms
   const reportedNeuro = patient.payload && patient.payload.health &&
@@ -5324,13 +5660,17 @@ function abandonExam(){
       romNotes: '',
       orthoTests: {},
       orthoNotes: '',
+      orthoAddOnRegions: [],
       neuroDerm: {},
       neuroMyo: {},
       neuroReflexes: {},
       neuroSpecial: [],
       neuroNotes: '',
-      palpSoft: '',
-      palpJoint: '',
+      palpSpine: {},
+      palpMuscles: {},
+      palpSpineShowAll: false,
+      palpMuscleShowAll: false,
+      palpNotes: '',
     },
   };
   // Clear all exam form fields
@@ -5750,7 +6090,26 @@ function getSuggestedOrthoTests(patient){
     suggested.add('valsalva');
   }
 
+  // Add tests from any regions the provider manually added mid-exam
+  const addOnRegions = S.exam.chiro.orthoAddOnRegions || [];
+  addOnRegions.forEach(region => {
+    addOrthoTestsForRegion(region, suggested);
+  });
+
   return Array.from(suggested);
+}
+
+// Helper: add all ortho tests from the library that match a given region
+function addOrthoTestsForRegion(regionKey, suggestedSet){
+  Object.keys(ORTHO_TESTS).forEach(testKey => {
+    const test = ORTHO_TESTS[testKey];
+    // Match on test.region — handle combined regions (si-hip, si)
+    if(test.region === regionKey) suggestedSet.add(testKey);
+    // 'lumbar' add-on should include SI tests too
+    if(regionKey === 'lumbar' && (test.region === 'si' || test.region === 'si-hip')) suggestedSet.add(testKey);
+    // 'si-hip' add-on includes si, hip, and si-hip
+    if(regionKey === 'si-hip' && (test.region === 'si' || test.region === 'si-hip')) suggestedSet.add(testKey);
+  });
 }
 
 function buildOrthoSuggestions(patient){
@@ -5769,16 +6128,23 @@ function buildOrthoSuggestions(patient){
   container.innerHTML = suggested.map(key => {
     const t = ORTHO_TESTS[key];
     if(!t) return '';
+    // Preserve existing result state from S.exam.chiro.orthoTests
+    const existing = S.exam.chiro.orthoTests[key];
+    const result = existing ? existing.result : null;
+    const itemClass = result ? ' ' + result : '';
+    const negSel = result === 'negative' ? ' neg-sel' : '';
+    const posSel = result === 'positive' ? ' pos-sel' : '';
+    const npSel = result === 'not-performed' ? ' np-sel' : '';
     return `
-      <div class="ortho-test-item" id="ortho-item-${key}">
+      <div class="ortho-test-item${itemClass}" id="ortho-item-${key}">
         <div style="flex:1;">
           <div class="ortho-test-name">${escapeHtml(t.name)}</div>
           <div class="ortho-test-why">${escapeHtml(t.indication)} · ${escapeHtml(t.evidence)}</div>
         </div>
         <div class="ortho-test-result">
-          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','negative')">Neg</button>
-          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','positive')">Pos</button>
-          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','not-performed')">N/P</button>
+          <button class="ortho-result-btn${negSel}" onclick="setOrthoResult('${key}','negative')">Neg</button>
+          <button class="ortho-result-btn${posSel}" onclick="setOrthoResult('${key}','positive')">Pos</button>
+          <button class="ortho-result-btn${npSel}" onclick="setOrthoResult('${key}','not-performed')">N/P</button>
         </div>
       </div>`;
   }).join('');
@@ -5872,6 +6238,353 @@ function wireNeuroSpecialChips(){
         S.exam.chiro.neuroSpecial.push(val);
       }
     });
+  });
+}
+
+/* ═════════════════════════════════════════════════
+   PALPATION — SPINAL SEGMENTS + MUSCLE BUTTONS
+   ═════════════════════════════════════════════════ */
+
+// Get list of relevant spine regions for a patient, based on intake regions
+function getRelevantSpineRegions(patient){
+  const regions = Object.keys((patient.payload && patient.payload.complaint && patient.payload.complaint.regions) || {});
+  const relevant = new Set();
+  regions.forEach(r => {
+    (REGION_TO_SPINE[r] || []).forEach(sp => relevant.add(sp));
+  });
+  return Array.from(relevant);
+}
+
+// Get list of relevant muscle group IDs for a patient
+function getRelevantMuscleGroups(patient){
+  const regions = Object.keys((patient.payload && patient.payload.complaint && patient.payload.complaint.regions) || {});
+  return MUSCLE_GROUPS.filter(g =>
+    g.showForRegions.some(r => regions.includes(r))
+  ).map(g => g.id);
+}
+
+// Build spine palpation grid (tappable segments grouped by region)
+function buildPalpSpine(){
+  const container = document.getElementById('palp-spine-container');
+  if(!container || !S.exam.patient) return;
+
+  const relevantRegions = S.exam.chiro.palpSpineShowAll
+    ? Object.keys(SPINE_SEGMENTS)
+    : getRelevantSpineRegions(S.exam.patient);
+
+  // Fallback: if filter returns nothing, show all
+  const regionsToShow = relevantRegions.length > 0 ? relevantRegions : Object.keys(SPINE_SEGMENTS);
+
+  let html = '';
+  regionsToShow.forEach(key => {
+    const spec = SPINE_SEGMENTS[key];
+    if(!spec) return;
+    html += `<div class="palp-region-header">${spec.label}</div>`;
+    html += `<div class="spine-grid">` + spec.segments.map(seg => {
+      const marked = !!(S.exam.chiro.palpSpine[seg] && S.exam.chiro.palpSpine[seg].length > 0);
+      return `<div class="spine-seg${marked ? ' marked' : ''}" onclick="openPalpSpineModal('${seg.replace(/'/g,"\\'")}')">${escapeHtml(seg)}</div>`;
+    }).join('') + `</div>`;
+  });
+  container.innerHTML = html;
+
+  // Update toggle button text
+  const toggleBtn = document.getElementById('palp-spine-toggle');
+  if(toggleBtn){
+    toggleBtn.textContent = S.exam.chiro.palpSpineShowAll ? '− Show Only Relevant Regions' : '+ Show All Spinal Regions';
+  }
+}
+
+function togglePalpSpineShowAll(){
+  S.exam.chiro.palpSpineShowAll = !S.exam.chiro.palpSpineShowAll;
+  buildPalpSpine();
+}
+
+// Build muscle palpation grid
+function buildPalpMuscles(){
+  const container = document.getElementById('palp-muscle-container');
+  if(!container || !S.exam.patient) return;
+
+  const relevantGroupIds = S.exam.chiro.palpMuscleShowAll
+    ? MUSCLE_GROUPS.map(g => g.id)
+    : getRelevantMuscleGroups(S.exam.patient);
+
+  // Fallback
+  const groupsToShow = relevantGroupIds.length > 0 ? relevantGroupIds : MUSCLE_GROUPS.map(g => g.id);
+
+  let html = '';
+  MUSCLE_GROUPS.forEach(group => {
+    if(!groupsToShow.includes(group.id)) return;
+    html += `<div class="muscle-region-block">`;
+    html += `<div class="palp-region-header">${escapeHtml(group.label)}</div>`;
+    html += `<div class="muscle-grid">` + group.muscles.map(m => {
+      const finding = S.exam.chiro.palpMuscles[m.id];
+      const isMarked = finding && finding.sides && finding.sides.length > 0;
+      let sideBadge = '';
+      if(isMarked){
+        const sides = finding.sides.join('');
+        sideBadge = `<span class="muscle-btn-side">${sides}</span>`;
+      }
+      return `<button class="muscle-btn${isMarked ? ' marked' : ''}" onclick="openPalpMuscleModal('${m.id}')" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}${sideBadge}</button>`;
+    }).join('') + `</div>`;
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+
+  const toggleBtn = document.getElementById('palp-muscle-toggle');
+  if(toggleBtn){
+    toggleBtn.textContent = S.exam.chiro.palpMuscleShowAll ? '− Show Only Relevant Muscles' : '+ Show All Muscles';
+  }
+}
+
+function togglePalpMuscleShowAll(){
+  S.exam.chiro.palpMuscleShowAll = !S.exam.chiro.palpMuscleShowAll;
+  buildPalpMuscles();
+}
+
+/* ════════ SPINE SEGMENT MODAL ════════ */
+let _currentSpineSeg = null;
+
+function openPalpSpineModal(seg){
+  _currentSpineSeg = seg;
+  const modal = document.getElementById('palp-spine-modal');
+  const title = document.getElementById('palp-spine-modal-title');
+  const clearBtn = document.getElementById('palp-spine-clear-btn');
+  if(title) title.textContent = 'Segment: ' + seg;
+
+  // Pre-select any existing restrictions
+  const existing = S.exam.chiro.palpSpine[seg] || [];
+  modal.querySelectorAll('.palp-restriction-grid .chip').forEach(chip => {
+    const r = chip.dataset.restriction;
+    if(existing.includes(r)) chip.classList.add('sel');
+    else chip.classList.remove('sel');
+  });
+  // Wire chip clicks (once per modal open — clear previous listeners by cloning)
+  modal.querySelectorAll('.palp-restriction-grid .chip').forEach(chip => {
+    chip.onclick = () => chip.classList.toggle('sel');
+  });
+
+  if(clearBtn) clearBtn.style.display = existing.length > 0 ? '' : 'none';
+  modal.classList.add('show');
+}
+function closePalpSpineModal(){
+  document.getElementById('palp-spine-modal').classList.remove('show');
+  _currentSpineSeg = null;
+}
+function savePalpSpineModal(){
+  if(!_currentSpineSeg) { closePalpSpineModal(); return; }
+  const selected = [];
+  document.querySelectorAll('#palp-restriction-grid .chip.sel').forEach(chip => {
+    selected.push(chip.dataset.restriction);
+  });
+  if(selected.length === 0){
+    // Treat zero selections as clearing the segment
+    delete S.exam.chiro.palpSpine[_currentSpineSeg];
+  } else {
+    S.exam.chiro.palpSpine[_currentSpineSeg] = selected;
+  }
+  closePalpSpineModal();
+  buildPalpSpine();
+  renderSpineFindingsList();
+}
+function clearSpineSegment(){
+  if(!_currentSpineSeg) return;
+  delete S.exam.chiro.palpSpine[_currentSpineSeg];
+  closePalpSpineModal();
+  buildPalpSpine();
+  renderSpineFindingsList();
+}
+
+function renderSpineFindingsList(){
+  const list = document.getElementById('palp-spine-findings-list');
+  const target = document.getElementById('palp-spine-findings');
+  if(!list || !target) return;
+
+  const keys = Object.keys(S.exam.chiro.palpSpine);
+  if(keys.length === 0){
+    list.style.display = 'none';
+    target.innerHTML = '';
+    return;
+  }
+  list.style.display = '';
+
+  const RESTRICTION_LABELS = {
+    'flex':'Flex restr',
+    'ext':'Ext restr',
+    'lat-l':'L-lat restr',
+    'lat-r':'R-lat restr',
+    'rot-l':'L-rot restr',
+    'rot-r':'R-rot restr',
+    'hypomobile':'Hypomobile',
+    'hypermobile':'Hypermobile',
+    'tender':'Tender',
+  };
+  target.innerHTML = keys.map(seg => {
+    const restrictions = S.exam.chiro.palpSpine[seg] || [];
+    const rLabels = restrictions.map(r => RESTRICTION_LABELS[r] || r).join(', ');
+    return `<span class="palp-finding-tag"><strong>${escapeHtml(seg)}</strong>: ${escapeHtml(rLabels)}<button onclick="removeSpineFindingViaTag('${seg.replace(/'/g,"\\'")}')" title="Remove">×</button></span>`;
+  }).join('');
+}
+function removeSpineFindingViaTag(seg){
+  delete S.exam.chiro.palpSpine[seg];
+  buildPalpSpine();
+  renderSpineFindingsList();
+}
+
+/* ════════ MUSCLE MODAL ════════ */
+let _currentMuscleId = null;
+
+function openPalpMuscleModal(muscleId){
+  _currentMuscleId = muscleId;
+  const modal = document.getElementById('palp-muscle-modal');
+  const title = document.getElementById('palp-muscle-modal-title');
+  const clearBtn = document.getElementById('palp-muscle-clear-btn');
+
+  // Find muscle name
+  let muscleName = muscleId;
+  MUSCLE_GROUPS.forEach(g => {
+    const m = g.muscles.find(x => x.id === muscleId);
+    if(m) muscleName = m.name;
+  });
+  if(title) title.textContent = muscleName;
+
+  // Pre-select existing
+  const existing = S.exam.chiro.palpMuscles[muscleId] || {sides:[], findings:[]};
+  const sideChips = document.querySelectorAll('#palp-muscle-side-chips .chip');
+  sideChips.forEach(chip => {
+    if(existing.sides.includes(chip.dataset.side)) chip.classList.add('sel');
+    else chip.classList.remove('sel');
+    // Wire side chip clicks — Bilateral is mutex with L/R
+    chip.onclick = () => {
+      const side = chip.dataset.side;
+      if(side === 'B'){
+        sideChips.forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+      } else {
+        // Deselect Bilateral if picking L or R
+        const bChip = document.querySelector('#palp-muscle-side-chips .chip[data-side="B"]');
+        if(bChip) bChip.classList.remove('sel');
+        chip.classList.toggle('sel');
+      }
+    };
+  });
+
+  // Finding chips (multi-select)
+  const findingChips = document.querySelectorAll('#palp-muscle-finding-chips .chip');
+  findingChips.forEach(chip => {
+    if(existing.findings.includes(chip.dataset.finding)) chip.classList.add('sel');
+    else chip.classList.remove('sel');
+    chip.onclick = () => chip.classList.toggle('sel');
+  });
+
+  if(clearBtn) clearBtn.style.display = (existing.sides.length > 0 || existing.findings.length > 0) ? '' : 'none';
+  modal.classList.add('show');
+}
+function closePalpMuscleModal(){
+  document.getElementById('palp-muscle-modal').classList.remove('show');
+  _currentMuscleId = null;
+}
+function savePalpMuscleModal(){
+  if(!_currentMuscleId) { closePalpMuscleModal(); return; }
+  const sides = [];
+  document.querySelectorAll('#palp-muscle-side-chips .chip.sel').forEach(c => sides.push(c.dataset.side));
+  const findings = [];
+  document.querySelectorAll('#palp-muscle-finding-chips .chip.sel').forEach(c => findings.push(c.dataset.finding));
+
+  if(sides.length === 0 && findings.length === 0){
+    // Empty — clear
+    delete S.exam.chiro.palpMuscles[_currentMuscleId];
+  } else if(sides.length === 0 || findings.length === 0){
+    alert('Select at least one side (L/R/B) and at least one finding type.');
+    return;
+  } else {
+    S.exam.chiro.palpMuscles[_currentMuscleId] = {sides, findings};
+  }
+  closePalpMuscleModal();
+  buildPalpMuscles();
+  renderMuscleFindingsList();
+}
+function clearMuscleFinding(){
+  if(!_currentMuscleId) return;
+  delete S.exam.chiro.palpMuscles[_currentMuscleId];
+  closePalpMuscleModal();
+  buildPalpMuscles();
+  renderMuscleFindingsList();
+}
+
+function renderMuscleFindingsList(){
+  const list = document.getElementById('palp-muscle-findings-list');
+  const target = document.getElementById('palp-muscle-findings');
+  if(!list || !target) return;
+
+  const keys = Object.keys(S.exam.chiro.palpMuscles);
+  if(keys.length === 0){
+    list.style.display = 'none';
+    target.innerHTML = '';
+    return;
+  }
+  list.style.display = '';
+
+  const FINDING_LABELS = {hyper:'Hypertonic', trp:'TrP', tender:'Tender'};
+
+  target.innerHTML = keys.map(mid => {
+    const finding = S.exam.chiro.palpMuscles[mid];
+    // Find muscle name
+    let muscleName = mid;
+    MUSCLE_GROUPS.forEach(g => {
+      const m = g.muscles.find(x => x.id === mid);
+      if(m) muscleName = m.name;
+    });
+    const sides = (finding.sides || []).join('');
+    const findLabels = (finding.findings || []).map(f => FINDING_LABELS[f] || f).join(' + ');
+    return `<span class="palp-finding-tag"><strong>${escapeHtml(sides)}</strong> ${escapeHtml(muscleName)} — ${escapeHtml(findLabels)}<button onclick="removeMuscleFindingViaTag('${mid}')" title="Remove">×</button></span>`;
+  }).join('');
+}
+function removeMuscleFindingViaTag(mid){
+  delete S.exam.chiro.palpMuscles[mid];
+  buildPalpMuscles();
+  renderMuscleFindingsList();
+}
+
+/* ═════════════════════════════════════════════════
+   ORTHO TEST ADD-ON (for patients who reveal additional regions mid-exam)
+   ═════════════════════════════════════════════════ */
+function toggleOrthoAddOn(){
+  const el = document.getElementById('ex-ortho-addon');
+  const btn = document.getElementById('ortho-addon-toggle');
+  if(!el) return;
+  if(el.style.display === 'none' || !el.style.display){
+    el.style.display = '';
+    if(btn) btn.textContent = '− Hide Region Options';
+    // Wire chips (idempotent)
+    wireOrthoAddOnChips();
+  } else {
+    el.style.display = 'none';
+    if(btn) btn.textContent = '+ Add Tests from Other Regions';
+  }
+}
+
+function wireOrthoAddOnChips(){
+  const grp = document.getElementById('ortho-addon-regions');
+  if(!grp) return;
+  grp.querySelectorAll('.chip').forEach(chip => {
+    // Highlight chips already added
+    const region = chip.dataset.region;
+    if(S.exam.chiro.orthoAddOnRegions.includes(region)) chip.classList.add('sel');
+    else chip.classList.remove('sel');
+    chip.onclick = () => {
+      const region = chip.dataset.region;
+      if(chip.classList.contains('sel')){
+        chip.classList.remove('sel');
+        S.exam.chiro.orthoAddOnRegions = S.exam.chiro.orthoAddOnRegions.filter(r => r !== region);
+      } else {
+        chip.classList.add('sel');
+        if(!S.exam.chiro.orthoAddOnRegions.includes(region)){
+          S.exam.chiro.orthoAddOnRegions.push(region);
+        }
+      }
+      // Rebuild ortho suggestions to include new region's tests (preserves existing results)
+      buildOrthoSuggestions(S.exam.patient);
+    };
   });
 }
 

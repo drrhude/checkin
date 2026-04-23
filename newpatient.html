@@ -744,6 +744,146 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 .pd-redflag-warning-body ul{margin:6px 0 0 16px;padding:0;font-size:.82rem;color:var(--ink-md);}
 
 /* ═════════════════════════════════════════════════
+   EXAM VIEW (PROVIDER SIDE)
+   ═════════════════════════════════════════════════ */
+.exam-header{
+  background:white;border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 18px;margin-bottom:12px;box-shadow:var(--sh);
+}
+.exam-header-top{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.exam-patient-info{flex:1;min-width:200px;}
+.exam-patient-name{
+  font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--ink);line-height:1.2;
+}
+.exam-patient-meta{
+  font-size:.78rem;color:var(--ink-sm);margin-top:3px;
+}
+.exam-service-pills{
+  display:flex;gap:5px;flex-wrap:wrap;
+}
+.exam-header-actions{
+  display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--cream-dk);
+}
+
+/* Exam step strip (like the patient step strip but provider-styled) */
+.exam-step-strip{
+  background:white;border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 14px;display:flex;gap:6px;margin-bottom:14px;
+  overflow-x:auto;box-shadow:var(--sh);
+}
+.exam-step-pill{
+  flex:1;min-width:100px;padding:8px 12px;text-align:center;
+  font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  background:var(--cream-dk);color:var(--ink-sm);border-radius:6px;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.exam-step-pill.active{background:var(--sage);color:white;}
+.exam-step-pill.done{background:var(--sage-xl);color:var(--sage);}
+.exam-step-pill.done::before{content:'✓ ';}
+
+/* Exam steps */
+.exam-step{display:none;animation:fi .3s ease;}
+.exam-step.active{display:block;}
+
+/* Subjective review grid */
+.exam-subj-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:14px;
+}
+.exam-subj-grid .card{margin-bottom:0;}
+.exam-subj-grid .card > div:not(.card-title){
+  font-size:.86rem;line-height:1.7;color:var(--ink-md);
+}
+.exam-subj-grid strong{color:var(--ink);}
+
+/* Red flag banner in exam */
+.exam-redflag-banner{
+  background:var(--red-lt);border:2px solid var(--red);border-radius:var(--r);
+  padding:14px 18px;margin-bottom:14px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.exam-redflag-icon{font-size:2rem;flex-shrink:0;line-height:1;}
+.exam-redflag-title{font-weight:700;color:var(--red);font-size:1rem;margin-bottom:6px;}
+.exam-redflag-body{font-size:.88rem;color:var(--ink);line-height:1.6;}
+.exam-redflag-body ul{margin:6px 0 0 18px;padding:0;}
+
+/* ROM Tester */
+.rom-block{
+  padding:11px 13px;border-left:3px solid var(--sage);background:var(--cream);
+  border-radius:6px;margin-bottom:10px;
+}
+.rom-block-title{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--ink);
+  margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.rom-block-title .rom-region-pain{
+  margin-left:auto;padding:2px 8px;background:var(--red-lt);color:var(--red);
+  border-radius:10px;font-size:.7rem;font-weight:700;
+}
+.rom-row{
+  display:grid;grid-template-columns:120px 1fr 80px;gap:8px;align-items:center;
+  padding:5px 0;font-size:.82rem;
+}
+.rom-row-label{font-weight:600;color:var(--ink-md);font-size:.8rem;}
+.rom-row-input{
+  border:1.5px solid var(--border);border-radius:6px;
+  padding:6px 9px;background:white;font-size:.82rem;color:var(--ink);width:100%;
+  font-family:'DM Sans',sans-serif;
+}
+.rom-row-input:focus{outline:none;border-color:var(--sage);}
+.rom-row-pain{
+  display:flex;align-items:center;gap:4px;font-size:.75rem;color:var(--ink-sm);
+}
+.rom-row-pain input[type=checkbox]{width:14px;height:14px;accent-color:var(--red);cursor:pointer;}
+
+/* Ortho test suggestions */
+.ex-ortho-suggestions{display:flex;flex-direction:column;gap:8px;}
+.ortho-test-item{
+  background:var(--cream);border:1.5px solid var(--border);border-radius:var(--rs);
+  padding:10px 14px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  transition:all .15s;
+}
+.ortho-test-item.positive{background:var(--red-lt);border-color:var(--red);}
+.ortho-test-item.negative{background:var(--green-lt);border-color:var(--green);}
+.ortho-test-item.not-performed{opacity:.7;}
+.ortho-test-name{flex:1;font-weight:600;font-size:.88rem;color:var(--ink);}
+.ortho-test-why{
+  font-size:.73rem;color:var(--ink-sm);font-style:italic;
+  display:block;margin-top:2px;font-weight:400;
+}
+.ortho-test-result{display:flex;gap:5px;flex-shrink:0;}
+.ortho-result-btn{
+  padding:6px 13px;border-radius:6px;border:1.5px solid var(--border);
+  background:white;font-size:.75rem;font-weight:700;cursor:pointer;
+  transition:all .13s;color:var(--ink-sm);min-width:52px;
+}
+.ortho-result-btn.neg-sel{background:var(--green);border-color:var(--green);color:white;}
+.ortho-result-btn.pos-sel{background:var(--red);border-color:var(--red);color:white;}
+.ortho-result-btn.np-sel{background:var(--border);border-color:var(--border);color:white;}
+.ortho-result-btn:hover:not(.neg-sel):not(.pos-sel):not(.np-sel){border-color:var(--sage-md);color:var(--sage-md);}
+
+/* Neuro exam grids */
+.ex-neuro-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:7px;
+}
+.ex-neuro-item{
+  display:flex;align-items:center;gap:8px;padding:7px 11px;
+  background:var(--cream);border:1.5px solid var(--border);border-radius:6px;
+  font-size:.8rem;
+}
+.ex-neuro-item-label{flex:1;font-weight:600;color:var(--ink-md);font-size:.76rem;}
+.ex-neuro-item-input{
+  border:1.5px solid var(--border);border-radius:5px;
+  padding:4px 8px;background:white;font-size:.78rem;color:var(--ink);width:60px;text-align:center;
+  font-family:'DM Sans',sans-serif;
+}
+.ex-neuro-item-input:focus{outline:none;border-color:var(--sage);}
+
+/* ═════════════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════════════ */
 @media (max-width:640px){
@@ -761,6 +901,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
   .mnsi-item{flex-wrap:wrap;}
   .mnsi-item-q{min-width:100%;order:2;}
   .mnsi-item-yn{order:3;margin-left:auto;}
+  .exam-header-top{flex-direction:column;align-items:stretch;}
+  .exam-subj-grid{grid-template-columns:1fr;}
+  .rom-row{grid-template-columns:1fr;gap:4px;}
+  .rom-row-label{font-size:.78rem;}
 }
 
 /* Hide language toggle on provider/staff pages */
@@ -1557,6 +1701,305 @@ body[data-role="provider"] .lang-toggle{display:none;}
     <button class="btn btn-h btn-sm" onclick="goLanding()">← Back to Landing</button>
     <div class="spacer"></div>
     <button class="btn btn-h btn-sm" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     EXAM VIEW (Provider running an exam)
+     ══════════════════════════════ -->
+<div class="app" id="exam-app" style="display:none;">
+  <!-- Exam header with patient context -->
+  <div class="exam-header">
+    <div class="exam-header-top">
+      <button class="btn btn-h btn-sm" onclick="exitExamToWaitingRoom()">← Back to Queue</button>
+      <div class="exam-patient-info">
+        <div class="exam-patient-name" id="exam-patient-name">—</div>
+        <div class="exam-patient-meta" id="exam-patient-meta">—</div>
+      </div>
+      <div class="exam-service-pills" id="exam-service-pills"></div>
+    </div>
+    <div class="exam-header-actions">
+      <button class="btn btn-h btn-sm" onclick="openPatientIntakePDF()" id="exam-pdf-btn">📄 View Intake PDF</button>
+      <button class="btn btn-red btn-sm" onclick="abandonExam()">⊘ Abandon</button>
+    </div>
+  </div>
+
+  <!-- Exam step strip -->
+  <div class="exam-step-strip" id="exam-step-strip">
+    <!-- Populated dynamically by buildExamSteps() based on patient services -->
+  </div>
+
+  <!-- Exam steps -->
+  <div id="exam-steps-container">
+    <!-- STEP 0 — SUBJECTIVE REVIEW -->
+    <div class="exam-step active" id="exam-step-subjective">
+      <div class="phase-hdr">
+        <div class="phase-lbl">Step 1 · Subjective Review</div>
+        <div class="phase-title">What Did the Patient Tell Us?</div>
+        <div class="phase-desc">Review the patient's intake. Verify accuracy with them before moving to objective exam.</div>
+      </div>
+
+      <!-- Red flag alert (shown if critical red flag was hit) -->
+      <div id="exam-redflag-banner" style="display:none;"></div>
+
+      <div class="exam-subj-grid">
+        <div class="card">
+          <div class="card-title">🦴 Chief Complaint</div>
+          <div id="exam-subj-complaint"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎯 Patient Goals</div>
+          <div id="exam-subj-goals"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💊 Medical History</div>
+          <div id="exam-subj-hx"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚠️ Nerve Symptoms &amp; Safety Screen</div>
+          <div id="exam-subj-neuro"></div>
+        </div>
+
+        <div class="card" id="exam-subj-sw-card" style="display:none;">
+          <div class="card-title" style="color:var(--gold-dk);">⚡ Shockwave Intake Data</div>
+          <div id="exam-subj-sw"></div>
+        </div>
+
+        <div class="card" id="exam-subj-np-card" style="display:none;">
+          <div class="card-title" style="color:#6a4a8f;">🧠 NeuroPath Intake Data</div>
+          <div id="exam-subj-np"></div>
+        </div>
+
+        <div class="card" id="exam-subj-wl-card" style="display:none;">
+          <div class="card-title" style="color:var(--teal);">⚖️ Weight Loss Intake Data</div>
+          <div id="exam-subj-wl"></div>
+        </div>
+      </div>
+
+      <div class="brow" style="margin-top:20px;">
+        <div class="spacer"></div>
+        <button class="btn btn-p btn-lg" onclick="examNextStep()">Begin Objective Exam →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1 — CHIRO EXAM -->
+    <div class="exam-step" id="exam-step-chiro">
+      <div class="phase-hdr">
+        <div class="phase-lbl" id="exam-chiro-lbl">Step 2 · Chiropractic Exam</div>
+        <div class="phase-title">Objective Chiropractic Exam</div>
+        <div class="phase-desc">Run the exam. The tests suggested below are driven by what the patient told us in their intake.</div>
+      </div>
+
+      <!-- Vitals & Observation -->
+      <div class="card">
+        <div class="card-title">Vitals &amp; Observation</div>
+        <div class="row r3">
+          <div class="field">
+            <label>Blood Pressure</label>
+            <input id="ex-bp" placeholder="e.g., 120/80">
+          </div>
+          <div class="field">
+            <label>Resting Heart Rate (bpm)</label>
+            <input type="number" id="ex-hr" placeholder="e.g., 72" min="30" max="200">
+          </div>
+          <div class="field">
+            <label>Pain Scale (Today)</label>
+            <select id="ex-pain-today">
+              <option value="">—</option>
+              <option>0/10 — No pain</option>
+              <option>1/10</option><option>2/10</option><option>3/10</option><option>4/10</option>
+              <option>5/10 — Moderate</option>
+              <option>6/10</option><option>7/10</option>
+              <option>8/10 — Severe</option>
+              <option>9/10</option>
+              <option>10/10 — Worst possible</option>
+            </select>
+          </div>
+        </div>
+        <div class="row r1">
+          <div class="field">
+            <label>Posture / Gait / Observation Notes</label>
+            <textarea id="ex-obs" placeholder="Antalgic lean, head-forward posture, LE weight-bearing asymmetry, etc."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROM Tester — dynamically built based on body regions reported -->
+      <div class="card">
+        <div class="card-title">Range of Motion <span class="sub">Tests are suggested based on patient's reported regions</span></div>
+        <div id="ex-rom-container">
+          <!-- populated by buildROMTester() -->
+        </div>
+        <div id="ex-rom-empty" style="display:none;color:var(--ink-sm);font-style:italic;font-size:.85rem;padding:10px;">
+          Patient did not report specific body regions in intake. Use free-form notes below.
+        </div>
+        <div class="row r1" style="margin-top:10px;">
+          <div class="field">
+            <label>Additional ROM Notes (free-form)</label>
+            <textarea id="ex-rom-notes" placeholder=""></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditional Ortho Tests -->
+      <div class="card">
+        <div class="card-title">Orthopedic Tests <span class="sub">Suggested from patient complaint pattern</span></div>
+        <div id="ex-ortho-suggestions" class="ex-ortho-suggestions">
+          <!-- populated by buildOrthoSuggestions() -->
+        </div>
+        <div id="ex-ortho-empty" style="display:none;color:var(--ink-sm);font-style:italic;font-size:.85rem;padding:10px;">
+          No specific ortho tests auto-suggested. Document any tests performed in the notes below.
+        </div>
+        <div class="row r1" style="margin-top:10px;">
+          <div class="field">
+            <label>Additional Ortho / Special Tests (free-form)</label>
+            <textarea id="ex-ortho-notes" placeholder=""></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neuro Exam — shown only if patient reported neuro symptoms -->
+      <div class="card" id="ex-neuro-card" style="display:none;">
+        <div class="card-title">Neurological Exam <span class="sub">Patient reported nerve symptoms — performing neuro screen</span></div>
+        <div class="callout">
+          <div class="callout-icon">💡</div>
+          <div id="ex-neuro-reported">Patient reported: —</div>
+        </div>
+
+        <div class="sec-lbl">Dermatomes (Light Touch + Sharp/Dull)</div>
+        <div id="ex-dermatomes" class="ex-neuro-grid"></div>
+
+        <div class="sec-lbl" style="margin-top:12px;">Myotomes (Motor Strength 0–5)</div>
+        <div id="ex-myotomes" class="ex-neuro-grid"></div>
+
+        <div class="sec-lbl" style="margin-top:12px;">Deep Tendon Reflexes (0–4)</div>
+        <div id="ex-reflexes" class="ex-neuro-grid"></div>
+
+        <div class="sec-lbl" style="margin-top:12px;">Special Neuro Tests</div>
+        <div id="ex-neuro-special" class="chips">
+          <div class="chip" data-val="babinski-neg" data-test="Babinski" data-result="negative">Babinski (−)</div>
+          <div class="chip" data-val="babinski-pos" data-test="Babinski" data-result="POSITIVE">Babinski (+)</div>
+          <div class="chip" data-val="hoffman-neg" data-test="Hoffman" data-result="negative">Hoffman (−)</div>
+          <div class="chip" data-val="hoffman-pos" data-test="Hoffman" data-result="POSITIVE">Hoffman (+)</div>
+          <div class="chip" data-val="clonus-neg" data-test="Clonus" data-result="negative">Clonus (−)</div>
+          <div class="chip" data-val="clonus-pos" data-test="Clonus" data-result="POSITIVE">Clonus (+)</div>
+        </div>
+
+        <div class="row r1" style="margin-top:10px;">
+          <div class="field">
+            <label>Neuro Notes (free-form)</label>
+            <textarea id="ex-neuro-notes" placeholder=""></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Palpation + Motion Palpation -->
+      <div class="card">
+        <div class="card-title">Palpation &amp; Motion Palpation</div>
+        <div class="row r1">
+          <div class="field">
+            <label>Hypertonicity / Trigger Points / Tender Points</label>
+            <textarea id="ex-palp-soft" placeholder="e.g., bilateral upper trapezius hypertonic, TrPs in R piriformis"></textarea>
+          </div>
+        </div>
+        <div class="row r1">
+          <div class="field">
+            <label>Motion Palpation Findings (restrictions, fixations)</label>
+            <textarea id="ex-palp-joint" placeholder="e.g., R/P restriction at L4/L5, C5/C6 hypomobility in right rotation"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Subjective Review</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" onclick="examNextStep()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER STEPS (to be built out in Part 3B-3D) -->
+    <div class="exam-step" id="exam-step-sw">
+      <div class="phase-hdr">
+        <div class="phase-lbl">Shockwave Exam</div>
+        <div class="phase-title">⚡ Shockwave Objective Exam</div>
+      </div>
+      <div class="callout gold">
+        <div class="callout-icon">🚧</div>
+        <div>Shockwave exam module ships in Part 3C. For now, you can navigate through this step.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" onclick="examNextStep()">Continue →</button>
+      </div>
+    </div>
+
+    <div class="exam-step" id="exam-step-np">
+      <div class="phase-hdr">
+        <div class="phase-lbl">NeuroPath Exam</div>
+        <div class="phase-title">🧠 NeuroPath Objective Exam</div>
+      </div>
+      <div class="callout" style="background:#f3ecf7;border-left-color:#6a4a8f;">
+        <div class="callout-icon">🚧</div>
+        <div>NeuroPath sensory battery ships in Part 3C.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" onclick="examNextStep()">Continue →</button>
+      </div>
+    </div>
+
+    <div class="exam-step" id="exam-step-wl">
+      <div class="phase-hdr">
+        <div class="phase-lbl">Weight Loss</div>
+        <div class="phase-title">⚖️ Weight Loss Assessment</div>
+      </div>
+      <div class="callout teal">
+        <div class="callout-icon">🚧</div>
+        <div>Weight loss assessment ships in Part 3C.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" onclick="examNextStep()">Continue →</button>
+      </div>
+    </div>
+
+    <div class="exam-step" id="exam-step-plan">
+      <div class="phase-hdr">
+        <div class="phase-lbl">Assessment &amp; Plan</div>
+        <div class="phase-title">Diagnosis &amp; Treatment Plan</div>
+      </div>
+      <div class="callout">
+        <div class="callout-icon">🚧</div>
+        <div>ICD-10 auto-suggest engine + treatment plan builder ships in Part 3B.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" onclick="examNextStep()">Continue →</button>
+      </div>
+    </div>
+
+    <div class="exam-step" id="exam-step-signoff">
+      <div class="phase-hdr">
+        <div class="phase-lbl">Sign-Off</div>
+        <div class="phase-title">Complete &amp; Sign Exam</div>
+      </div>
+      <div class="callout">
+        <div class="callout-icon">🚧</div>
+        <div>Sign-off + combined PDF generator ships in Part 3D.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <div class="spacer"></div>
+        <button class="btn btn-p" disabled>Submit Exam (Part 3D)</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -4410,10 +4853,1025 @@ async function markPatientStatus(newStatus){
 
 function startExam(){
   if(!wrSelectedPatient) return;
-  // For Part 2B — just mark as in-exam and show a placeholder
-  // Part 3 will build the actual exam flow
+  const p = wrSelectedPatient;
+  // Capture patient before closing modal
+  const patientSnapshot = Object.assign({}, p, {payload: p.payload});
   markPatientStatus('in-exam').then(() => {
-    alert(`Patient ${wrSelectedPatient?.first} ${wrSelectedPatient?.last} moved to "In Exam" status.\n\nThe full provider exam flow (with ICD engine, ortho tests, and combined PDF) will ship in Part 3.`);
+    enterExamView(patientSnapshot);
+  });
+}
+
+/* ═════════════════════════════════════════════════
+   EXAM CLINICAL DATA
+   ═════════════════════════════════════════════════ */
+
+// ROM reference — per region, list of planes tested + normal ranges
+const ROM_SPECS = {
+  'neck': {
+    name:'Cervical',
+    planes:[
+      {key:'cerv-flex',   label:'Flexion',          normal:'50°'},
+      {key:'cerv-ext',    label:'Extension',        normal:'60°'},
+      {key:'cerv-lat-l',  label:'L Lateral Flex',   normal:'45°'},
+      {key:'cerv-lat-r',  label:'R Lateral Flex',   normal:'45°'},
+      {key:'cerv-rot-l',  label:'L Rotation',       normal:'80°'},
+      {key:'cerv-rot-r',  label:'R Rotation',       normal:'80°'},
+    ]
+  },
+  'upper-back': {
+    name:'Thoracic',
+    planes:[
+      {key:'thor-flex',   label:'Flexion',          normal:'25°'},
+      {key:'thor-ext',    label:'Extension',        normal:'25°'},
+      {key:'thor-rot-l',  label:'L Rotation',       normal:'30°'},
+      {key:'thor-rot-r',  label:'R Rotation',       normal:'30°'},
+    ]
+  },
+  'mid-back': {
+    name:'Thoracic',
+    planes:[
+      {key:'thor-flex',   label:'Flexion',          normal:'25°'},
+      {key:'thor-ext',    label:'Extension',        normal:'25°'},
+      {key:'thor-rot-l',  label:'L Rotation',       normal:'30°'},
+      {key:'thor-rot-r',  label:'R Rotation',       normal:'30°'},
+    ]
+  },
+  'low-back': {
+    name:'Lumbar',
+    planes:[
+      {key:'lum-flex',    label:'Flexion',          normal:'60°'},
+      {key:'lum-ext',     label:'Extension',        normal:'25°'},
+      {key:'lum-lat-l',   label:'L Lateral Flex',   normal:'25°'},
+      {key:'lum-lat-r',   label:'R Lateral Flex',   normal:'25°'},
+      {key:'lum-rot-l',   label:'L Rotation',       normal:'30°'},
+      {key:'lum-rot-r',   label:'R Rotation',       normal:'30°'},
+    ]
+  },
+  'shoulder': {
+    name:'Shoulder',
+    planes:[
+      {key:'sh-flex',   label:'Flexion',           normal:'180°'},
+      {key:'sh-ext',    label:'Extension',         normal:'50°'},
+      {key:'sh-abd',    label:'Abduction',         normal:'180°'},
+      {key:'sh-add',    label:'Adduction',         normal:'50°'},
+      {key:'sh-er',     label:'External Rotation', normal:'90°'},
+      {key:'sh-ir',     label:'Internal Rotation', normal:'70°'},
+    ]
+  },
+  'elbow': {
+    name:'Elbow',
+    planes:[
+      {key:'el-flex',   label:'Flexion',       normal:'150°'},
+      {key:'el-ext',    label:'Extension',     normal:'0°'},
+      {key:'el-sup',    label:'Supination',    normal:'90°'},
+      {key:'el-pron',   label:'Pronation',     normal:'80°'},
+    ]
+  },
+  'wrist': {
+    name:'Wrist/Hand',
+    planes:[
+      {key:'wr-flex',   label:'Flexion',       normal:'80°'},
+      {key:'wr-ext',    label:'Extension',     normal:'70°'},
+      {key:'wr-rad',    label:'Radial Dev.',   normal:'20°'},
+      {key:'wr-uln',    label:'Ulnar Dev.',    normal:'30°'},
+    ]
+  },
+  'hip': {
+    name:'Hip',
+    planes:[
+      {key:'hip-flex',   label:'Flexion',           normal:'120°'},
+      {key:'hip-ext',    label:'Extension',         normal:'30°'},
+      {key:'hip-abd',    label:'Abduction',         normal:'45°'},
+      {key:'hip-add',    label:'Adduction',         normal:'30°'},
+      {key:'hip-er',     label:'External Rotation', normal:'45°'},
+      {key:'hip-ir',     label:'Internal Rotation', normal:'45°'},
+    ]
+  },
+  'knee': {
+    name:'Knee',
+    planes:[
+      {key:'kn-flex',   label:'Flexion',       normal:'135°'},
+      {key:'kn-ext',    label:'Extension',     normal:'0°'},
+    ]
+  },
+  'ankle': {
+    name:'Ankle/Foot',
+    planes:[
+      {key:'an-dorsi',    label:'Dorsiflexion',     normal:'20°'},
+      {key:'an-plantar',  label:'Plantarflexion',   normal:'50°'},
+      {key:'an-inv',      label:'Inversion',        normal:'35°'},
+      {key:'an-ev',       label:'Eversion',         normal:'15°'},
+    ]
+  },
+  'jaw': {
+    name:'TMJ',
+    planes:[
+      {key:'tmj-open',   label:'Opening',       normal:'40–55 mm'},
+      {key:'tmj-lat-l',  label:'L Lateral',     normal:'10 mm'},
+      {key:'tmj-lat-r',  label:'R Lateral',     normal:'10 mm'},
+    ]
+  },
+};
+
+// Orthopedic test library — keyed by what triggers the suggestion
+// Evidence citations noted for each
+const ORTHO_TESTS = {
+  // ════ CERVICAL / UPPER EXTREMITY ════
+  spurlings: {
+    name: "Spurling's Test",
+    indication: 'Cervical radiculopathy (sens ~50%, spec ~90%)',
+    evidence: 'Tong et al. 2002, Wainner 2003',
+    region: 'cervical',
+    positiveFor: 'Cervical nerve root compression (C5–C8)',
+  },
+  'cerv-distraction': {
+    name: 'Cervical Distraction Test',
+    indication: 'Reduces radicular symptoms → supports cervical radiculopathy',
+    evidence: 'Wainner 2003',
+    region: 'cervical',
+    positiveFor: 'Cervical radiculopathy (relief with distraction)',
+  },
+  'ult': {
+    name: 'Upper Limb Tension Test (ULTT-A / median nerve)',
+    indication: 'Cervical radiculopathy / neural tension',
+    evidence: 'Wainner 2003, Nee 2012',
+    region: 'cervical',
+    positiveFor: 'Neural tension → upper nerve root / median nerve',
+  },
+  'neer': {
+    name: "Neer's Impingement Test",
+    indication: 'Subacromial / supraspinatus impingement',
+    evidence: 'Hegedus 2012 meta-analysis',
+    region: 'shoulder',
+    positiveFor: 'Subacromial impingement',
+  },
+  'hawkins': {
+    name: 'Hawkins-Kennedy Test',
+    indication: 'Subacromial impingement',
+    evidence: 'Hegedus 2012',
+    region: 'shoulder',
+    positiveFor: 'Subacromial impingement',
+  },
+  'empty-can': {
+    name: "Empty Can (Jobe's) Test",
+    indication: 'Supraspinatus tear / tendinopathy',
+    evidence: 'Hegedus 2012',
+    region: 'shoulder',
+    positiveFor: 'Supraspinatus pathology',
+  },
+  'drop-arm': {
+    name: 'Drop Arm Test',
+    indication: 'Full-thickness rotator cuff tear',
+    evidence: 'Calis 2000',
+    region: 'shoulder',
+    positiveFor: 'Large/full-thickness rotator cuff tear',
+  },
+  'cozen': {
+    name: "Cozen's Test (resisted wrist extension)",
+    indication: 'Lateral epicondylitis (tennis elbow)',
+    evidence: 'Saroja 2014',
+    region: 'elbow',
+    positiveFor: 'Lateral epicondylosis',
+  },
+  'mills': {
+    name: "Mill's Test",
+    indication: 'Lateral epicondylitis',
+    evidence: 'Saroja 2014',
+    region: 'elbow',
+    positiveFor: 'Lateral epicondylosis',
+  },
+  'golfer': {
+    name: "Golfer's Elbow Test (medial epicondyle)",
+    indication: 'Medial epicondylitis',
+    evidence: 'Clinical convention',
+    region: 'elbow',
+    positiveFor: 'Medial epicondylosis',
+  },
+  'phalen': {
+    name: "Phalen's Test",
+    indication: 'Carpal tunnel syndrome',
+    evidence: 'Wainner 2005 meta-analysis',
+    region: 'wrist',
+    positiveFor: 'Median nerve compression at carpal tunnel',
+  },
+  'tinel-wrist': {
+    name: "Tinel's Sign (wrist)",
+    indication: 'Carpal tunnel syndrome',
+    evidence: 'Wainner 2005',
+    region: 'wrist',
+    positiveFor: 'Median nerve irritation at carpal tunnel',
+  },
+  // ════ LUMBAR / LOWER EXTREMITY ════
+  'slr': {
+    name: 'Straight Leg Raise (SLR)',
+    indication: 'Lumbar radiculopathy (sens 91%, spec 26%)',
+    evidence: 'Deville 2000 meta-analysis',
+    region: 'lumbar',
+    positiveFor: 'Lumbar nerve root tension (L4–S1)',
+  },
+  'crossed-slr': {
+    name: 'Crossed SLR (contralateral)',
+    indication: 'Lumbar radiculopathy — high specificity (~88%)',
+    evidence: 'Deville 2000',
+    region: 'lumbar',
+    positiveFor: 'Lumbar disc herniation (more specific)',
+  },
+  'slump': {
+    name: 'Slump Test',
+    indication: 'Lumbar radiculopathy / neural tension',
+    evidence: 'Majlesi 2008',
+    region: 'lumbar',
+    positiveFor: 'Neural tension / radiculopathy',
+  },
+  'kemp': {
+    name: "Kemp's Test (quadrant)",
+    indication: 'Facet syndrome / lateral recess stenosis',
+    evidence: 'Laslett 2006',
+    region: 'lumbar',
+    positiveFor: 'Facet joint pain / foraminal narrowing',
+  },
+  'faber': {
+    name: 'FABER (Patrick) Test',
+    indication: 'SI joint or hip pathology',
+    evidence: 'Laslett 2005',
+    region: 'si-hip',
+    positiveFor: 'SI joint or hip pathology',
+  },
+  'gaenslen': {
+    name: "Gaenslen's Test",
+    indication: 'SI joint pathology',
+    evidence: 'Laslett 2005 (cluster)',
+    region: 'si',
+    positiveFor: 'SI joint pathology',
+  },
+  'si-compress': {
+    name: 'SI Compression Test',
+    indication: 'SI joint pathology (part of Laslett cluster)',
+    evidence: 'Laslett 2005',
+    region: 'si',
+    positiveFor: 'SI joint pathology',
+  },
+  'si-distract': {
+    name: 'SI Distraction Test',
+    indication: 'SI joint pathology',
+    evidence: 'Laslett 2005',
+    region: 'si',
+    positiveFor: 'SI joint pathology',
+  },
+  'thigh-thrust': {
+    name: 'Thigh Thrust / Posterior Shear Test',
+    indication: 'SI joint pathology (most sensitive in Laslett cluster)',
+    evidence: 'Laslett 2005',
+    region: 'si',
+    positiveFor: 'SI joint pathology',
+  },
+  // ════ KNEE / ANKLE ════
+  'mcmurray': {
+    name: "McMurray's Test",
+    indication: 'Meniscal tear',
+    evidence: 'Hegedus 2007 meta-analysis',
+    region: 'knee',
+    positiveFor: 'Meniscal tear (medial or lateral based on rotation)',
+  },
+  'lachman': {
+    name: 'Lachman Test',
+    indication: 'ACL integrity (most sensitive)',
+    evidence: 'Benjaminse 2006',
+    region: 'knee',
+    positiveFor: 'ACL tear',
+  },
+  'drawer-ant': {
+    name: 'Anterior Drawer',
+    indication: 'ACL integrity',
+    evidence: 'Benjaminse 2006',
+    region: 'knee',
+    positiveFor: 'ACL tear',
+  },
+  'valgus-knee': {
+    name: 'Valgus Stress Test (knee)',
+    indication: 'MCL integrity',
+    evidence: 'Malanga 2003',
+    region: 'knee',
+    positiveFor: 'MCL sprain/tear',
+  },
+  'thompson': {
+    name: "Thompson's Test",
+    indication: 'Achilles rupture',
+    evidence: 'Maffulli 1998',
+    region: 'ankle',
+    positiveFor: 'Achilles tendon rupture',
+  },
+  'windlass': {
+    name: 'Windlass Test',
+    indication: 'Plantar fasciitis',
+    evidence: 'De Garceau 2003',
+    region: 'ankle',
+    positiveFor: 'Plantar fasciitis',
+  },
+  // ════ SCREENING ════
+  'valsalva': {
+    name: "Valsalva Maneuver",
+    indication: 'Space-occupying lesion → disc/tumor',
+    evidence: 'Classic',
+    region: 'general',
+    positiveFor: 'Increased intrathecal pressure reproducing symptoms',
+  },
+};
+
+// Dermatomes + myotomes + reflexes reference
+const NEURO_DERMATOMES = [
+  {key:'derm-c5', label:'C5 (lateral arm / deltoid)'},
+  {key:'derm-c6', label:'C6 (thumb / lateral forearm)'},
+  {key:'derm-c7', label:'C7 (middle finger)'},
+  {key:'derm-c8', label:'C8 (pinky / medial forearm)'},
+  {key:'derm-t1', label:'T1 (medial arm)'},
+  {key:'derm-l2', label:'L2 (anterior thigh)'},
+  {key:'derm-l3', label:'L3 (medial knee)'},
+  {key:'derm-l4', label:'L4 (medial ankle / great toe medial)'},
+  {key:'derm-l5', label:'L5 (dorsal foot / great toe lateral)'},
+  {key:'derm-s1', label:'S1 (lateral foot / heel)'},
+];
+
+const NEURO_MYOTOMES = [
+  {key:'myo-c5', label:'C5 (deltoid / biceps)'},
+  {key:'myo-c6', label:'C6 (biceps / wrist ext)'},
+  {key:'myo-c7', label:'C7 (triceps / wrist flex)'},
+  {key:'myo-c8', label:'C8 (finger flex)'},
+  {key:'myo-t1', label:'T1 (finger abd/add)'},
+  {key:'myo-l2', label:'L2 (hip flexion)'},
+  {key:'myo-l3', label:'L3 (knee ext)'},
+  {key:'myo-l4', label:'L4 (ankle dorsiflex)'},
+  {key:'myo-l5', label:'L5 (great toe ext / heel walk)'},
+  {key:'myo-s1', label:'S1 (ankle plantarflex / toe walk)'},
+];
+
+const NEURO_REFLEXES = [
+  {key:'ref-biceps',  label:'Biceps (C5/C6)'},
+  {key:'ref-brachio', label:'Brachioradialis (C5/C6)'},
+  {key:'ref-triceps', label:'Triceps (C7)'},
+  {key:'ref-patellar',label:'Patellar (L4)'},
+  {key:'ref-achilles',label:'Achilles (S1)'},
+];
+
+/* ═════════════════════════════════════════════════
+   EXAM STATE
+   ═════════════════════════════════════════════════ */
+S.exam = {
+  active: false,
+  patient: null,       // full patient object from waiting room (key, payload, etc.)
+  currentStep: 0,
+  stepKeys: [],        // dynamic list of exam step IDs based on services
+  // Chiro exam findings
+  chiro: {
+    vitals: {bp:'', hr:'', painToday:''},
+    observation: '',
+    rom: {},            // keyed by rom plane: { value, painful }
+    romNotes: '',
+    orthoTests: {},     // keyed by test key: { result: 'positive'|'negative'|'not-performed' }
+    orthoNotes: '',
+    neuroDerm: {},      // keyed by dermatome key: normal|decreased|absent|hyperesthesia
+    neuroMyo: {},       // keyed by myotome key: 0-5
+    neuroReflexes: {},  // keyed by reflex key: 0-4
+    neuroSpecial: [],   // chip values selected
+    neuroNotes: '',
+    palpSoft: '',
+    palpJoint: '',
+  },
+};
+
+/* ═════════════════════════════════════════════════
+   EXAM ENTRY / EXIT
+   ═════════════════════════════════════════════════ */
+function enterExamView(patient){
+  if(!patient) return;
+
+  S.exam.active = true;
+  S.exam.patient = patient;
+  S.exam.currentStep = 0;
+
+  // Hide waiting room, show exam
+  document.getElementById('provider-app').style.display = 'none';
+  document.getElementById('exam-app').style.display = '';
+
+  // Stop the waiting room polling while exam is active (lower API load)
+  stopWaitingRoomPolling();
+
+  // Build the exam step structure based on services picked
+  buildExamSteps();
+
+  // Populate header
+  populateExamHeader(patient);
+
+  // Populate subjective review
+  populateSubjectiveReview(patient);
+
+  // Build ROM tester based on patient's reported regions
+  buildROMTester(patient);
+
+  // Build conditional ortho suggestions
+  buildOrthoSuggestions(patient);
+
+  // Build neuro exam grids (dermatomes, myotomes, reflexes)
+  buildNeuroExamGrids();
+
+  // Wire neuro special tests chips
+  wireNeuroSpecialChips();
+
+  // Show/hide neuro exam card based on whether patient reported symptoms
+  const reportedNeuro = patient.payload && patient.payload.health &&
+                        patient.payload.health.neuroSymptoms &&
+                        patient.payload.health.neuroSymptoms.some(s => s !== 'neuro-none');
+  const neuroCard = document.getElementById('ex-neuro-card');
+  if(neuroCard) neuroCard.style.display = reportedNeuro ? '' : 'none';
+  if(reportedNeuro){
+    const lbls = (patient.payload.health.neuroSymptomsLabels || []).join(', ');
+    const where = patient.payload.health.neuroWhere || '';
+    const el = document.getElementById('ex-neuro-reported');
+    if(el) el.textContent = 'Patient reported: ' + lbls + (where ? ' — Distribution: ' + where : '');
+  }
+
+  // Go to step 0
+  examGoStep(0);
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function exitExamToWaitingRoom(){
+  // Returns to waiting room — exam state PERSISTS in memory (can resume)
+  // Only abandonExam() or completing the exam resets state.
+  S.exam.active = false;
+  document.getElementById('exam-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = '';
+  startWaitingRoomPolling();
+}
+
+function abandonExam(){
+  if(!confirm('Abandon this exam? Patient status will revert to "pending" and all exam findings will be lost.')) return;
+  // Revert patient status to pending
+  if(S.exam.patient){
+    wrSelectedPatient = S.exam.patient;
+    markPatientStatus('pending').catch(e => console.warn('Revert status failed:', e));
+  }
+  // Reset exam state
+  S.exam = {
+    active: false,
+    patient: null,
+    currentStep: 0,
+    stepKeys: [],
+    chiro: {
+      vitals: {bp:'', hr:'', painToday:''},
+      observation: '',
+      rom: {},
+      romNotes: '',
+      orthoTests: {},
+      orthoNotes: '',
+      neuroDerm: {},
+      neuroMyo: {},
+      neuroReflexes: {},
+      neuroSpecial: [],
+      neuroNotes: '',
+      palpSoft: '',
+      palpJoint: '',
+    },
+  };
+  // Clear all exam form fields
+  document.querySelectorAll('#exam-app input, #exam-app textarea, #exam-app select').forEach(el => {
+    if(el.type === 'checkbox') el.checked = false;
+    else el.value = '';
+  });
+  document.querySelectorAll('#exam-app .chip.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.ortho-result-btn').forEach(el => el.classList.remove('neg-sel','pos-sel','np-sel'));
+  document.querySelectorAll('.ortho-test-item').forEach(el => el.classList.remove('positive','negative','not-performed'));
+  document.getElementById('exam-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = '';
+  startWaitingRoomPolling();
+}
+
+/* Populate exam header with patient info */
+function populateExamHeader(patient){
+  const name = document.getElementById('exam-patient-name');
+  if(name) name.textContent = `${patient.first} ${patient.last}`;
+
+  let age = '';
+  if(patient.dob){
+    const dobDate = new Date(patient.dob);
+    if(!isNaN(dobDate.getTime())){
+      const today = new Date();
+      let a = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if(m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) a--;
+      age = a + ' y/o · ';
+    }
+  }
+  const meta = document.getElementById('exam-patient-meta');
+  if(meta) meta.textContent = `${age}DOB ${patient.dob || '—'} · ${patient.phone || '—'}`;
+
+  const pills = document.getElementById('exam-service-pills');
+  if(pills){
+    pills.innerHTML = (patient.services || []).map(svc => {
+      const cls = svc === 'CHIRO' ? 'chiro' : svc === 'SW' ? 'sw' : svc === 'NP' ? 'np' : svc === 'WL' ? 'wl' : '';
+      return `<span class="wr-service-pill ${cls}">${svc}</span>`;
+    }).join('');
+  }
+
+  const pdfBtn = document.getElementById('exam-pdf-btn');
+  if(pdfBtn){
+    if(patient.pdfLink){
+      pdfBtn.onclick = () => window.open(patient.pdfLink, '_blank');
+      pdfBtn.style.display = '';
+    } else {
+      pdfBtn.style.display = 'none';
+    }
+  }
+}
+
+function openPatientIntakePDF(){
+  if(S.exam.patient && S.exam.patient.pdfLink){
+    window.open(S.exam.patient.pdfLink, '_blank');
+  }
+}
+
+/* Build exam step structure dynamically based on services picked */
+function buildExamSteps(){
+  const services = S.exam.patient.services || [];
+  const steps = [
+    {key:'subjective', label:'Subjective', condition:'always'},
+  ];
+  if(services.includes('CHIRO')) steps.push({key:'chiro', label:'Chiro Exam'});
+  if(services.includes('SW'))    steps.push({key:'sw',    label:'Shockwave'});
+  if(services.includes('NP'))    steps.push({key:'np',    label:'NeuroPath'});
+  if(services.includes('WL'))    steps.push({key:'wl',    label:'Weight Loss'});
+  steps.push({key:'plan',    label:'Plan'});
+  steps.push({key:'signoff', label:'Sign-Off'});
+
+  S.exam.stepKeys = steps.map(s => s.key);
+
+  // Render step strip
+  const strip = document.getElementById('exam-step-strip');
+  if(strip){
+    strip.innerHTML = steps.map((s, i) =>
+      `<div class="exam-step-pill${i === 0 ? ' active' : ''}" onclick="examGoStep(${i})" data-step-key="${s.key}">${i+1} · ${s.label}</div>`
+    ).join('');
+  }
+
+  // Hide exam-step divs that aren't in the step list (e.g. if SW not picked, hide exam-step-sw)
+  const allPossibleSteps = ['subjective','chiro','sw','np','wl','plan','signoff'];
+  allPossibleSteps.forEach(k => {
+    const el = document.getElementById('exam-step-' + k);
+    if(el){
+      // keep in DOM but ensure hidden if not in stepKeys
+      el.classList.remove('active');
+    }
+  });
+}
+
+function examGoStep(idx){
+  const keys = S.exam.stepKeys;
+  if(idx < 0 || idx >= keys.length) return;
+  S.exam.currentStep = idx;
+  document.querySelectorAll('.exam-step').forEach(el => el.classList.remove('active'));
+  const key = keys[idx];
+  const stepEl = document.getElementById('exam-step-' + key);
+  if(stepEl) stepEl.classList.add('active');
+  document.querySelectorAll('.exam-step-pill').forEach((p, i) => {
+    p.classList.remove('active','done');
+    if(i < idx) p.classList.add('done');
+    else if(i === idx) p.classList.add('active');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function examNextStep(){ examGoStep(S.exam.currentStep + 1); }
+function examPrevStep(){ examGoStep(S.exam.currentStep - 1); }
+
+/* ═════════════════════════════════════════════════
+   SUBJECTIVE REVIEW RENDERER
+   ═════════════════════════════════════════════════ */
+function populateSubjectiveReview(patient){
+  const payload = patient.payload || {};
+
+  // Red flag banner
+  const banner = document.getElementById('exam-redflag-banner');
+  const hasCritical = payload.health && payload.health.redFlagCritical;
+  if(banner){
+    if(hasCritical){
+      const labels = (payload.health.redFlagsLabels || []).filter(f => f);
+      banner.className = 'exam-redflag-banner';
+      banner.style.display = '';
+      banner.innerHTML = `
+        <div class="exam-redflag-icon">🚨</div>
+        <div class="exam-redflag-body">
+          <div class="exam-redflag-title">CRITICAL RED FLAG — Evaluate Before Treatment</div>
+          <div>Patient reported the following on intake:</div>
+          <ul>${labels.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>
+          <div style="margin-top:6px;font-size:.82rem;"><strong>Consider:</strong> urgent imaging, ER referral, or neurosurgical consult depending on findings.</div>
+        </div>`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  // Chief Complaint
+  const ccEl = document.getElementById('exam-subj-complaint');
+  if(ccEl){
+    const cc = payload.complaint || {};
+    const regions = cc.regions || {};
+    const BODY_LABELS = {
+      head:'Head',neck:'Neck',shoulder:'Shoulder','upper-back':'Upper Back','mid-back':'Mid Back',
+      'low-back':'Low Back',hip:'Hip/Pelvis',elbow:'Elbow',wrist:'Wrist/Hand',knee:'Knee',
+      ankle:'Ankle/Foot',arm:'Arm',leg:'Leg',jaw:'Jaw/TMJ'
+    };
+    const regionStrs = Object.keys(regions).map(rid => {
+      const d = regions[rid];
+      const side = d.side === 'L' ? ' (L)' : d.side === 'R' ? ' (R)' : d.side === 'B' ? ' (Bilateral)' : '';
+      return `<strong>${BODY_LABELS[rid] || rid}${side}</strong>: ${d.pain}/10`;
+    });
+    const ONSET = {'today':'Today','this-week':'This week','2-4-wk':'2–4 weeks ago','1-3-mo':'1–3 months ago','3-plus-mo':'3+ months ago','chronic':'Chronic 1+ year'};
+    const MECH = {gradual:'Gradual',sudden:'Sudden (no cause)',mva:'MVA',work:'Work injury',sports:'Sports/exercise',lifting:'Lifting',fall:'Fall',unknown:'Unknown'};
+    const AGG_MAP = {sitting:'Sitting',standing:'Standing',walking:'Walking',bending:'Bending',lifting:'Lifting',sleeping:'Sleeping',mornings:'Mornings',exercise:'Exercise',driving:'Driving',stairs:'Stairs'};
+    const REL_MAP = {rest:'Rest',ice:'Ice',heat:'Heat',movement:'Movement',stretching:'Stretching',medication:'Medication',nothing:'Nothing'};
+    const TX_MAP = {nothing:'Nothing yet',rest:'Rest',nsaids:'NSAIDs','other-chiro':'Other chiro',pt:'PT',massage:'Massage',injections:'Cortisone',surgery:'Surgery',imaging:'X-ray/MRI'};
+    const mapList = (arr, m) => (arr || []).map(v => m[v] || v).join(', ') || '—';
+
+    ccEl.innerHTML = `
+      ${regionStrs.length ? '<div>' + regionStrs.join(' &nbsp;·&nbsp; ') + '</div>' : '<div><em>No regions captured.</em></div>'}
+      <div style="margin-top:8px;"><strong>Onset:</strong> ${ONSET[cc.onset] || '—'} &nbsp; <strong>Mechanism:</strong> ${MECH[cc.mechanism] || '—'}</div>
+      <div style="margin-top:4px;"><strong>Aggravating:</strong> ${mapList(cc.aggravating, AGG_MAP)}</div>
+      <div style="margin-top:4px;"><strong>Relieving:</strong> ${mapList(cc.relieving, REL_MAP)}</div>
+      <div style="margin-top:4px;"><strong>Prior treatment:</strong> ${mapList(cc.priorTx, TX_MAP)}</div>
+      ${cc.goal ? `<div style="margin-top:6px;"><strong>Patient goal:</strong> <em>"${escapeHtml(cc.goal)}"</em></div>` : ''}`;
+  }
+
+  // Goals
+  const goalsEl = document.getElementById('exam-subj-goals');
+  if(goalsEl){
+    const goals = (payload.health && payload.health.goalsLabels) || [];
+    goalsEl.innerHTML = goals.length ? goals.map(g => `<div>• ${escapeHtml(g)}</div>`).join('') : '<em>No specific goals captured.</em>';
+  }
+
+  // Medical Hx
+  const hxEl = document.getElementById('exam-subj-hx');
+  if(hxEl){
+    const hx = payload.hx || {};
+    const parts = [];
+    if(hx.meds && hx.meds !== 'None') parts.push(`<strong>Meds:</strong> ${escapeHtml(hx.meds)}`);
+    if(hx.allergies && hx.allergies !== 'NKDA') parts.push(`<strong>Allergies:</strong> ${escapeHtml(hx.allergies)}`);
+    if(hx.surgeries && hx.surgeries !== 'None') parts.push(`<strong>Surgeries:</strong> ${escapeHtml(hx.surgeries)}`);
+    if(hx.injuries && hx.injuries !== 'None') parts.push(`<strong>Prior injuries:</strong> ${escapeHtml(hx.injuries)}`);
+    if(hx.conditions && hx.conditions.length){
+      const filtered = hx.conditions.filter(c => c !== 'None of the Above');
+      if(filtered.length) parts.push(`<strong>Conditions:</strong> ${filtered.map(escapeHtml).join(', ')}`);
+    }
+    hxEl.innerHTML = parts.length ? parts.join('<br>') : '<em>No significant medical history reported.</em>';
+  }
+
+  // Neuro + safety screen
+  const neuroEl = document.getElementById('exam-subj-neuro');
+  if(neuroEl){
+    const h = payload.health || {};
+    const parts = [];
+    const neuros = (h.neuroSymptomsLabels || []).filter(s => s !== 'None of the above');
+    if(neuros.length){
+      parts.push(`<strong>Nerve symptoms:</strong> ${neuros.map(escapeHtml).join(', ')}`);
+      if(h.neuroWhere) parts.push(`<strong>Distribution:</strong> ${escapeHtml(h.neuroWhere)}`);
+    } else {
+      parts.push('<em>No nerve symptoms reported.</em>');
+    }
+    const rfs = (h.redFlagsLabels || []).filter(f => f);
+    if(rfs.length){
+      const color = h.redFlagCritical ? 'var(--red)' : 'var(--amber)';
+      parts.push(`<div style="margin-top:6px;color:${color};"><strong>Red flags:</strong> ${rfs.map(escapeHtml).join(', ')}</div>`);
+    }
+    neuroEl.innerHTML = parts.join('<br>');
+  }
+
+  // Shockwave subjective summary
+  const swCard = document.getElementById('exam-subj-sw-card');
+  const swEl = document.getElementById('exam-subj-sw');
+  if(swCard && swEl){
+    if(payload.health && payload.health.sw){
+      swCard.style.display = '';
+      const sw = payload.health.sw;
+      const SW_LABELS = {'cortisone-recent':'Cortisone <6 wks','cortisone-past':'Cortisone >6 wks',prp:'PRP',mri:'MRI',ultrasound:'Ultrasound',xray:'X-ray',none:'None'};
+      const LIMIT_LABELS = {walking:'Walking',running:'Running',lifting:'Lifting',reaching:'Reaching',gripping:'Gripping',sleep:'Sleep',work:'Work',sports:'Sports'};
+      const priors = (sw.prior || []).map(v => SW_LABELS[v] || v).join(', ') || '—';
+      const limits = (sw.limits || []).map(v => LIMIT_LABELS[v] || v).join(', ') || '—';
+      swEl.innerHTML = `
+        <div><strong>Prior:</strong> ${priors}</div>
+        <div><strong>Cortisone count:</strong> ${escapeHtml(sw.cortCount || '—')} &nbsp; <strong>Date:</strong> ${escapeHtml(sw.cortDate || '—')}</div>
+        ${sw.imagingNotes ? `<div><strong>Imaging:</strong> ${escapeHtml(sw.imagingNotes)}</div>` : ''}
+        <div><strong>Limits:</strong> ${limits}</div>`;
+    } else {
+      swCard.style.display = 'none';
+    }
+  }
+
+  // NeuroPath subjective
+  const npCard = document.getElementById('exam-subj-np-card');
+  const npEl = document.getElementById('exam-subj-np');
+  if(npCard && npEl){
+    if(payload.health && payload.health.np){
+      npCard.style.display = '';
+      const np = payload.health.np;
+      const interp = np.mnsiInterpretation;
+      const interpColor = interp === 'high' ? 'var(--red)' : interp === 'moderate' ? 'var(--amber)' : 'var(--green)';
+      const interpTxt = interp === 'high' ? 'HIGH probability' : interp === 'moderate' ? 'MODERATE probability' : 'LOW probability';
+      const DIAB = {'no':'No diabetes','prediabetic':'Prediabetic','type2':'Type 2 DM','type1':'Type 1 DM','not-sure':'Unknown'};
+      const FALLS = {'none':'No falls','1':'1 fall','2-3':'2–3 falls','4+':'4+ falls'};
+      npEl.innerHTML = `
+        <div><strong>MNSI Score:</strong> <span style="color:${interpColor};font-weight:700;">${np.mnsiScore}/13 — ${interpTxt}</span></div>
+        <div><strong>Diabetic status:</strong> ${DIAB[np.diabeticStatus] || '—'} ${np.hba1c ? `(A1c ${escapeHtml(np.hba1c)})` : ''}</div>
+        <div><strong>Falls in past year:</strong> ${FALLS[np.fallsLastYear] || '—'}</div>
+        <div><strong>Nocturnal symptoms:</strong> ${escapeHtml(np.nocturnal || '—')}</div>
+        ${(np.medsLabels && np.medsLabels.length) ? `<div><strong>Current meds:</strong> ${np.medsLabels.map(escapeHtml).join(', ')}</div>` : ''}`;
+    } else {
+      npCard.style.display = 'none';
+    }
+  }
+
+  // Weight Loss subjective
+  const wlCard = document.getElementById('exam-subj-wl-card');
+  const wlEl = document.getElementById('exam-subj-wl');
+  if(wlCard && wlEl){
+    if(payload.health && payload.health.wl){
+      wlCard.style.display = '';
+      const wl = payload.health.wl;
+      wlEl.innerHTML = `
+        <div><strong>Weight:</strong> ${wl.currentWeightLbs || '—'} lbs &nbsp; <strong>Goal:</strong> ${wl.goalWeightLbs || '—'} lbs</div>
+        <div><strong>Height:</strong> ${wl.heightFt ? wl.heightFt + "' " + (wl.heightIn || 0) + '"' : '—'} &nbsp; <strong>BMI:</strong> ${wl.bmi || '—'}</div>
+        <div><strong>Readiness:</strong> ${wl.readinessToChange}/10 &nbsp; <strong>Stress:</strong> ${wl.stressLevel}/10 &nbsp; <strong>Sleep:</strong> ${wl.sleepQuality}/10</div>
+        <div><strong>Activity:</strong> ${escapeHtml(wl.activityLevel || '—')}</div>
+        ${wl.biggestBarrier ? `<div><strong>Barrier:</strong> <em>"${escapeHtml(wl.biggestBarrier)}"</em></div>` : ''}`;
+    } else {
+      wlCard.style.display = 'none';
+    }
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   ROM TESTER — builds UI based on patient's reported regions
+   ═════════════════════════════════════════════════ */
+function buildROMTester(patient){
+  const container = document.getElementById('ex-rom-container');
+  const emptyEl = document.getElementById('ex-rom-empty');
+  if(!container) return;
+
+  const regions = (patient.payload && patient.payload.complaint && patient.payload.complaint.regions) || {};
+  const regionIds = Object.keys(regions);
+
+  if(regionIds.length === 0){
+    container.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  // De-duplicate: multiple region IDs that map to the same ROM spec (upper-back + mid-back both thoracic) — use one block
+  const seen = new Set();
+  const blocks = [];
+  regionIds.forEach(rid => {
+    const spec = ROM_SPECS[rid];
+    if(!spec) return;
+    if(seen.has(spec.name)) return;
+    seen.add(spec.name);
+    const painData = regions[rid];
+    const side = painData.side === 'L' ? ' (Left)' : painData.side === 'R' ? ' (Right)' : painData.side === 'B' ? ' (Bilateral)' : '';
+    blocks.push({rid, spec, pain: painData.pain, side});
+  });
+
+  if(blocks.length === 0){
+    container.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = '';
+    return;
+  }
+
+  container.innerHTML = blocks.map(b =>
+    `<div class="rom-block">
+       <div class="rom-block-title">
+         ${b.spec.name}${b.side}
+         <span class="rom-region-pain">Reported: ${b.pain}/10</span>
+       </div>
+       ${b.spec.planes.map(p => `
+         <div class="rom-row">
+           <div class="rom-row-label">${p.label} <span style="font-size:.68rem;color:var(--ink-sm);">(normal ${p.normal})</span></div>
+           <input class="rom-row-input" id="rom-${p.key}" placeholder="actual ROM (e.g., '40°' or 'WNL')" oninput="updateROMField('${p.key}', this.value)">
+           <label class="rom-row-pain"><input type="checkbox" id="rom-${p.key}-pain" onchange="updateROMPain('${p.key}', this.checked)"> Pain</label>
+         </div>`).join('')}
+     </div>`
+  ).join('');
+}
+
+function updateROMField(key, value){
+  S.exam.chiro.rom[key] = S.exam.chiro.rom[key] || {};
+  S.exam.chiro.rom[key].value = value;
+}
+function updateROMPain(key, painful){
+  S.exam.chiro.rom[key] = S.exam.chiro.rom[key] || {};
+  S.exam.chiro.rom[key].painful = painful;
+}
+
+/* ═════════════════════════════════════════════════
+   CONDITIONAL ORTHO TEST ENGINE
+   Suggests tests based on:
+   - Body regions reported in intake
+   - Neuro symptoms reported
+   - Mechanism of injury
+   ═════════════════════════════════════════════════ */
+function getSuggestedOrthoTests(patient){
+  const suggested = new Set();
+  const payload = patient.payload || {};
+  const complaint = payload.complaint || {};
+  const regions = Object.keys(complaint.regions || {});
+  const neuroSymptoms = (payload.health && payload.health.neuroSymptoms) || [];
+  const hasRadicular = neuroSymptoms.some(s =>
+    ['neuro-num','neuro-tingle','neuro-shoot','neuro-burn','neuro-weak'].includes(s)
+  );
+
+  // Cervical / upper extremity
+  if(regions.includes('neck')){
+    if(hasRadicular){
+      suggested.add('spurlings');
+      suggested.add('cerv-distraction');
+      suggested.add('ult');
+    } else {
+      suggested.add('spurlings');
+    }
+  }
+  if(regions.includes('shoulder')){
+    suggested.add('neer');
+    suggested.add('hawkins');
+    suggested.add('empty-can');
+    suggested.add('drop-arm');
+  }
+  if(regions.includes('elbow')){
+    suggested.add('cozen');
+    suggested.add('mills');
+    suggested.add('golfer');
+  }
+  if(regions.includes('wrist')){
+    suggested.add('phalen');
+    suggested.add('tinel-wrist');
+  }
+
+  // Lumbar / lower extremity
+  if(regions.includes('low-back')){
+    if(hasRadicular){
+      suggested.add('slr');
+      suggested.add('crossed-slr');
+      suggested.add('slump');
+      suggested.add('kemp');
+    } else {
+      suggested.add('slr');
+      suggested.add('kemp');
+    }
+    // SI cluster if low back + any mechanism that could implicate SI
+    suggested.add('faber');
+    suggested.add('gaenslen');
+    suggested.add('thigh-thrust');
+    suggested.add('si-compress');
+    suggested.add('si-distract');
+  }
+  if(regions.includes('hip')){
+    suggested.add('faber');
+  }
+  if(regions.includes('knee')){
+    suggested.add('mcmurray');
+    suggested.add('lachman');
+    suggested.add('valgus-knee');
+    if(complaint.mechanism === 'sports' || complaint.mechanism === 'fall'){
+      suggested.add('drawer-ant');
+    }
+  }
+  if(regions.includes('ankle')){
+    suggested.add('thompson');
+    suggested.add('windlass');
+  }
+
+  // If strong radicular signs OR cauda-equina screen was positive: add Valsalva
+  if(hasRadicular || (payload.health && payload.health.redFlagCritical)){
+    suggested.add('valsalva');
+  }
+
+  return Array.from(suggested);
+}
+
+function buildOrthoSuggestions(patient){
+  const container = document.getElementById('ex-ortho-suggestions');
+  const emptyEl = document.getElementById('ex-ortho-empty');
+  if(!container) return;
+
+  const suggested = getSuggestedOrthoTests(patient);
+  if(suggested.length === 0){
+    container.innerHTML = '';
+    if(emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+
+  container.innerHTML = suggested.map(key => {
+    const t = ORTHO_TESTS[key];
+    if(!t) return '';
+    return `
+      <div class="ortho-test-item" id="ortho-item-${key}">
+        <div style="flex:1;">
+          <div class="ortho-test-name">${escapeHtml(t.name)}</div>
+          <div class="ortho-test-why">${escapeHtml(t.indication)} · ${escapeHtml(t.evidence)}</div>
+        </div>
+        <div class="ortho-test-result">
+          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','negative')">Neg</button>
+          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','positive')">Pos</button>
+          <button class="ortho-result-btn" onclick="setOrthoResult('${key}','not-performed')">N/P</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setOrthoResult(key, result){
+  S.exam.chiro.orthoTests[key] = {result, testName: ORTHO_TESTS[key]?.name || key};
+  const item = document.getElementById('ortho-item-' + key);
+  if(!item) return;
+  item.classList.remove('positive','negative','not-performed');
+  item.classList.add(result);
+  item.querySelectorAll('.ortho-result-btn').forEach(b => b.classList.remove('neg-sel','pos-sel','np-sel'));
+  const btns = item.querySelectorAll('.ortho-result-btn');
+  if(result === 'negative') btns[0].classList.add('neg-sel');
+  else if(result === 'positive') btns[1].classList.add('pos-sel');
+  else if(result === 'not-performed') btns[2].classList.add('np-sel');
+}
+
+/* ═════════════════════════════════════════════════
+   NEURO EXAM GRIDS
+   ═════════════════════════════════════════════════ */
+function buildNeuroExamGrids(){
+  const derm = document.getElementById('ex-dermatomes');
+  if(derm){
+    derm.innerHTML = NEURO_DERMATOMES.map(d =>
+      `<div class="ex-neuro-item">
+         <div class="ex-neuro-item-label">${d.label}</div>
+         <select class="ex-neuro-item-input" style="width:100px;" onchange="setNeuroDerm('${d.key}', this.value)">
+           <option value="">—</option>
+           <option value="normal">Normal</option>
+           <option value="decreased">↓</option>
+           <option value="absent">Absent</option>
+           <option value="hyperesthesia">Hyperesthetic</option>
+         </select>
+       </div>`
+    ).join('');
+  }
+  const myo = document.getElementById('ex-myotomes');
+  if(myo){
+    myo.innerHTML = NEURO_MYOTOMES.map(m =>
+      `<div class="ex-neuro-item">
+         <div class="ex-neuro-item-label">${m.label}</div>
+         <select class="ex-neuro-item-input" onchange="setNeuroMyo('${m.key}', this.value)">
+           <option value="">—</option>
+           <option value="5">5/5</option>
+           <option value="4">4/5</option>
+           <option value="3">3/5</option>
+           <option value="2">2/5</option>
+           <option value="1">1/5</option>
+           <option value="0">0/5</option>
+         </select>
+       </div>`
+    ).join('');
+  }
+  const ref = document.getElementById('ex-reflexes');
+  if(ref){
+    ref.innerHTML = NEURO_REFLEXES.map(r =>
+      `<div class="ex-neuro-item">
+         <div class="ex-neuro-item-label">${r.label}</div>
+         <select class="ex-neuro-item-input" onchange="setNeuroRef('${r.key}', this.value)">
+           <option value="">—</option>
+           <option value="4+">4+</option>
+           <option value="3+">3+</option>
+           <option value="2+">2+ (WNL)</option>
+           <option value="1+">1+</option>
+           <option value="0">0</option>
+         </select>
+       </div>`
+    ).join('');
+  }
+}
+function setNeuroDerm(key, val){ S.exam.chiro.neuroDerm[key] = val; }
+function setNeuroMyo(key, val)  { S.exam.chiro.neuroMyo[key] = val; }
+function setNeuroRef(key, val)  { S.exam.chiro.neuroReflexes[key] = val; }
+
+function wireNeuroSpecialChips(){
+  const grp = document.getElementById('ex-neuro-special');
+  if(!grp) return;
+  grp.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.val;
+      // mutex pairs — e.g., babinski-neg vs babinski-pos
+      const testName = chip.dataset.test;
+      if(testName){
+        grp.querySelectorAll(`.chip[data-test="${testName}"]`).forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        // Remove any previous entry for this test from the list
+        S.exam.chiro.neuroSpecial = S.exam.chiro.neuroSpecial.filter(v =>
+          !v.startsWith(testName.toLowerCase() + '-')
+        );
+        S.exam.chiro.neuroSpecial.push(val);
+      }
+    });
   });
 }
 

@@ -594,6 +594,156 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 .bmi-category strong{color:var(--ink);}
 
 /* ═════════════════════════════════════════════════
+   PROVIDER WAITING ROOM
+   ═════════════════════════════════════════════════ */
+.wr-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  margin-bottom:14px;flex-wrap:wrap;
+}
+.wr-title-block{flex:1;min-width:240px;}
+.wr-title-row{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.wr-count-badge{
+  background:var(--sage);color:white;border-radius:14px;
+  padding:3px 12px;font-size:.82rem;font-weight:700;min-width:28px;text-align:center;
+}
+.wr-count-badge.empty{background:var(--border);color:var(--ink-sm);}
+.wr-count-badge.urgent{background:var(--red);animation:pulse-urgent 1.5s infinite;}
+@keyframes pulse-urgent{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.6);}50%{box-shadow:0 0 0 6px rgba(192,57,43,0);}}
+.wr-controls{display:flex;align-items:center;gap:10px;}
+.wr-live-indicator{
+  display:flex;align-items:center;gap:7px;padding:5px 11px;
+  background:var(--green-lt);color:var(--green);border-radius:20px;
+  font-size:.74rem;font-weight:700;
+}
+.wr-live-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:pulse 1.8s infinite;
+}
+.wr-live-indicator.stale{background:var(--amber-lt);color:var(--amber);}
+.wr-live-indicator.stale .wr-live-dot{background:var(--amber);animation:none;}
+.wr-live-indicator.error{background:var(--red-lt);color:var(--red);}
+.wr-live-indicator.error .wr-live-dot{background:var(--red);animation:none;}
+
+/* Filter tabs */
+.wr-filters{
+  display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid var(--border-lt);overflow-x:auto;
+}
+.wr-filter{
+  display:flex;align-items:center;gap:7px;padding:10px 14px;
+  font-size:.82rem;font-weight:600;color:var(--ink-sm);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .13s;
+  white-space:nowrap;
+}
+.wr-filter:hover{color:var(--sage);}
+.wr-filter.active{color:var(--sage);border-bottom-color:var(--sage);}
+.wr-filter-count{
+  background:var(--cream-dk);color:var(--ink-sm);border-radius:10px;
+  padding:1px 8px;font-size:.7rem;font-weight:700;min-width:22px;text-align:center;
+}
+.wr-filter.active .wr-filter-count{background:var(--sage-xl);color:var(--sage);}
+
+/* Loading + empty states */
+.wr-loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;text-align:center;
+}
+.wr-empty{
+  text-align:center;padding:60px 20px;color:var(--ink-sm);
+}
+.wr-empty-icon{font-size:3.5rem;margin-bottom:12px;opacity:.4;}
+.wr-empty-title{
+  font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:6px;
+}
+.wr-empty-desc{font-size:.87rem;line-height:1.6;max-width:400px;margin:0 auto;}
+
+/* Patient card list */
+.wr-list{display:flex;flex-direction:column;gap:10px;}
+.wr-card{
+  background:white;border:1.5px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;cursor:pointer;transition:all .17s;
+  display:flex;flex-direction:column;gap:10px;
+  box-shadow:var(--sh);
+}
+.wr-card:hover{border-color:var(--sage-lt);transform:translateY(-1px);box-shadow:var(--sh-lg);}
+.wr-card.in-exam{background:var(--sage-xl);border-color:var(--sage);}
+.wr-card.completed{opacity:.6;background:var(--cream);}
+.wr-card.red-flag{border-left:5px solid var(--red);}
+.wr-card.red-flag::before{content:'';position:absolute;}
+.wr-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.wr-card-name{
+  font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);line-height:1.2;
+  flex:1;min-width:160px;
+}
+.wr-card-meta{
+  font-size:.75rem;color:var(--ink-sm);margin-top:3px;
+}
+.wr-card-wait{
+  text-align:right;flex-shrink:0;
+}
+.wr-wait-time{
+  font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--sage);line-height:1;
+  font-weight:700;
+}
+.wr-wait-label{
+  font-size:.62rem;color:var(--ink-sm);letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;margin-top:2px;
+}
+.wr-wait-time.urgent{color:var(--red);}
+.wr-wait-time.warn{color:var(--amber);}
+
+.wr-card-bottom{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding-top:8px;border-top:1px solid var(--cream-dk);
+}
+.wr-card-pills{display:flex;gap:5px;flex-wrap:wrap;}
+.wr-service-pill{
+  padding:3px 9px;border-radius:10px;font-size:.68rem;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.wr-service-pill.chiro{background:var(--sage-xl);color:var(--sage);}
+.wr-service-pill.sw{background:var(--gold-lt);color:var(--gold-dk);}
+.wr-service-pill.np{background:#f3ecf7;color:#6a4a8f;}
+.wr-service-pill.wl{background:var(--teal-lt);color:var(--teal);}
+
+.wr-card-flags{display:flex;gap:6px;flex-wrap:wrap;}
+.wr-flag-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:10px;font-size:.7rem;font-weight:700;
+}
+.wr-flag-badge.red{background:var(--red-lt);color:var(--red);}
+.wr-flag-badge.status-in-exam{background:var(--sage);color:white;}
+.wr-flag-badge.status-completed{background:var(--border);color:var(--ink-sm);}
+
+/* Patient detail modal */
+.pd-header{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+  margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border-lt);
+}
+.pd-svc-pills{display:flex;gap:5px;flex-wrap:wrap;max-width:50%;}
+.pd-card{
+  background:var(--cream);border:1px solid var(--border-lt);border-radius:var(--rs);
+  padding:12px 14px;margin-bottom:14px;font-size:.85rem;line-height:1.6;color:var(--ink-md);
+}
+.pd-card strong{color:var(--ink);}
+.pd-pdf-link{
+  display:block;padding:12px 14px;background:var(--sage-xl);border-radius:var(--rs);
+  text-decoration:none;color:var(--sage);font-weight:700;font-size:.88rem;
+  border:1.5px solid var(--sage);text-align:center;transition:all .15s;
+}
+.pd-pdf-link:hover{background:var(--sage);color:white;}
+
+/* Red flag critical warning banner (in modal) */
+.pd-redflag-warning{
+  background:var(--red-lt);border-left:4px solid var(--red);border-radius:var(--rs);
+  padding:12px 14px;margin-bottom:14px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.pd-redflag-warning-icon{font-size:1.3rem;flex-shrink:0;}
+.pd-redflag-warning-body{flex:1;}
+.pd-redflag-warning-title{font-weight:700;color:var(--red);font-size:.9rem;margin-bottom:4px;}
+.pd-redflag-warning-body ul{margin:6px 0 0 16px;padding:0;font-size:.82rem;color:var(--ink-md);}
+
+/* ═════════════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════════════ */
 @media (max-width:640px){
@@ -1347,18 +1497,97 @@ body[data-role="provider"] .lang-toggle{display:none;}
      PROVIDER PLACEHOLDER (Part 2)
      ══════════════════════════════ -->
 <div class="app" id="provider-app" style="display:none;">
-  <div class="phase-hdr">
-    <div class="phase-lbl">Staff — Patient Queue</div>
-    <div class="phase-title">Provider Waiting Room</div>
-    <div class="phase-desc">Patients who completed intake today. Tap to pick up and run the exam.</div>
+  <!-- Waiting room header with filters + live refresh indicator -->
+  <div class="wr-header">
+    <div class="wr-title-block">
+      <div class="phase-lbl">Staff — Patient Queue</div>
+      <div class="wr-title-row">
+        <div class="phase-title">Waiting Room</div>
+        <div class="wr-count-badge" id="wr-count-badge">0</div>
+      </div>
+      <div class="phase-desc" id="wr-subtitle">Today's patients. Refreshes automatically every 30 seconds.</div>
+    </div>
+    <div class="wr-controls">
+      <div class="wr-live-indicator" id="wr-live-indicator" title="Live — auto-refreshes every 30s">
+        <div class="wr-live-dot"></div>
+        <span>Live</span>
+      </div>
+      <button class="btn btn-h btn-sm" onclick="loadWaitingRoom(true)" id="wr-refresh-btn">🔄 Refresh</button>
+    </div>
   </div>
-  <div class="callout gold">
-    <div class="callout-icon">🚧</div>
-    <div><strong>Part 1 foundation.</strong> Provider exam flow is in Part 3. For now, you can verify: patient intakes are saving to Sheets + Drive. Check your Sheet and Drive folder after any test submission.</div>
+
+  <!-- Filter tabs -->
+  <div class="wr-filters">
+    <div class="wr-filter active" data-filter="waiting" onclick="setWRFilter('waiting')">
+      <span>Waiting</span>
+      <span class="wr-filter-count" id="wr-count-waiting">0</span>
+    </div>
+    <div class="wr-filter" data-filter="in-exam" onclick="setWRFilter('in-exam')">
+      <span>In Exam</span>
+      <span class="wr-filter-count" id="wr-count-in-exam">0</span>
+    </div>
+    <div class="wr-filter" data-filter="completed" onclick="setWRFilter('completed')">
+      <span>Completed Today</span>
+      <span class="wr-filter-count" id="wr-count-completed">0</span>
+    </div>
+    <div class="wr-filter" data-filter="all" onclick="setWRFilter('all')">
+      <span>All Today</span>
+      <span class="wr-filter-count" id="wr-count-all">0</span>
+    </div>
   </div>
-  <div class="brow">
-    <button class="btn btn-h" onclick="goLanding()">← Back to Landing</button>
-    <button class="btn btn-p" onclick="openSettings()">⚙ Open Settings</button>
+
+  <!-- Loading state -->
+  <div class="wr-loading" id="wr-loading">
+    <div class="spinner" style="width:28px;height:28px;border-width:3px;color:var(--sage);"></div>
+    <div style="margin-top:12px;color:var(--ink-sm);font-size:.88rem;">Loading patient queue…</div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="wr-empty" id="wr-empty" style="display:none;">
+    <div class="wr-empty-icon">👥</div>
+    <div class="wr-empty-title">No patients in this view</div>
+    <div class="wr-empty-desc" id="wr-empty-desc">Patients will appear here automatically when they complete intake.</div>
+  </div>
+
+  <!-- Patient cards list -->
+  <div class="wr-list" id="wr-list"></div>
+
+  <!-- Bottom action row -->
+  <div class="brow" style="margin-top:24px;">
+    <button class="btn btn-h btn-sm" onclick="goLanding()">← Back to Landing</button>
+    <div class="spacer"></div>
+    <button class="btn btn-h btn-sm" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</div>
+
+<!-- Patient detail modal (tapping a card opens this) -->
+<div class="modal-ov" id="patient-detail-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="pd-header">
+      <div>
+        <div class="modal-title" id="pd-name">Patient Name</div>
+        <div class="modal-sub" id="pd-meta">DOB · Phone · Checked in</div>
+      </div>
+      <div class="pd-svc-pills" id="pd-svc-pills"></div>
+    </div>
+
+    <div id="pd-redflag-warning" style="display:none;"></div>
+
+    <div class="sec-lbl">Chief Complaint</div>
+    <div class="pd-card" id="pd-complaint"></div>
+
+    <div class="sec-lbl">Health Focus Summary</div>
+    <div class="pd-card" id="pd-health-focus"></div>
+
+    <div class="sec-lbl">Full Intake PDF</div>
+    <a class="pd-pdf-link" id="pd-pdf-link" href="#" target="_blank" rel="noopener">📄 Open Intake PDF in Drive →</a>
+
+    <div class="modal-footer">
+      <button class="btn btn-h btn-sm" onclick="closePatientDetail()">Close</button>
+      <button class="btn btn-red btn-sm" onclick="markPatientStatus('no-show')" id="pd-btn-noshow">Mark No-Show</button>
+      <button class="btn btn-o btn-sm" onclick="markPatientStatus('completed')" id="pd-btn-complete" style="display:none;">Mark Completed</button>
+      <button class="btn btn-p btn-sm" onclick="startExam()" id="pd-btn-start">Start Exam →</button>
+    </div>
   </div>
 </div>
 
@@ -1761,6 +1990,8 @@ function goLanding(){
   document.getElementById('patient-app').style.display = 'none';
   document.getElementById('provider-app').style.display = 'none';
   document.body.dataset.role = '';
+  // Stop waiting room polling if leaving provider view
+  stopWaitingRoomPolling();
 }
 function enterPatient(){
   S.role = 'patient';
@@ -1811,6 +2042,8 @@ function enterProvider(){
   document.getElementById('provider-app').style.display = '';
   // Force English on provider side
   setLang('en');
+  // Boot waiting room — load immediately, then poll every 30s
+  startWaitingRoomPolling();
 }
 
 function goStep(n){
@@ -3763,6 +3996,425 @@ function resetToLanding(){
   goStep(0);
   goLanding();
   setLang('en');
+}
+
+/* ═════════════════════════════════════════════════
+   PROVIDER WAITING ROOM — SHEET POLLING + PATIENT QUEUE
+   ═════════════════════════════════════════════════ */
+const WR_POLL_INTERVAL_MS = 30000; // 30 seconds
+let wrPollTimer = null;
+let wrActiveFilter = 'waiting';
+let wrPatients = [];           // normalized patient objects
+let wrSelectedPatient = null;  // currently opened in modal
+let wrLastFetchOk = null;      // timestamp of last successful fetch
+
+function startWaitingRoomPolling(){
+  stopWaitingRoomPolling();
+  loadWaitingRoom(false);
+  wrPollTimer = setInterval(() => loadWaitingRoom(false), WR_POLL_INTERVAL_MS);
+}
+function stopWaitingRoomPolling(){
+  if(wrPollTimer){
+    clearInterval(wrPollTimer);
+    wrPollTimer = null;
+  }
+}
+
+async function loadWaitingRoom(manualRefresh){
+  const loadingEl = document.getElementById('wr-loading');
+  const listEl = document.getElementById('wr-list');
+  const emptyEl = document.getElementById('wr-empty');
+  const liveInd = document.getElementById('wr-live-indicator');
+
+  // On manual refresh or first load, show loading spinner
+  if(manualRefresh || wrPatients.length === 0){
+    if(loadingEl) loadingEl.style.display = '';
+    if(listEl) listEl.style.display = 'none';
+    if(emptyEl) emptyEl.style.display = 'none';
+  }
+
+  // Preflight: Drive must be connected
+  loadCfg();
+  if(!driveToken || !cfg.sheetId){
+    if(loadingEl) loadingEl.style.display = 'none';
+    if(emptyEl){
+      emptyEl.style.display = '';
+      emptyEl.innerHTML = `
+        <div class="wr-empty-icon">🔌</div>
+        <div class="wr-empty-title">Drive Not Connected</div>
+        <div class="wr-empty-desc">Open Settings and connect Google Drive to start pulling patient intakes.</div>`;
+    }
+    if(liveInd){ liveInd.className = 'wr-live-indicator error'; liveInd.querySelector('span').textContent = 'Offline'; }
+    return;
+  }
+
+  try {
+    const tab = 'NewPatient_Intake';
+    // Fetch all data from A:J (Key/Timestamp/Last/First/DOB/Phone/Services/Status/PDFLink/PayloadJSON)
+    const resp = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${tab}!A2:J?majorDimension=ROWS`,
+      { headers: {'Authorization': 'Bearer ' + driveToken} }
+    );
+    if(!resp.ok){
+      if(resp.status === 401){
+        // Token expired — try silent refresh
+        driveToken = null;
+        localStorage.removeItem('cvc_drive_token');
+        setDriveStatus(false);
+        silentRefreshDrive();
+        throw new Error('Drive token expired — attempting to reconnect. Try refresh in a few seconds.');
+      }
+      if(resp.status === 400){
+        // Tab likely doesn't exist yet (no patients submitted ever)
+        wrPatients = [];
+        renderWaitingRoom();
+        wrLastFetchOk = Date.now();
+        if(liveInd){ liveInd.className = 'wr-live-indicator'; liveInd.querySelector('span').textContent = 'Live'; }
+        return;
+      }
+      throw new Error('Sheet fetch failed: HTTP ' + resp.status);
+    }
+    const data = await resp.json();
+    const rows = data.values || [];
+
+    // Normalize rows into patient objects, filtering to TODAY only
+    const today = new Date().toDateString(); // e.g. "Thu Apr 23 2026"
+    wrPatients = rows.map((row, idx) => {
+      const [key, timestamp, last, first, dob, phone, services, status, pdfLink, payloadJson] = row;
+      if(!timestamp || !key) return null;
+      // Parse timestamp — Sheet stores it as locale string like "4/23/2026, 10:15:30 AM"
+      const tsDate = new Date(timestamp);
+      if(isNaN(tsDate.getTime())) return null;
+      if(tsDate.toDateString() !== today) return null; // only today's patients
+      // Parse payload JSON for red flags, chief complaint, etc.
+      let payload = {};
+      try { payload = JSON.parse(payloadJson || '{}'); } catch(e){}
+      return {
+        rowIndex: idx + 2, // sheet row number (1-indexed, +1 for header)
+        key,
+        timestamp: tsDate,
+        last: last || '',
+        first: first || '',
+        dob: dob || '',
+        phone: phone || '',
+        services: (services || '').split(',').map(s => s.trim()).filter(Boolean),
+        status: status || 'pending',
+        pdfLink: pdfLink || '',
+        payload,
+      };
+    }).filter(Boolean);
+
+    // Sort: pending first (oldest first), then in-exam, then completed
+    wrPatients.sort((a, b) => {
+      const statusOrder = { pending: 0, 'in-exam': 1, completed: 2, 'no-show': 3 };
+      const aRank = statusOrder[a.status] ?? 4;
+      const bRank = statusOrder[b.status] ?? 4;
+      if(aRank !== bRank) return aRank - bRank;
+      return a.timestamp - b.timestamp;
+    });
+
+    wrLastFetchOk = Date.now();
+    renderWaitingRoom();
+
+    if(liveInd){ liveInd.className = 'wr-live-indicator'; liveInd.querySelector('span').textContent = 'Live'; }
+
+  } catch(e){
+    console.error('Waiting room load error:', e);
+    if(liveInd){ liveInd.className = 'wr-live-indicator error'; liveInd.querySelector('span').textContent = 'Error'; }
+    if(loadingEl) loadingEl.style.display = 'none';
+    if(emptyEl && wrPatients.length === 0){
+      emptyEl.style.display = '';
+      emptyEl.innerHTML = `
+        <div class="wr-empty-icon">⚠️</div>
+        <div class="wr-empty-title">Couldn't Load Queue</div>
+        <div class="wr-empty-desc">${e.message || 'Unknown error'}<br><br>Tap Refresh to try again.</div>`;
+    }
+  }
+}
+
+function renderWaitingRoom(){
+  const loadingEl = document.getElementById('wr-loading');
+  const listEl = document.getElementById('wr-list');
+  const emptyEl = document.getElementById('wr-empty');
+  if(loadingEl) loadingEl.style.display = 'none';
+
+  // Compute counts for each filter
+  const counts = {
+    waiting:   wrPatients.filter(p => p.status === 'pending').length,
+    'in-exam': wrPatients.filter(p => p.status === 'in-exam').length,
+    completed: wrPatients.filter(p => p.status === 'completed').length,
+    all:       wrPatients.length,
+  };
+  document.getElementById('wr-count-waiting').textContent = counts.waiting;
+  document.getElementById('wr-count-in-exam').textContent = counts['in-exam'];
+  document.getElementById('wr-count-completed').textContent = counts.completed;
+  document.getElementById('wr-count-all').textContent = counts.all;
+  // Header badge shows waiting count, with urgency style if ≥5
+  const headerBadge = document.getElementById('wr-count-badge');
+  headerBadge.textContent = counts.waiting;
+  headerBadge.className = 'wr-count-badge' + (counts.waiting === 0 ? ' empty' : '') + (counts.waiting >= 5 ? ' urgent' : '');
+
+  // Filter patients for current view
+  let filtered;
+  if(wrActiveFilter === 'all')       filtered = wrPatients;
+  else if(wrActiveFilter === 'waiting')   filtered = wrPatients.filter(p => p.status === 'pending');
+  else if(wrActiveFilter === 'in-exam')   filtered = wrPatients.filter(p => p.status === 'in-exam');
+  else if(wrActiveFilter === 'completed') filtered = wrPatients.filter(p => p.status === 'completed');
+
+  if(filtered.length === 0){
+    listEl.style.display = 'none';
+    emptyEl.style.display = '';
+    emptyEl.innerHTML = `
+      <div class="wr-empty-icon">👥</div>
+      <div class="wr-empty-title">No patients in this view</div>
+      <div class="wr-empty-desc">${wrActiveFilter === 'waiting' ? "Patients will appear here automatically when they complete intake." : ''}</div>`;
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = '';
+  listEl.innerHTML = filtered.map(p => renderPatientCard(p)).join('');
+}
+
+function renderPatientCard(p){
+  // Calculate age from DOB
+  let age = '';
+  if(p.dob){
+    const dobDate = new Date(p.dob);
+    if(!isNaN(dobDate.getTime())){
+      const today = new Date();
+      let a = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if(m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) a--;
+      age = a + ' y/o';
+    }
+  }
+
+  // Wait time calculation
+  const waitMs = Date.now() - p.timestamp.getTime();
+  const waitMin = Math.max(0, Math.floor(waitMs / 60000));
+  const waitClass = p.status === 'pending' ? (waitMin >= 30 ? ' urgent' : waitMin >= 15 ? ' warn' : '') : '';
+
+  // Format check-in time
+  const timeStr = p.timestamp.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+
+  // Services pills
+  const servicePills = p.services.map(svc => {
+    const cls = svc === 'CHIRO' ? 'chiro' : svc === 'SW' ? 'sw' : svc === 'NP' ? 'np' : svc === 'WL' ? 'wl' : '';
+    return `<span class="wr-service-pill ${cls}">${svc}</span>`;
+  }).join('');
+
+  // Red flag badge
+  const hasCriticalFlag = p.payload && p.payload.health && p.payload.health.redFlagCritical;
+  const redFlagBadge = hasCriticalFlag ? `<span class="wr-flag-badge red">⚠ Red Flag</span>` : '';
+
+  // Status badge
+  let statusBadge = '';
+  if(p.status === 'in-exam') statusBadge = `<span class="wr-flag-badge status-in-exam">In Exam</span>`;
+  else if(p.status === 'completed') statusBadge = `<span class="wr-flag-badge status-completed">✓ Done</span>`;
+  else if(p.status === 'no-show') statusBadge = `<span class="wr-flag-badge status-completed">No-Show</span>`;
+
+  const cardClasses = ['wr-card'];
+  if(p.status === 'in-exam') cardClasses.push('in-exam');
+  else if(p.status === 'completed' || p.status === 'no-show') cardClasses.push('completed');
+  if(hasCriticalFlag) cardClasses.push('red-flag');
+
+  return `
+    <div class="${cardClasses.join(' ')}" onclick="openPatientDetail('${p.key}')">
+      <div class="wr-card-top">
+        <div>
+          <div class="wr-card-name">${escapeHtml(p.first)} ${escapeHtml(p.last)}</div>
+          <div class="wr-card-meta">${age ? age + ' · ' : ''}${escapeHtml(p.dob || '—')} · ${escapeHtml(p.phone || '—')} · Checked in ${timeStr}</div>
+        </div>
+        <div class="wr-card-wait">
+          <div class="wr-wait-time${waitClass}">${waitMin}<span style="font-size:.7rem;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--ink-sm);"> min</span></div>
+          <div class="wr-wait-label">waiting</div>
+        </div>
+      </div>
+      <div class="wr-card-bottom">
+        <div class="wr-card-pills">${servicePills}</div>
+        <div class="wr-card-flags">${redFlagBadge}${statusBadge}</div>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function setWRFilter(filter){
+  wrActiveFilter = filter;
+  document.querySelectorAll('.wr-filter').forEach(el => {
+    el.classList.toggle('active', el.dataset.filter === filter);
+  });
+  renderWaitingRoom();
+}
+
+function openPatientDetail(key){
+  const p = wrPatients.find(x => x.key === key);
+  if(!p) return;
+  wrSelectedPatient = p;
+
+  // Header
+  document.getElementById('pd-name').textContent = `${p.first} ${p.last}`;
+  let age = '';
+  if(p.dob){
+    const dobDate = new Date(p.dob);
+    if(!isNaN(dobDate.getTime())){
+      const today = new Date();
+      let a = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if(m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) a--;
+      age = a + ' y/o';
+    }
+  }
+  const checkInTime = p.timestamp.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  document.getElementById('pd-meta').textContent = `${age ? age + ' · ' : ''}DOB ${p.dob || '—'} · ${p.phone || '—'} · Checked in ${checkInTime}`;
+
+  // Service pills
+  document.getElementById('pd-svc-pills').innerHTML = p.services.map(svc => {
+    const cls = svc === 'CHIRO' ? 'chiro' : svc === 'SW' ? 'sw' : svc === 'NP' ? 'np' : svc === 'WL' ? 'wl' : '';
+    return `<span class="wr-service-pill ${cls}">${svc}</span>`;
+  }).join('');
+
+  // Red flag warning banner (if applicable)
+  const rfWarning = document.getElementById('pd-redflag-warning');
+  if(p.payload && p.payload.health && p.payload.health.redFlagCritical){
+    const flagLabels = (p.payload.health.redFlagsLabels || []).filter(f => f);
+    rfWarning.className = 'pd-redflag-warning';
+    rfWarning.style.display = '';
+    rfWarning.innerHTML = `
+      <div class="pd-redflag-warning-icon">⚠️</div>
+      <div class="pd-redflag-warning-body">
+        <div class="pd-redflag-warning-title">Critical Red Flag Screen</div>
+        <div>Patient reported:</div>
+        <ul>${flagLabels.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>
+      </div>`;
+  } else {
+    rfWarning.style.display = 'none';
+  }
+
+  // Chief Complaint summary
+  const cc = p.payload && p.payload.complaint ? p.payload.complaint : null;
+  const ccEl = document.getElementById('pd-complaint');
+  if(cc){
+    const regions = cc.regions || {};
+    const regionStrs = Object.keys(regions).map(rid => {
+      const d = regions[rid];
+      const side = d.side === 'L' ? ' (L)' : d.side === 'R' ? ' (R)' : d.side === 'B' ? ' (Bilateral)' : '';
+      return `<strong>${rid}${side}</strong>: ${d.pain}/10`;
+    });
+    const ONSET_LABELS = {'today':'Today','this-week':'This week','2-4-wk':'2–4 wk ago','1-3-mo':'1–3 mo ago','3-plus-mo':'3+ mo ago','chronic':'Chronic 1+ yr'};
+    ccEl.innerHTML = `
+      ${regionStrs.length ? '<div>' + regionStrs.join(' &nbsp;·&nbsp; ') + '</div>' : '<div>No regions captured.</div>'}
+      <div style="margin-top:6px;"><strong>Onset:</strong> ${ONSET_LABELS[cc.onset] || '—'} &nbsp; <strong>Mechanism:</strong> ${escapeHtml(cc.mechanism || '—')}</div>
+      ${cc.goal ? `<div style="margin-top:6px;"><strong>Goal:</strong> ${escapeHtml(cc.goal)}</div>` : ''}`;
+  } else {
+    ccEl.innerHTML = '<em>No complaint data captured.</em>';
+  }
+
+  // Health focus summary
+  const h = p.payload && p.payload.health ? p.payload.health : null;
+  const hfEl = document.getElementById('pd-health-focus');
+  if(h){
+    const parts = [];
+    if(h.neuroSymptomsLabels && h.neuroSymptomsLabels.length){
+      parts.push(`<strong>Neuro Symptoms:</strong> ${h.neuroSymptomsLabels.map(escapeHtml).join(', ')}`);
+    }
+    if(h.goalsLabels && h.goalsLabels.length){
+      parts.push(`<strong>Functional Goals:</strong> ${h.goalsLabels.map(escapeHtml).join(', ')}`);
+    }
+    if(h.np){
+      const interp = h.np.mnsiInterpretation;
+      const interpTxt = interp === 'high' ? 'HIGH probability' : interp === 'moderate' ? 'MODERATE probability' : 'LOW probability';
+      parts.push(`<strong>MNSI Score:</strong> ${h.np.mnsiScore}/13 — ${interpTxt}`);
+      if(h.np.diabeticStatus) parts.push(`<strong>Diabetic:</strong> ${escapeHtml(h.np.diabeticStatus)} ${h.np.hba1c ? `(A1c ${escapeHtml(h.np.hba1c)})` : ''}`);
+    }
+    if(h.sw){
+      const priors = h.sw.prior && h.sw.prior.length ? h.sw.prior.join(', ') : 'none';
+      parts.push(`<strong>SW Prior Interventions:</strong> ${escapeHtml(priors)}`);
+    }
+    if(h.wl){
+      const bmi = h.wl.bmi;
+      parts.push(`<strong>Weight:</strong> ${h.wl.currentWeightLbs || '—'} lbs (goal ${h.wl.goalWeightLbs || '—'}) &nbsp; <strong>BMI:</strong> ${bmi || '—'}`);
+      parts.push(`<strong>Readiness:</strong> ${h.wl.readinessToChange}/10 &nbsp; <strong>Stress:</strong> ${h.wl.stressLevel}/10 &nbsp; <strong>Sleep:</strong> ${h.wl.sleepQuality}/10`);
+    }
+    hfEl.innerHTML = parts.length ? parts.join('<br>') : '<em>No health focus data captured.</em>';
+  } else {
+    hfEl.innerHTML = '<em>No health focus data captured.</em>';
+  }
+
+  // PDF link
+  const pdfLink = document.getElementById('pd-pdf-link');
+  if(p.pdfLink){
+    pdfLink.href = p.pdfLink;
+    pdfLink.style.display = '';
+  } else {
+    pdfLink.style.display = 'none';
+  }
+
+  // Button state based on status
+  const btnStart = document.getElementById('pd-btn-start');
+  const btnComplete = document.getElementById('pd-btn-complete');
+  const btnNoShow = document.getElementById('pd-btn-noshow');
+  if(p.status === 'pending'){
+    btnStart.style.display = '';
+    btnStart.textContent = 'Start Exam →';
+    btnComplete.style.display = 'none';
+    btnNoShow.style.display = '';
+  } else if(p.status === 'in-exam'){
+    btnStart.style.display = 'none';
+    btnComplete.style.display = '';
+    btnNoShow.style.display = 'none';
+  } else {
+    // completed or no-show
+    btnStart.style.display = 'none';
+    btnComplete.style.display = 'none';
+    btnNoShow.style.display = 'none';
+  }
+
+  document.getElementById('patient-detail-modal').classList.add('show');
+}
+
+function closePatientDetail(){
+  document.getElementById('patient-detail-modal').classList.remove('show');
+  wrSelectedPatient = null;
+}
+
+async function markPatientStatus(newStatus){
+  if(!wrSelectedPatient) return;
+  const p = wrSelectedPatient;
+  try {
+    // Update column H (status) of the row
+    const range = `NewPatient_Intake!H${p.rowIndex}`;
+    const resp = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+      {
+        method: 'PUT',
+        headers: {'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json'},
+        body: JSON.stringify({values: [[newStatus]]})
+      }
+    );
+    if(!resp.ok) throw new Error('Failed to update status: HTTP ' + resp.status);
+
+    // Update local state immediately (don't wait for next poll)
+    p.status = newStatus;
+    closePatientDetail();
+    renderWaitingRoom();
+  } catch(e){
+    console.error('Status update error:', e);
+    alert('Failed to update status: ' + e.message);
+  }
+}
+
+function startExam(){
+  if(!wrSelectedPatient) return;
+  // For Part 2B — just mark as in-exam and show a placeholder
+  // Part 3 will build the actual exam flow
+  markPatientStatus('in-exam').then(() => {
+    alert(`Patient ${wrSelectedPatient?.first} ${wrSelectedPatient?.last} moved to "In Exam" status.\n\nThe full provider exam flow (with ICD engine, ortho tests, and combined PDF) will ship in Part 3.`);
+  });
 }
 
 /* ═════════════════════════════════════════════════

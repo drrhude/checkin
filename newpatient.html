@@ -1775,7 +1775,7 @@ body[data-role="provider"] .lang-toggle{display:none;}
       </div>
       <div class="row">
         <div class="field">
-          <label data-en="Past Surgeries" data-es="Cirugías Previas">Past Surgeries</label>
+          <label data-en="Past Surgeries (free-text details)" data-es="Cirugías Previas (detalles)">Past Surgeries (free-text details)</label>
           <textarea id="surgeries" placeholder="" data-en-ph="Surgery type and year..." data-es-ph="Tipo de cirugía y año..."></textarea>
           <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('surgeries').value='None'" data-en="None" data-es="Ninguna">None</span>
         </div>
@@ -1783,6 +1783,162 @@ body[data-role="provider"] .lang-toggle{display:none;}
           <label data-en="Prior Injuries / Fractures" data-es="Lesiones / Fracturas Previas">Prior Injuries / Fractures</label>
           <textarea id="injuries" placeholder="" data-en-ph="Prior injuries, fractures, accidents..." data-es-ph="Lesiones, fracturas, accidentes previos..."></textarea>
           <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('injuries').value='None'" data-en="None" data-es="Ninguna">None</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SURGICAL HISTORY CARD -->
+    <div class="card">
+      <div class="card-title" data-en="Surgical History — Common Categories" data-es="Historial Quirúrgico — Categorías Comunes">Surgical History — Common Categories <span class="sub" data-en="Check all that apply" data-es="Marque todas las que apliquen">Check all that apply</span></div>
+      <div class="check-grid" id="surg-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SOCIAL HISTORY CARD -->
+    <div class="card">
+      <div class="card-title" data-en="Social History" data-es="Historial Social">Social History <span class="sub" data-en="This helps us give you safer, more effective care." data-es="Esto nos ayuda a brindarle atención más segura y efectiva.">This helps us give you safer, more effective care.</span></div>
+
+      <!-- Smoking -->
+      <div class="sec-lbl" data-en="Smoking / Tobacco Use" data-es="Uso de Tabaco">Smoking / Tobacco Use</div>
+      <div class="chips" id="smoking-chips">
+        <div class="chip" data-val="never" data-en="Never smoked" data-es="Nunca he fumado">Never smoked</div>
+        <div class="chip" data-val="former" data-en="Former smoker" data-es="Exfumador">Former smoker</div>
+        <div class="chip" data-val="current-light" data-en="Current (&lt;1 pack/day)" data-es="Fumador actual (menos de 1 paquete/día)">Current (&lt;1 pack/day)</div>
+        <div class="chip" data-val="current-heavy" data-en="Current (1+ packs/day)" data-es="Fumador actual (1+ paquetes/día)">Current (1+ packs/day)</div>
+        <div class="chip" data-val="vape" data-en="Vape / e-cigarette" data-es="Vapeo / cigarrillo electrónico">Vape / e-cigarette</div>
+      </div>
+      <div class="row" id="smoking-detail-row" style="margin-top:10px;display:none;">
+        <div class="field">
+          <label id="smoking-detail-label" data-en="When did you quit? (month/year)" data-es="¿Cuándo lo dejó? (mes/año)">When did you quit? (month/year)</label>
+          <input id="smoking-detail" placeholder="e.g., 'March 2020' or '15 years ago'">
+        </div>
+        <div class="field">
+          <label data-en="Total years smoking" data-es="Años totales fumando">Total years smoking <span style="color:var(--ink-sm);font-weight:400;font-style:italic;font-size:.7rem;">(optional)</span></label>
+          <input type="number" id="smoking-years" min="0" max="80" placeholder="e.g., 20">
+        </div>
+      </div>
+
+      <!-- Alcohol -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Alcohol Use" data-es="Uso de Alcohol">Alcohol Use</div>
+      <div class="chips" id="alcohol-chips">
+        <div class="chip" data-val="none" data-en="None" data-es="Ninguno">None</div>
+        <div class="chip" data-val="social" data-en="Social (1–3 drinks/week)" data-es="Social (1–3 tragos/semana)">Social (1–3 drinks/week)</div>
+        <div class="chip" data-val="moderate" data-en="Moderate (4–7 drinks/week)" data-es="Moderado (4–7 tragos/semana)">Moderate (4–7 drinks/week)</div>
+        <div class="chip" data-val="heavy" data-en="Heavy (8+ drinks/week)" data-es="Fuerte (8+ tragos/semana)">Heavy (8+ drinks/week)</div>
+        <div class="chip" data-val="former" data-en="Former / in recovery" data-es="Antes / en recuperación">Former / in recovery</div>
+      </div>
+
+      <!-- Caffeine -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Caffeine Intake (coffee, energy drinks, etc.)" data-es="Consumo de Cafeína (café, bebidas energéticas, etc.)">Caffeine Intake</div>
+      <div class="chips" id="caffeine-chips">
+        <div class="chip" data-val="none" data-en="None" data-es="Ninguna">None</div>
+        <div class="chip" data-val="light" data-en="1–2 cups/day" data-es="1–2 tazas/día">1–2 cups/day</div>
+        <div class="chip" data-val="moderate" data-en="3–4 cups/day" data-es="3–4 tazas/día">3–4 cups/day</div>
+        <div class="chip" data-val="heavy" data-en="5+ cups/day" data-es="5+ tazas/día">5+ cups/day</div>
+      </div>
+
+      <!-- Recreational substances (optional, with private framing) -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Recreational Substances" data-es="Sustancias Recreativas">Recreational Substances <span style="color:var(--ink-sm);font-weight:400;font-style:italic;font-size:.7rem;">Optional · Confidential</span></div>
+      <div class="callout" style="margin-bottom:10px;padding:10px 12px;font-size:.8rem;">
+        <div class="callout-icon">🔒</div>
+        <div data-en="This information is protected by HIPAA and only visible to your provider. It helps us avoid dangerous interactions with anything we prescribe or recommend." data-es="Esta información está protegida por HIPAA y solo es visible para su proveedor. Nos ayuda a evitar interacciones peligrosas con cualquier cosa que recetemos o recomendemos.">This information is protected by HIPAA and only visible to your provider. It helps us avoid dangerous interactions with anything we prescribe or recommend.</div>
+      </div>
+      <div class="chips" id="rec-sub-chips">
+        <div class="chip" data-val="none" data-en="None" data-es="Ninguna">None</div>
+        <div class="chip" data-val="cannabis" data-en="Cannabis / Marijuana" data-es="Cannabis / Marihuana">Cannabis / Marijuana</div>
+        <div class="chip" data-val="cbd" data-en="CBD products" data-es="Productos CBD">CBD products</div>
+        <div class="chip" data-val="kratom" data-en="Kratom" data-es="Kratom">Kratom</div>
+        <div class="chip" data-val="psychedelics" data-en="Psychedelics" data-es="Psicodélicos">Psychedelics</div>
+        <div class="chip" data-val="stimulants" data-en="Stimulants (cocaine, meth, etc.)" data-es="Estimulantes (cocaína, etc.)">Stimulants (cocaine, meth, etc.)</div>
+        <div class="chip" data-val="opioids" data-en="Non-prescribed opioids" data-es="Opioides sin receta">Non-prescribed opioids</div>
+        <div class="chip" data-val="other" data-en="Other (write below)" data-es="Otro (escriba abajo)">Other (write below)</div>
+        <div class="chip" data-val="no-answer" data-en="Prefer not to say" data-es="Prefiero no decir">Prefer not to say</div>
+      </div>
+      <div class="row" id="rec-sub-detail-row" style="margin-top:10px;display:none;">
+        <div class="field">
+          <label data-en="Frequency / details (optional)" data-es="Frecuencia / detalles (opcional)">Frequency / details (optional)</label>
+          <textarea id="rec-sub-detail" placeholder="" data-en-ph="e.g., 'weekend cannabis use', 'daily CBD for sleep'" data-es-ph="ej., 'cannabis los fines de semana', 'CBD diario para dormir'"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY PROFILE CARD -->
+    <div class="card">
+      <div class="card-title" data-en="Activity &amp; Fitness Profile" data-es="Perfil de Actividad y Estado Físico">Activity &amp; Fitness Profile <span class="sub" data-en="Helps us set realistic treatment goals." data-es="Nos ayuda a establecer metas de tratamiento realistas.">Helps us set realistic treatment goals.</span></div>
+
+      <!-- Current activity level -->
+      <div class="sec-lbl" data-en="Overall Activity Level" data-es="Nivel de Actividad General">Overall Activity Level</div>
+      <div class="chips" id="activity-level-chips">
+        <div class="chip" data-val="sedentary" data-en="Sedentary (mostly sitting, little/no exercise)" data-es="Sedentario (mayormente sentado, poco/sin ejercicio)">Sedentary (mostly sitting, little/no exercise)</div>
+        <div class="chip" data-val="light" data-en="Light (1–3 days/week)" data-es="Ligero (1–3 días/semana)">Light (1–3 days/week)</div>
+        <div class="chip" data-val="moderate" data-en="Moderate (3–5 days/week)" data-es="Moderado (3–5 días/semana)">Moderate (3–5 days/week)</div>
+        <div class="chip" data-val="active" data-en="Active (6–7 days/week)" data-es="Activo (6–7 días/semana)">Active (6–7 days/week)</div>
+        <div class="chip" data-val="very-active" data-en="Very Active (physical job + training)" data-es="Muy Activo (trabajo físico + entrenamiento)">Very Active (physical job + training)</div>
+      </div>
+
+      <!-- Primary activities (multi-select) -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Primary Activities" data-es="Actividades Principales">Primary Activities <span class="sub" data-en="Select all you do regularly" data-es="Seleccione todas las que hace regularmente">Select all you do regularly</span></div>
+      <div class="chips" id="activities-chips">
+        <div class="chip" data-val="walking" data-en="Walking" data-es="Caminar">Walking</div>
+        <div class="chip" data-val="running" data-en="Running / Jogging" data-es="Correr / Trotar">Running / Jogging</div>
+        <div class="chip" data-val="gym" data-en="Gym / Weight Lifting" data-es="Gimnasio / Levantar Pesas">Gym / Weight Lifting</div>
+        <div class="chip" data-val="crossfit" data-en="CrossFit / HIIT" data-es="CrossFit / HIIT">CrossFit / HIIT</div>
+        <div class="chip" data-val="yoga" data-en="Yoga" data-es="Yoga">Yoga</div>
+        <div class="chip" data-val="pilates" data-en="Pilates" data-es="Pilates">Pilates</div>
+        <div class="chip" data-val="swimming" data-en="Swimming" data-es="Natación">Swimming</div>
+        <div class="chip" data-val="cycling" data-en="Cycling (road/indoor)" data-es="Ciclismo">Cycling (road/indoor)</div>
+        <div class="chip" data-val="team-sports" data-en="Team Sports (basketball, soccer, etc.)" data-es="Deportes en Equipo">Team Sports</div>
+        <div class="chip" data-val="golf" data-en="Golf / Tennis / Pickleball" data-es="Golf / Tenis / Pickleball">Golf / Tennis / Pickleball</div>
+        <div class="chip" data-val="martial-arts" data-en="Martial Arts / BJJ / Boxing" data-es="Artes Marciales / BJJ / Boxeo">Martial Arts / BJJ / Boxing</div>
+        <div class="chip" data-val="dance" data-en="Dance" data-es="Baile">Dance</div>
+        <div class="chip" data-val="hiking" data-en="Hiking / Outdoor" data-es="Senderismo / Al Aire Libre">Hiking / Outdoor</div>
+        <div class="chip" data-val="manual-labor" data-en="Manual Labor (work-based)" data-es="Trabajo Manual">Manual Labor (work-based)</div>
+        <div class="chip" data-val="none" data-en="None / no regular activity" data-es="Ninguna / sin actividad regular">None / no regular activity</div>
+      </div>
+
+      <!-- Frequency + duration -->
+      <div class="row" style="margin-top:14px;">
+        <div class="field">
+          <label data-en="Days per week" data-es="Días por semana">Days per week</label>
+          <select id="activity-days">
+            <option value="">—</option>
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+            <option value="6">6</option><option value="7">7</option>
+          </select>
+        </div>
+        <div class="field">
+          <label data-en="Typical session duration" data-es="Duración típica de sesión">Typical session duration</label>
+          <select id="activity-duration">
+            <option value="">—</option>
+            <option value="<30" data-en="Under 30 min" data-es="Menos de 30 min">Under 30 min</option>
+            <option value="30-60" data-en="30–60 min" data-es="30–60 min">30–60 min</option>
+            <option value="60-90" data-en="1–1.5 hours" data-es="1–1.5 horas">1–1.5 hours</option>
+            <option value=">90" data-en="Over 1.5 hours" data-es="Más de 1.5 horas">Over 1.5 hours</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Competitive athlete? -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Competitive Athlete?" data-es="¿Atleta de Competición?">Competitive Athlete?</div>
+      <div class="chips" id="competitive-chips">
+        <div class="chip" data-val="no" data-en="No — recreational only" data-es="No — solo recreativo">No — recreational only</div>
+        <div class="chip" data-val="amateur" data-en="Amateur / club level" data-es="Aficionado / nivel de club">Amateur / club level</div>
+        <div class="chip" data-val="competitive" data-en="Competitive (tournaments, racing)" data-es="Competitivo (torneos, carreras)">Competitive (tournaments, racing)</div>
+        <div class="chip" data-val="pro" data-en="Professional / elite" data-es="Profesional / élite">Professional / elite</div>
+      </div>
+
+      <!-- Recent activity changes -->
+      <div class="sec-lbl" style="margin-top:14px;" data-en="Recent Activity Changes" data-es="Cambios Recientes de Actividad">Recent Activity Changes</div>
+      <label class="ci" onclick="toggleActivityChange(this)">
+        <input type="checkbox" id="activity-changed">
+        <span data-en="I recently changed my activity level (started new sport, increased volume, stopped due to injury, etc.)" data-es="Recientemente cambié mi nivel de actividad (comencé un nuevo deporte, aumenté el volumen, me detuve por lesión, etc.)">I recently changed my activity level (started new sport, increased volume, stopped due to injury, etc.)</span>
+      </label>
+      <div class="row" id="activity-change-detail-row" style="margin-top:10px;display:none;">
+        <div class="field">
+          <label data-en="Describe the change" data-es="Describa el cambio">Describe the change</label>
+          <textarea id="activity-change-detail" placeholder="" data-en-ph="e.g., 'Started training for marathon 8 weeks ago, mileage doubled'" data-es-ph="ej., 'Comencé a entrenar para un maratón hace 8 semanas, dupliqué el kilometraje'"></textarea>
         </div>
       </div>
     </div>
@@ -1991,6 +2147,11 @@ body[data-role="provider"] .lang-toggle{display:none;}
         <div class="card">
           <div class="card-title">💊 Medical History</div>
           <div id="exam-subj-hx"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏃 Lifestyle &amp; Activity</div>
+          <div id="exam-subj-lifestyle"></div>
         </div>
 
         <div class="card">
@@ -2529,6 +2690,25 @@ const HX_CONDITIONS = [
   {id:'hx-none',en:'None of the Above',                 es:'Ninguna de las Anteriores'},
 ];
 
+// Common surgical categories for structured capture
+// (Free-text "surgeries" textarea remains for specific details)
+const SURG_CATEGORIES = [
+  {id:'surg-spine',      en:'Spinal surgery (fusion, laminectomy, discectomy)', es:'Cirugía espinal (fusión, laminectomía, discectomía)'},
+  {id:'surg-shoulder',   en:'Shoulder surgery (cuff repair, labrum, etc.)',      es:'Cirugía de hombro (reparación manguito, labrum, etc.)'},
+  {id:'surg-knee',       en:'Knee surgery (ACL, meniscus, replacement)',         es:'Cirugía de rodilla (LCA, menisco, reemplazo)'},
+  {id:'surg-hip',        en:'Hip surgery (replacement, labral repair)',          es:'Cirugía de cadera (reemplazo, reparación labral)'},
+  {id:'surg-foot-ankle', en:'Foot or ankle surgery',                             es:'Cirugía de pie o tobillo'},
+  {id:'surg-wrist-hand', en:'Wrist or hand surgery (carpal tunnel, etc.)',       es:'Cirugía de muñeca o mano (túnel carpiano, etc.)'},
+  {id:'surg-elbow',      en:'Elbow surgery',                                     es:'Cirugía de codo'},
+  {id:'surg-abdominal',  en:'Abdominal surgery (appendix, C-section, hernia)',   es:'Cirugía abdominal (apéndice, cesárea, hernia)'},
+  {id:'surg-ortho-other',en:'Other orthopedic surgery',                          es:'Otra cirugía ortopédica'},
+  {id:'surg-cardiac',    en:'Cardiac / vascular surgery',                        es:'Cirugía cardíaca / vascular'},
+  {id:'surg-cancer',     en:'Cancer-related surgery',                            es:'Cirugía relacionada con cáncer'},
+  {id:'surg-cosmetic',   en:'Cosmetic / plastic surgery',                        es:'Cirugía cosmética / plástica'},
+  {id:'surg-other',      en:'Other (specify in text field above)',               es:'Otra (especifique en campo de texto arriba)'},
+  {id:'surg-none',       en:'No prior surgeries',                                es:'Sin cirugías previas'},
+];
+
 // Body regions for chief complaint
 // bilateral: true means we can specify L/R side
 const BODY_REGIONS = [
@@ -2695,6 +2875,17 @@ const WL_EATING_PATTERNS = [
   {val:'fast-food',     en:'Fast food 3+ times/week',       es:'Comida rápida 3+ veces/semana'},
   {val:'sugary-drinks', en:'Sugary drinks / soda daily',    es:'Bebidas azucaradas / soda diariamente'},
 ];
+
+// State for Lifestyle + Social History + Activity (Step 6)
+S.lifestyle = {
+  smoking: '',        // 'never'|'former'|'current-light'|'current-heavy'|'vape'
+  alcohol: '',        // 'none'|'social'|'moderate'|'heavy'|'former'
+  caffeine: '',       // 'none'|'light'|'moderate'|'heavy'
+  recSubstances: [],  // multi-select chip values
+  activityLevel: '',  // 'sedentary'|'light'|'moderate'|'active'|'very-active'
+  activities: [],     // multi-select activity types
+  competitive: '',    // 'no'|'amateur'|'competitive'|'pro'
+};
 
 // State for Health Focus step
 S.health = {
@@ -2989,6 +3180,186 @@ function toggleCi(el){
   el.classList.toggle('checked');
   const cb = el.querySelector('input[type=checkbox]');
   if(cb) cb.checked = el.classList.contains('checked');
+}
+
+/* Surgical history category grid */
+function buildSurgGrid(){
+  const grid = document.getElementById('surg-grid');
+  if(!grid) return;
+  grid.innerHTML = SURG_CATEGORIES.map(c =>
+    `<label class="ci" onclick="toggleSurgCi(this,'${c.id}')">
+       <input type="checkbox" id="${c.id}">
+       <span data-en="${c.en.replace(/"/g,'&quot;')}" data-es="${c.es.replace(/"/g,'&quot;')}">${c.en}</span>
+     </label>`
+  ).join('');
+}
+function toggleSurgCi(el, id){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+  // "None" is mutually exclusive with everything else
+  if(el.classList.contains('checked')){
+    if(id === 'surg-none'){
+      SURG_CATEGORIES.forEach(c => {
+        if(c.id !== 'surg-none'){
+          const other = document.getElementById(c.id);
+          if(other && other.checked){
+            other.checked = false;
+            other.parentElement.classList.remove('checked');
+          }
+        }
+      });
+    } else {
+      const noneEl = document.getElementById('surg-none');
+      if(noneEl && noneEl.checked){
+        noneEl.checked = false;
+        noneEl.parentElement.classList.remove('checked');
+      }
+    }
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   LIFESTYLE — Social + Activity chip wiring
+   ═════════════════════════════════════════════════ */
+function initLifestyleChips(){
+  // Smoking (single-select, shows detail row if former/current)
+  const smokingGrp = document.getElementById('smoking-chips');
+  if(smokingGrp){
+    smokingGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        smokingGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.lifestyle.smoking = chip.dataset.val;
+        const detailRow = document.getElementById('smoking-detail-row');
+        const detailLabel = document.getElementById('smoking-detail-label');
+        if(detailRow && detailLabel){
+          if(chip.dataset.val === 'former'){
+            detailRow.style.display = '';
+            detailLabel.setAttribute('data-en', 'When did you quit? (month/year)');
+            detailLabel.setAttribute('data-es', '¿Cuándo lo dejó? (mes/año)');
+            detailLabel.textContent = S.lang === 'es' ? '¿Cuándo lo dejó? (mes/año)' : 'When did you quit? (month/year)';
+          } else if(chip.dataset.val === 'current-light' || chip.dataset.val === 'current-heavy' || chip.dataset.val === 'vape'){
+            detailRow.style.display = '';
+            detailLabel.setAttribute('data-en', 'How long have you been smoking/vaping?');
+            detailLabel.setAttribute('data-es', '¿Cuánto tiempo lleva fumando/vapeando?');
+            detailLabel.textContent = S.lang === 'es' ? '¿Cuánto tiempo lleva fumando/vapeando?' : 'How long have you been smoking/vaping?';
+          } else {
+            detailRow.style.display = 'none';
+          }
+        }
+      });
+    });
+  }
+  // Alcohol (single-select)
+  const alcGrp = document.getElementById('alcohol-chips');
+  if(alcGrp){
+    alcGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        alcGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.lifestyle.alcohol = chip.dataset.val;
+      });
+    });
+  }
+  // Caffeine (single-select)
+  const caffGrp = document.getElementById('caffeine-chips');
+  if(caffGrp){
+    caffGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        caffGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.lifestyle.caffeine = chip.dataset.val;
+      });
+    });
+  }
+  // Recreational substances (multi-select with none/no-answer exclusivity)
+  const recGrp = document.getElementById('rec-sub-chips');
+  if(recGrp){
+    recGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        const isExclusive = (val === 'none' || val === 'no-answer');
+        if(isExclusive){
+          recGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+          chip.classList.add('sel');
+          S.lifestyle.recSubstances = [val];
+        } else {
+          // Clear "none" or "no-answer" if another is picked
+          recGrp.querySelectorAll('.chip[data-val="none"], .chip[data-val="no-answer"]').forEach(c => c.classList.remove('sel'));
+          S.lifestyle.recSubstances = S.lifestyle.recSubstances.filter(v => v !== 'none' && v !== 'no-answer');
+          if(chip.classList.contains('sel')){
+            chip.classList.remove('sel');
+            S.lifestyle.recSubstances = S.lifestyle.recSubstances.filter(v => v !== val);
+          } else {
+            chip.classList.add('sel');
+            if(!S.lifestyle.recSubstances.includes(val)) S.lifestyle.recSubstances.push(val);
+          }
+        }
+        // Show detail field if anything non-exclusive is selected
+        const detailRow = document.getElementById('rec-sub-detail-row');
+        if(detailRow){
+          const hasDetail = S.lifestyle.recSubstances.some(v => v !== 'none' && v !== 'no-answer');
+          detailRow.style.display = hasDetail ? '' : 'none';
+        }
+      });
+    });
+  }
+  // Activity level (single-select)
+  const actLvlGrp = document.getElementById('activity-level-chips');
+  if(actLvlGrp){
+    actLvlGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        actLvlGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.lifestyle.activityLevel = chip.dataset.val;
+      });
+    });
+  }
+  // Primary activities (multi-select with "none" exclusive)
+  const actGrp = document.getElementById('activities-chips');
+  if(actGrp){
+    actGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(val === 'none'){
+          actGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+          chip.classList.add('sel');
+          S.lifestyle.activities = ['none'];
+        } else {
+          const noneChip = actGrp.querySelector('.chip[data-val="none"]');
+          if(noneChip) noneChip.classList.remove('sel');
+          S.lifestyle.activities = S.lifestyle.activities.filter(v => v !== 'none');
+          if(chip.classList.contains('sel')){
+            chip.classList.remove('sel');
+            S.lifestyle.activities = S.lifestyle.activities.filter(v => v !== val);
+          } else {
+            chip.classList.add('sel');
+            if(!S.lifestyle.activities.includes(val)) S.lifestyle.activities.push(val);
+          }
+        }
+      });
+    });
+  }
+  // Competitive (single-select)
+  const compGrp = document.getElementById('competitive-chips');
+  if(compGrp){
+    compGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        compGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.lifestyle.competitive = chip.dataset.val;
+      });
+    });
+  }
+}
+
+function toggleActivityChange(el){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+  const row = document.getElementById('activity-change-detail-row');
+  if(row) row.style.display = el.classList.contains('checked') ? '' : 'none';
 }
 
 /* ═════════════════════════════════════════════════
@@ -4385,6 +4756,101 @@ function buildIntakePdfBlob(){
     .map(c => c.en);
   y += field('Conditions', conditions.length ? conditions.join(', ') : 'None reported', margin, W - margin);
 
+  // Surgical categories checked
+  const surgCats = SURG_CATEGORIES
+    .filter(c => document.getElementById(c.id)?.checked)
+    .map(c => c.en);
+  y += field('Surgical Categories', surgCats.length ? surgCats.join(', ') : 'None reported', margin, W - margin);
+
+  // ═══════════════════════════════════════
+  // LIFESTYLE — Social History + Activity
+  // ═══════════════════════════════════════
+  if(y > H - 260){ doc.addPage(); y = margin; }
+  sectionHeader('LIFESTYLE & SOCIAL HISTORY');
+
+  const SMOKING_LBL = {
+    'never':'Never smoked','former':'Former smoker',
+    'current-light':'Current smoker (<1 pack/day)','current-heavy':'Current smoker (1+ packs/day)',
+    'vape':'Vape / e-cigarette'
+  };
+  const ALCOHOL_LBL = {
+    'none':'None','social':'Social (1–3/wk)','moderate':'Moderate (4–7/wk)',
+    'heavy':'Heavy (8+/wk)','former':'Former / in recovery'
+  };
+  const CAFF_LBL = {'none':'None','light':'1–2 cups/day','moderate':'3–4 cups/day','heavy':'5+ cups/day'};
+
+  const smokeLbl = SMOKING_LBL[S.lifestyle.smoking] || '—';
+  const smokeDetail = getVal('smoking-detail');
+  const smokeYears = getVal('smoking-years');
+  let smokeFull = smokeLbl;
+  if(smokeDetail) smokeFull += ' — ' + smokeDetail;
+  if(smokeYears) smokeFull += ' — ' + smokeYears + ' years';
+
+  const r1 = Math.max(
+    field('Smoking / Tobacco', smokeFull, colA, colB),
+    field('Alcohol Use', ALCOHOL_LBL[S.lifestyle.alcohol] || '—', colB, colC),
+    field('Caffeine', CAFF_LBL[S.lifestyle.caffeine] || '—', colC, W - margin)
+  );
+  y += r1;
+
+  // Recreational substances (only show if provided and not "none")
+  const rec = S.lifestyle.recSubstances || [];
+  if(rec.length > 0 && !(rec.length === 1 && rec[0] === 'none')){
+    const REC_LBL = {
+      'cannabis':'Cannabis','cbd':'CBD products','kratom':'Kratom',
+      'psychedelics':'Psychedelics','stimulants':'Stimulants','opioids':'Non-prescribed opioids',
+      'other':'Other','no-answer':'Prefer not to say','none':'None'
+    };
+    const recLabels = rec.map(v => REC_LBL[v] || v).join(', ');
+    const recDetail = getVal('rec-sub-detail');
+    y += field('Recreational Substances', recLabels + (recDetail ? ' — ' + recDetail : ''), margin, W - margin);
+  }
+
+  // ═══════════════════════════════════════
+  // ACTIVITY PROFILE
+  // ═══════════════════════════════════════
+  if(y > H - 200){ doc.addPage(); y = margin; }
+  sectionHeader('ACTIVITY & FITNESS PROFILE');
+
+  const ACT_LEVEL_LBL = {
+    'sedentary':'Sedentary','light':'Light (1–3 d/wk)','moderate':'Moderate (3–5 d/wk)',
+    'active':'Active (6–7 d/wk)','very-active':'Very Active'
+  };
+  const ACTIVITY_LBL = {
+    'walking':'Walking','running':'Running/Jogging','gym':'Gym/Weight Lifting',
+    'crossfit':'CrossFit/HIIT','yoga':'Yoga','pilates':'Pilates','swimming':'Swimming',
+    'cycling':'Cycling','team-sports':'Team Sports','golf':'Golf/Tennis/Pickleball',
+    'martial-arts':'Martial Arts/BJJ/Boxing','dance':'Dance','hiking':'Hiking/Outdoor',
+    'manual-labor':'Manual Labor','none':'None / no regular activity'
+  };
+  const COMP_LBL = {
+    'no':'Recreational only','amateur':'Amateur/club','competitive':'Competitive','pro':'Professional/elite'
+  };
+  const DUR_LBL = {
+    '<30':'Under 30 min','30-60':'30–60 min','60-90':'1–1.5 hours','>90':'Over 1.5 hours'
+  };
+
+  const actLvlTxt = ACT_LEVEL_LBL[S.lifestyle.activityLevel] || '—';
+  const daysTxt = getVal('activity-days') || '—';
+  const durTxt = DUR_LBL[getVal('activity-duration')] || '—';
+  const compTxt = COMP_LBL[S.lifestyle.competitive] || '—';
+
+  const r2 = Math.max(
+    field('Overall Activity Level', actLvlTxt, colA, colB),
+    field('Days / Week', daysTxt, colB, colC),
+    field('Session Duration', durTxt, colC, W - margin)
+  );
+  y += r2;
+
+  const actLabels = (S.lifestyle.activities || []).map(v => ACTIVITY_LBL[v] || v);
+  y += field('Primary Activities', actLabels.length ? actLabels.join(', ') : '—', margin, W - margin);
+  y += field('Competitive Level', compTxt, margin, W - margin);
+
+  if(document.getElementById('activity-changed')?.checked){
+    const changeDetail = getVal('activity-change-detail');
+    y += field('Recent Activity Change', changeDetail || 'Yes — patient reports recent change', margin, W - margin);
+  }
+
   // Consents
   if(y > H - 180){ doc.addPage(); y = margin; }
   sectionHeader('CONSENTS SIGNED');
@@ -4680,6 +5146,60 @@ function collectFullPayload(){
     surgeries: getVal('surgeries'),
     injuries: getVal('injuries'),
     conditions: HX_CONDITIONS.filter(c => document.getElementById(c.id)?.checked).map(c => c.en),
+    surgCategories: SURG_CATEGORIES.filter(c => document.getElementById(c.id)?.checked).map(c => c.en),
+  };
+  // Lifestyle (social history + activity profile)
+  const SMOKING_LABELS = {
+    'never':'Never smoked','former':'Former smoker',
+    'current-light':'Current smoker (<1 pack/day)','current-heavy':'Current smoker (1+ packs/day)',
+    'vape':'Vape / e-cigarette'
+  };
+  const ALCOHOL_LABELS = {
+    'none':'None','social':'Social (1–3/wk)','moderate':'Moderate (4–7/wk)',
+    'heavy':'Heavy (8+/wk)','former':'Former / in recovery'
+  };
+  const CAFF_LABELS = {'none':'None','light':'1–2 cups/day','moderate':'3–4 cups/day','heavy':'5+ cups/day'};
+  const ACT_LEVEL_LABELS = {
+    'sedentary':'Sedentary','light':'Light (1–3 d/wk)','moderate':'Moderate (3–5 d/wk)',
+    'active':'Active (6–7 d/wk)','very-active':'Very Active'
+  };
+  const ACTIVITY_LABELS = {
+    'walking':'Walking','running':'Running/Jogging','gym':'Gym/Weight Lifting',
+    'crossfit':'CrossFit/HIIT','yoga':'Yoga','pilates':'Pilates','swimming':'Swimming',
+    'cycling':'Cycling','team-sports':'Team Sports','golf':'Golf/Tennis/Pickleball',
+    'martial-arts':'Martial Arts/BJJ/Boxing','dance':'Dance','hiking':'Hiking/Outdoor',
+    'manual-labor':'Manual Labor','none':'None / no regular activity'
+  };
+  const COMP_LABELS = {
+    'no':'Recreational only','amateur':'Amateur/club','competitive':'Competitive','pro':'Professional/elite'
+  };
+  const REC_LABELS = {
+    'none':'None','cannabis':'Cannabis','cbd':'CBD products','kratom':'Kratom',
+    'psychedelics':'Psychedelics','stimulants':'Stimulants','opioids':'Non-prescribed opioids',
+    'other':'Other','no-answer':'Prefer not to say'
+  };
+  p.lifestyle = {
+    smoking: S.lifestyle.smoking,
+    smokingLabel: SMOKING_LABELS[S.lifestyle.smoking] || '',
+    smokingDetail: getVal('smoking-detail'),
+    smokingYears: getVal('smoking-years'),
+    alcohol: S.lifestyle.alcohol,
+    alcoholLabel: ALCOHOL_LABELS[S.lifestyle.alcohol] || '',
+    caffeine: S.lifestyle.caffeine,
+    caffeineLabel: CAFF_LABELS[S.lifestyle.caffeine] || '',
+    recSubstances: S.lifestyle.recSubstances.slice(),
+    recSubstancesLabels: S.lifestyle.recSubstances.map(v => REC_LABELS[v] || v),
+    recSubstancesDetail: getVal('rec-sub-detail'),
+    activityLevel: S.lifestyle.activityLevel,
+    activityLevelLabel: ACT_LEVEL_LABELS[S.lifestyle.activityLevel] || '',
+    activities: S.lifestyle.activities.slice(),
+    activitiesLabels: S.lifestyle.activities.map(v => ACTIVITY_LABELS[v] || v),
+    activityDays: getVal('activity-days'),
+    activityDuration: getVal('activity-duration'),
+    competitive: S.lifestyle.competitive,
+    competitiveLabel: COMP_LABELS[S.lifestyle.competitive] || '',
+    activityChanged: document.getElementById('activity-changed')?.checked || false,
+    activityChangeDetail: getVal('activity-change-detail'),
   };
   // Consents
   p.consents = {
@@ -4774,6 +5294,19 @@ function resetToLanding(){
       readinessToChange: 5, biggestBarrier: '',
     },
   };
+
+  // Reset lifestyle state
+  S.lifestyle = {
+    smoking: '', alcohol: '', caffeine: '',
+    recSubstances: [],
+    activityLevel: '', activities: [],
+    competitive: '',
+  };
+  // Hide lifestyle detail rows
+  ['smoking-detail-row','rec-sub-detail-row','activity-change-detail-row'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
 
   // Reset MNSI UI (clear yes/no button selections and "answered" highlight)
   document.querySelectorAll('.mnsi-yn-btn').forEach(b => b.classList.remove('yes-sel','no-sel'));
@@ -6712,7 +7245,64 @@ function populateSubjectiveReview(patient){
       const filtered = hx.conditions.filter(c => c !== 'None of the Above');
       if(filtered.length) parts.push(`<strong>Conditions:</strong> ${filtered.map(escapeHtml).join(', ')}`);
     }
+    if(hx.surgCategories && hx.surgCategories.length){
+      const filtered = hx.surgCategories.filter(c => c !== 'No prior surgeries');
+      if(filtered.length) parts.push(`<strong>Surgical hx:</strong> ${filtered.map(escapeHtml).join(', ')}`);
+    }
     hxEl.innerHTML = parts.length ? parts.join('<br>') : '<em>No significant medical history reported.</em>';
+  }
+
+  // Lifestyle & Activity Profile
+  const lifeEl = document.getElementById('exam-subj-lifestyle');
+  if(lifeEl){
+    const life = payload.lifestyle || {};
+    const parts = [];
+
+    // Social history row
+    const socialParts = [];
+    if(life.smokingLabel){
+      let smoke = life.smokingLabel;
+      if(life.smokingDetail) smoke += ' (' + life.smokingDetail + ')';
+      if(life.smokingYears) smoke += ' — ' + life.smokingYears + ' yrs';
+      socialParts.push(`<strong>Smoking:</strong> ${escapeHtml(smoke)}`);
+    }
+    if(life.alcoholLabel) socialParts.push(`<strong>Alcohol:</strong> ${escapeHtml(life.alcoholLabel)}`);
+    if(life.caffeineLabel && life.caffeineLabel !== 'None') socialParts.push(`<strong>Caffeine:</strong> ${escapeHtml(life.caffeineLabel)}`);
+    if(socialParts.length) parts.push(socialParts.join(' &nbsp;·&nbsp; '));
+
+    // Recreational substances (only shown if more than none)
+    if(life.recSubstancesLabels && life.recSubstancesLabels.length){
+      const filtered = life.recSubstancesLabels.filter(v => v !== 'None');
+      if(filtered.length){
+        let recStr = `<strong>Recreational:</strong> <span style="color:var(--amber);">${filtered.map(escapeHtml).join(', ')}</span>`;
+        if(life.recSubstancesDetail) recStr += ` <em>— "${escapeHtml(life.recSubstancesDetail)}"</em>`;
+        parts.push(recStr);
+      }
+    }
+
+    // Activity profile row
+    const actParts = [];
+    if(life.activityLevelLabel) actParts.push(`<strong>Level:</strong> ${escapeHtml(life.activityLevelLabel)}`);
+    if(life.activitiesLabels && life.activitiesLabels.length){
+      const filtered = life.activitiesLabels.filter(v => v !== 'None / no regular activity');
+      if(filtered.length) actParts.push(`<strong>Activities:</strong> ${filtered.map(escapeHtml).join(', ')}`);
+    }
+    if(life.activityDays) actParts.push(`<strong>${escapeHtml(life.activityDays)} d/wk</strong>`);
+    const DUR_LBL = {'<30':'<30 min','30-60':'30–60 min','60-90':'1–1.5 hr','>90':'>1.5 hr'};
+    if(life.activityDuration && DUR_LBL[life.activityDuration]) actParts.push(`<strong>Duration:</strong> ${DUR_LBL[life.activityDuration]}`);
+    if(actParts.length) parts.push(actParts.join(' &nbsp;·&nbsp; '));
+
+    if(life.competitiveLabel && life.competitiveLabel !== 'Recreational only'){
+      parts.push(`<strong style="color:var(--sage);">Competitive level:</strong> ${escapeHtml(life.competitiveLabel)}`);
+    }
+
+    // Recent activity change is clinically relevant — flag it prominently
+    if(life.activityChanged){
+      const detail = life.activityChangeDetail || 'Yes (no details)';
+      parts.push(`<strong style="color:var(--amber);">⚠ Recent activity change:</strong> <em>${escapeHtml(detail)}</em>`);
+    }
+
+    lifeEl.innerHTML = parts.length ? parts.join('<br>') : '<em>No lifestyle data captured.</em>';
   }
 
   // Neuro + safety screen
@@ -7446,12 +8036,14 @@ function wireOrthoAddOnChips(){
 function init(){
   loadCfg();
   buildHxGrid();
+  buildSurgGrid();
   buildRegionGrid();
   buildHealthFocusGrids();
   initShockwaveChips();
   buildMNSIGrid();
   initNeuroPathControls();
   initWeightLossControls();
+  initLifestyleChips();
 
   // Wire chief complaint chip groups
   initSingleSelectChips('onset-chips', 'onset');

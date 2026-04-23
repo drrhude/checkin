@@ -1,0 +1,2894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CVC Clinical Suite — Colleyville Chiropractic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ═════════════════════════════════════════════════
+   CVC CLINICAL SUITE — DESIGN SYSTEM
+   Matches existing CVC tool aesthetic exactly
+   ═════════════════════════════════════════════════ */
+:root{
+  --sage:#2F5C43;
+  --sage-md:#4a7c5e;
+  --sage-lt:#B8D8C4;
+  --sage-xl:#EAF4EE;
+  --sage-dk:#1e3d2c;
+  --ink:#182820;
+  --ink-md:#3b4e41;
+  --ink-sm:#677a6e;
+  --cream:#f6faf7;
+  --cream-dk:#eaf2ec;
+  --white:#fff;
+  --border:#c8dcd0;
+  --border-lt:#e2ede7;
+  --gold:#C08A32;
+  --gold-lt:#fdf3e3;
+  --gold-dk:#9e7028;
+  --teal:#0D7377;
+  --teal-lt:#e4f5f5;
+  --red:#C0392B;
+  --red-lt:#FDECEA;
+  --amber:#D4860A;
+  --amber-lt:#FEF6E4;
+  --green:#1a6b3a;
+  --green-lt:#e8f7ef;
+  --cc:#2563a8;
+  --cc-lt:#eaf1fc;
+  --r:14px;
+  --rs:9px;
+  --sh:0 2px 12px rgba(0,0,0,.07);
+  --sh-lg:0 8px 32px rgba(24,40,32,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.55;
+  min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+input,select,textarea,button{font-family:inherit;font-size:inherit;}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline-offset:1px;}
+
+/* ═════════════════════════════════════════════════
+   TOPBAR (persistent across all screens)
+   ═════════════════════════════════════════════════ */
+.topbar{
+  background:linear-gradient(135deg,#1e3d2c,#152c1e);
+  padding:0 20px;height:58px;
+  display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 20px rgba(0,0,0,.22);
+}
+.tb-mark{
+  width:36px;height:36px;background:var(--sage);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:1.2rem;font-weight:700;color:white;flex-shrink:0;
+}
+.tb-name{font-family:'DM Serif Display',serif;font-size:1.05rem;color:white;line-height:1.1;}
+.tb-name span{display:block;font-size:.6rem;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+/* Language toggle */
+.lang-toggle{display:flex;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;overflow:hidden;}
+.lang-btn{
+  padding:6px 14px;font-size:.77rem;font-weight:700;cursor:pointer;
+  border:none;background:transparent;color:rgba(255,255,255,.6);
+  transition:all .15s;letter-spacing:.05em;
+}
+.lang-btn.active{background:rgba(255,255,255,.2);color:white;}
+
+/* Drive indicator */
+.drive-ind{
+  display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:20px;
+  font-size:.72rem;font-weight:700;transition:all .3s;
+}
+.drive-ind.off{background:rgba(201,123,42,.25);color:#f5c27a;}
+.drive-ind.on{background:rgba(42,127,127,.3);color:#7de8d8;}
+.drive-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.drive-ind.off .drive-dot{background:#f5c27a;}
+.drive-ind.on .drive-dot{background:#7de8d8;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+.tb-btn{
+  padding:6px 13px;border-radius:8px;font-size:.73rem;font-weight:600;
+  cursor:pointer;border:none;transition:all .17s;
+}
+.tb-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.14);}
+.tb-ghost:hover{background:rgba(255,255,255,.15);color:white;}
+
+/* ═════════════════════════════════════════════════
+   LANDING PAGE
+   ═════════════════════════════════════════════════ */
+.landing{
+  display:none;position:fixed;inset:58px 0 0 0;z-index:40;
+  background:linear-gradient(160deg,#1e3d2c 0%,#152c1e 50%,#0c1a12 100%);
+  align-items:center;justify-content:center;flex-direction:column;
+  padding:40px 24px;text-align:center;overflow-y:auto;
+}
+.landing.show{display:flex;}
+.landing::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 30%,rgba(192,138,50,.12) 0%,transparent 50%),
+             radial-gradient(ellipse at 70% 70%,rgba(184,216,196,.08) 0%,transparent 55%);
+  pointer-events:none;
+}
+.landing-inner{position:relative;max-width:560px;width:100%;}
+.landing-welcome{
+  font-family:'DM Serif Display',serif;font-style:italic;
+  font-size:1.15rem;color:var(--gold-lt);margin-bottom:10px;
+  letter-spacing:.02em;opacity:.9;
+}
+.landing-logo-mark{
+  width:72px;height:72px;margin:0 auto 18px;
+  background:var(--sage);border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:700;color:white;
+  box-shadow:0 8px 30px rgba(47,92,67,.4);
+}
+.landing-logo{font-family:'DM Serif Display',serif;font-size:1.9rem;color:white;line-height:1.1;margin-bottom:5px;}
+.landing-logo em{color:var(--gold-lt);font-style:italic;}
+.landing-sub{
+  font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:44px;font-weight:500;
+}
+.landing-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.landing-btn{
+  flex:1;min-width:220px;padding:28px 20px;
+  border-radius:var(--r);border:2px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);color:white;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .2s;text-align:center;
+  backdrop-filter:blur(6px);
+}
+.landing-btn:hover{
+  background:rgba(255,255,255,.12);border-color:rgba(184,216,196,.5);
+  transform:translateY(-2px);box-shadow:0 12px 34px rgba(0,0,0,.3);
+}
+.landing-btn-icon{font-size:2.2rem;margin-bottom:12px;}
+.landing-btn-title{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:6px;}
+.landing-btn-desc{font-size:.82rem;opacity:.7;line-height:1.5;}
+
+/* ═════════════════════════════════════════════════
+   MAIN APP CONTAINERS
+   ═════════════════════════════════════════════════ */
+.app{max-width:820px;margin:0 auto;padding:22px 16px 110px;}
+.step{display:none;animation:fi .3s ease;}
+.step.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Step strip */
+.step-strip{
+  background:var(--white);border-bottom:1px solid var(--border-lt);
+  padding:11px 18px;display:flex;gap:6px;overflow-x:auto;
+  box-shadow:0 1px 3px rgba(0,0,0,.03);
+}
+.step-pill{
+  flex:1;min-width:80px;padding:7px 10px;text-align:center;
+  font-size:.63rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  background:var(--cream-dk);color:var(--ink-sm);border-radius:6px;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.step-pill.active{background:var(--sage);color:white;}
+.step-pill.done{background:var(--sage-xl);color:var(--sage);}
+.step-pill.done::before{content:'✓ ';}
+
+/* Phase header */
+.phase-hdr{margin-bottom:18px;}
+.phase-lbl{
+  font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sage);margin-bottom:4px;
+}
+.phase-title{font-family:'DM Serif Display',serif;font-size:1.85rem;color:var(--ink);line-height:1.15;}
+.phase-desc{font-size:.87rem;color:var(--ink-sm);margin-top:5px;line-height:1.6;}
+
+/* Cards */
+.card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:20px 22px;margin-bottom:14px;box-shadow:var(--sh);
+}
+.card-title{
+  font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--sage);
+  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--cream-dk);
+  display:flex;align-items:center;gap:8px;
+}
+.card-title .sub{font-size:.73rem;color:var(--ink-sm);font-family:'DM Sans',sans-serif;font-weight:400;margin-left:auto;font-style:italic;}
+.sec-lbl{
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--sage);margin:14px 0 8px;
+}
+.sec-lbl:first-child{margin-top:0;}
+
+/* Form fields */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.row.r1{grid-template-columns:1fr;}
+.row.r3{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{
+  font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-sm);
+}
+.field label .req{color:var(--red);margin-left:2px;}
+.field input,.field select,.field textarea{
+  border:1.5px solid var(--border);border-radius:var(--rs);
+  padding:9px 12px;background:var(--cream);color:var(--ink);
+  font-size:.89rem;transition:border-color .15s,background .15s;
+  font-family:'DM Sans',sans-serif;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--sage);background:white;outline:none;
+}
+.field textarea{resize:vertical;min-height:68px;}
+.field-err{font-size:.72rem;color:var(--red);margin-top:2px;display:none;}
+.field-err.show{display:block;}
+.field.has-err input,.field.has-err select,.field.has-err textarea{border-color:var(--red);background:var(--red-lt);}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{
+  padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--cream);color:var(--ink-md);font-size:.82rem;font-weight:500;
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.chip:hover{border-color:var(--sage-md);}
+.chip.sel{background:var(--sage);border-color:var(--sage);color:white;}
+.chip.sel-gold{background:var(--gold);border-color:var(--gold);color:white;}
+.chip.sel-teal{background:var(--teal);border-color:var(--teal);color:white;}
+
+/* Check items */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.ci{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--cream);font-size:.84rem;cursor:pointer;transition:all .15s;
+}
+.ci:hover{border-color:var(--sage-md);}
+.ci input[type=checkbox]{width:15px;height:15px;accent-color:var(--sage);cursor:pointer;flex-shrink:0;}
+.ci.checked{background:var(--sage-xl);border-color:var(--sage);}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 22px;border-radius:var(--rs);font-size:.9rem;font-weight:700;
+  cursor:pointer;border:none;transition:all .18s;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-p{background:var(--sage);color:white;}
+.btn-p:hover{background:var(--sage-dk);transform:translateY(-1px);box-shadow:0 4px 14px rgba(47,92,67,.3);}
+.btn-p:disabled{background:var(--border);color:var(--ink-sm);cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-o{background:transparent;color:var(--sage);border:1.5px solid var(--sage);}
+.btn-o:hover{background:var(--sage-xl);}
+.btn-h{background:var(--white);border:1.5px solid var(--border);color:var(--ink-md);}
+.btn-h:hover{border-color:var(--sage);color:var(--sage);}
+.btn-gold{background:var(--gold);color:white;}
+.btn-gold:hover{background:var(--gold-dk);}
+.btn-red{background:var(--red-lt);color:var(--red);border:1.5px solid var(--red);}
+.btn-sm{padding:7px 14px;font-size:.79rem;}
+.btn-lg{padding:14px 28px;font-size:1rem;}
+.btn-block{width:100%;}
+
+.brow{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.brow .spacer{flex:1;}
+
+/* ═════════════════════════════════════════════════
+   SERVICE PICKER CARDS (large tappable tiles)
+   ═════════════════════════════════════════════════ */
+.svc-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;margin-bottom:20px;
+}
+.svc-card{
+  position:relative;padding:24px 20px;border-radius:var(--r);
+  border:2.5px solid var(--border);background:var(--white);
+  cursor:pointer;transition:all .2s;text-align:center;
+  box-shadow:var(--sh);
+}
+.svc-card:hover{border-color:var(--sage-lt);transform:translateY(-2px);box-shadow:var(--sh-lg);}
+.svc-card.sel{
+  border-color:var(--sage);background:var(--sage-xl);
+  box-shadow:0 0 0 4px rgba(47,92,67,.12),0 8px 28px rgba(47,92,67,.2);
+}
+.svc-card.sel .svc-check{background:var(--sage);border-color:var(--sage);color:white;}
+.svc-check{
+  position:absolute;top:14px;right:14px;
+  width:26px;height:26px;border-radius:7px;
+  border:2px solid var(--border);background:white;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:700;color:transparent;
+  transition:all .15s;
+}
+.svc-icon{font-size:2.4rem;margin-bottom:10px;line-height:1;}
+.svc-name{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--ink);margin-bottom:5px;}
+.svc-desc{font-size:.78rem;color:var(--ink-sm);line-height:1.55;}
+.svc-count-bar{
+  background:var(--sage);color:white;padding:11px 16px;border-radius:var(--rs);
+  font-size:.83rem;font-weight:600;text-align:center;margin-bottom:14px;
+  display:none;
+}
+.svc-count-bar.show{display:block;}
+
+/* Pills for selected services (shown in topbar during intake) */
+.svc-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.svc-pill{
+  padding:3px 9px;border-radius:12px;font-size:.67rem;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.svc-pill.chiro{background:rgba(47,92,67,.25);color:#c7e0d1;}
+.svc-pill.sw{background:rgba(192,138,50,.25);color:#f0d89a;}
+.svc-pill.wl{background:rgba(13,115,119,.3);color:#a5e0dd;}
+.svc-pill.np{background:rgba(109,63,160,.3);color:#d4b8f0;}
+
+/* ═════════════════════════════════════════════════
+   SIGNATURE PAD
+   ═════════════════════════════════════════════════ */
+.sig-wrap{
+  border:1.5px solid var(--border);border-radius:var(--rs);
+  background:white;overflow:hidden;
+}
+.sig-bar{
+  padding:8px 13px;background:var(--cream-dk);
+  font-size:.67rem;font-weight:700;color:var(--ink-sm);
+  text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sig-canvas{display:block;width:100%;height:140px;cursor:crosshair;touch-action:none;background:white;}
+.sig-clear{
+  background:none;border:none;font-size:.72rem;color:var(--sage);
+  cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;
+}
+
+/* ═════════════════════════════════════════════════
+   CONSENT BOXES
+   ═════════════════════════════════════════════════ */
+.consent-box{
+  font-size:.82rem;color:var(--ink-md);line-height:1.7;
+  padding:14px 16px;background:var(--cream);border-radius:var(--rs);
+  border:1px solid var(--border-lt);margin-bottom:10px;max-height:200px;overflow-y:auto;
+}
+.consent-box strong{color:var(--ink);}
+
+/* ═════════════════════════════════════════════════
+   HANDOFF SCREEN (patient submit success)
+   ═════════════════════════════════════════════════ */
+.handoff{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:linear-gradient(160deg,#1e3d2c,#152c1e);
+  align-items:center;justify-content:center;flex-direction:column;
+  padding:40px 24px;text-align:center;color:white;
+}
+.handoff.show{display:flex;}
+.ho-icon{
+  width:92px;height:92px;margin:0 auto 24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--sage),var(--sage-md));
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;color:white;
+  box-shadow:0 10px 40px rgba(47,92,67,.5);
+  animation:ho-pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes ho-pop{from{transform:scale(.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+.ho-title{font-family:'DM Serif Display',serif;font-size:2.2rem;margin-bottom:10px;}
+.ho-sub{font-size:1rem;color:rgba(255,255,255,.75);margin-bottom:8px;max-width:440px;line-height:1.6;}
+.ho-timer{
+  margin-top:30px;font-size:.8rem;color:rgba(255,255,255,.5);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.ho-progress{
+  width:260px;height:4px;background:rgba(255,255,255,.1);border-radius:4px;
+  margin:12px auto;overflow:hidden;
+}
+.ho-progress-bar{
+  height:100%;background:var(--gold);border-radius:4px;width:100%;
+  transform-origin:left center;animation:ho-shrink 30s linear forwards;
+}
+@keyframes ho-shrink{from{transform:scaleX(1);}to{transform:scaleX(0);}}
+
+/* ═════════════════════════════════════════════════
+   MODAL (Settings + PIN)
+   ═════════════════════════════════════════════════ */
+.modal-ov{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:600;align-items:center;justify-content:center;
+  padding:20px;backdrop-filter:blur(3px);
+}
+.modal-ov.show{display:flex;}
+.modal{
+  background:white;border-radius:var(--r);
+  width:100%;max-width:520px;max-height:88vh;overflow-y:auto;
+  box-shadow:var(--sh-lg);padding:26px 28px;
+}
+.modal-title{
+  font-family:'DM Serif Display',serif;font-size:1.5rem;
+  margin-bottom:4px;color:var(--ink);
+}
+.modal-sub{font-size:.82rem;color:var(--ink-sm);margin-bottom:18px;}
+.modal-footer{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap;}
+
+/* PIN keypad for staff unlock */
+.pin-row{display:flex;gap:10px;justify-content:center;margin:16px 0;}
+.pin-box{
+  width:54px;height:64px;border-radius:10px;
+  border:2px solid var(--border);background:var(--cream);
+  font-size:1.6rem;text-align:center;outline:none;
+  font-family:'DM Sans',sans-serif;font-weight:700;color:var(--ink);
+}
+.pin-box:focus{border-color:var(--sage);background:white;}
+.pin-err{color:var(--red);font-size:.82rem;text-align:center;min-height:20px;font-weight:600;}
+
+/* ═════════════════════════════════════════════════
+   ALERTS / CALLOUTS
+   ═════════════════════════════════════════════════ */
+.callout{
+  border-radius:var(--rs);padding:11px 14px;margin-bottom:12px;
+  font-size:.83rem;line-height:1.6;border-left:4px solid var(--sage);
+  background:var(--sage-xl);color:var(--ink-md);display:flex;gap:10px;align-items:flex-start;
+}
+.callout.gold{border-left-color:var(--gold);background:var(--gold-lt);}
+.callout.red{border-left-color:var(--red);background:var(--red-lt);color:var(--red);}
+.callout.teal{border-left-color:var(--teal);background:var(--teal-lt);color:var(--teal);}
+.callout-icon{flex-shrink:0;font-size:1.05rem;line-height:1.4;}
+
+/* Status bar for submit */
+.status-bar{
+  display:none;align-items:center;gap:10px;padding:11px 14px;
+  border-radius:var(--rs);font-size:.84rem;font-weight:600;margin-top:10px;
+}
+.status-bar.show{display:flex;}
+.status-bar.loading{background:var(--cc-lt);color:var(--cc);border:1px solid rgba(37,99,168,.2);}
+.status-bar.success{background:var(--green-lt);color:var(--green);border:1px solid rgba(26,107,58,.25);}
+.status-bar.error{background:var(--red-lt);color:var(--red);border:1px solid rgba(192,57,43,.25);}
+.spinner{
+  width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ═════════════════════════════════════════════════
+   BODY REGION GRID (chief complaint)
+   ═════════════════════════════════════════════════ */
+.region-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:8px;
+}
+.region-tile{
+  display:flex;align-items:center;gap:10px;padding:11px 13px;
+  border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--cream);cursor:pointer;transition:all .15s;
+  user-select:none;
+}
+.region-tile:hover{border-color:var(--sage-md);}
+.region-tile.sel{background:var(--sage-xl);border-color:var(--sage);}
+.region-tile-icon{font-size:1.2rem;line-height:1;}
+.region-tile-label{font-size:.84rem;font-weight:600;color:var(--ink);}
+.region-tile.sel .region-tile-label{color:var(--sage-dk);}
+
+/* Bilateral side toggle (appears within tile when selected) */
+.region-sides{
+  display:none;gap:5px;margin-left:auto;
+}
+.region-tile.sel .region-sides{display:flex;}
+.side-btn{
+  width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);
+  background:white;font-size:.7rem;font-weight:700;color:var(--ink-sm);
+  cursor:pointer;transition:all .13s;display:flex;align-items:center;justify-content:center;
+}
+.side-btn.active{background:var(--sage);border-color:var(--sage);color:white;}
+
+/* Pain rating row per selected region */
+.pain-row{
+  display:flex;align-items:center;gap:14px;padding:12px 0;
+  border-bottom:1px solid var(--border-lt);
+}
+.pain-row:last-child{border-bottom:none;}
+.pain-label{
+  font-size:.84rem;font-weight:600;color:var(--ink);
+  min-width:140px;flex-shrink:0;
+}
+.pain-slider-wrap{flex:1;display:flex;align-items:center;gap:10px;}
+.pain-slider{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:6px;border-radius:4px;
+  background:linear-gradient(to right,#8fbc9f 0%,#d4b444 50%,#c05454 100%);
+  outline:none;
+}
+.pain-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;border-radius:50%;
+  background:white;border:3px solid var(--sage);
+  cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2);
+}
+.pain-slider::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;
+  background:white;border:3px solid var(--sage);cursor:pointer;
+}
+.pain-value{
+  font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--sage);
+  min-width:36px;text-align:center;font-weight:700;
+}
+
+/* ═════════════════════════════════════════════════
+   RESPONSIVE
+   ═════════════════════════════════════════════════ */
+@media (max-width:640px){
+  .row,.row.r3{grid-template-columns:1fr;}
+  .check-grid{grid-template-columns:1fr;}
+  .landing-btns{flex-direction:column;}
+  .phase-title{font-size:1.5rem;}
+  .app{padding:16px 12px 110px;}
+  .card{padding:16px 17px;}
+  .tb-name{font-size:.9rem;}
+  .tb-name span{font-size:.55rem;}
+  .pain-row{flex-direction:column;align-items:stretch;gap:8px;}
+  .pain-label{min-width:0;}
+  .region-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* Hide language toggle on provider/staff pages */
+body[data-role="provider"] .lang-toggle{display:none;}
+
+/* Print optimizations for PDF generation iframe */
+@media print{
+  body{background:white;}
+  .topbar,.step-strip,.modal-ov,.handoff,.landing,.brow,.no-print{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     TOPBAR (always visible)
+     ══════════════════════════════ -->
+<div class="topbar">
+  <div class="tb-mark">C</div>
+  <div>
+    <div class="tb-name" data-en="CVC Clinical Suite" data-es="CVC Suite Clínica">CVC Clinical Suite<span data-en="Colleyville Chiropractic · CVC Spine &amp; Sport" data-es="Colleyville Chiropractic · CVC Spine &amp; Sport">Colleyville Chiropractic · CVC Spine &amp; Sport</span></div>
+  </div>
+  <div class="tb-right">
+    <div class="svc-pills" id="tb-svc-pills"></div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lb-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lb-es" onclick="setLang('es')">ES</button>
+    </div>
+    <div class="drive-ind off" id="drive-ind" onclick="openSettings()">
+      <div class="drive-dot"></div>
+      <span id="drive-label" data-en="Drive" data-es="Drive">Drive</span>
+    </div>
+    <button class="tb-btn tb-ghost" onclick="openSettings()" title="Settings">⚙</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     LANDING PAGE
+     ══════════════════════════════ -->
+<div class="landing show" id="landing">
+  <div class="landing-inner">
+    <div class="landing-welcome" data-en="Welcome to" data-es="Bienvenido a">Welcome to</div>
+    <div class="landing-logo-mark">C</div>
+    <div class="landing-logo">Colleyville <em>Chiropractic!</em></div>
+    <div class="landing-sub">CVC Spine &amp; Sport · Clinical Suite</div>
+    <div class="landing-btns">
+      <div class="landing-btn" onclick="enterPatient()">
+        <div class="landing-btn-icon">🧑</div>
+        <div class="landing-btn-title" data-en="Start My Paperwork" data-es="Comenzar Mis Documentos">Start My Paperwork</div>
+        <div class="landing-btn-desc" data-en="New patient? Check in here to get started" data-es="¿Paciente nuevo? Regístrese aquí para comenzar">New patient? Check in here to get started</div>
+      </div>
+      <div class="landing-btn" onclick="enterStaff()">
+        <div class="landing-btn-icon">🩺</div>
+        <div class="landing-btn-title">Staff / Provider</div>
+        <div class="landing-btn-desc">Review intakes and run exams</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PATIENT FLOW
+     ══════════════════════════════ -->
+<div class="app" id="patient-app" style="display:none;">
+
+  <!-- Step strip -->
+  <div class="step-strip" id="step-strip" style="margin:-22px -16px 16px;border-radius:0;">
+    <div class="step-pill active" id="sp-0" data-en="1 · Services" data-es="1 · Servicios">1 · Services</div>
+    <div class="step-pill" id="sp-1" data-en="2 · About You" data-es="2 · Sobre Usted">2 · About You</div>
+    <div class="step-pill" id="sp-2" data-en="3 · Insurance" data-es="3 · Seguro">3 · Insurance</div>
+    <div class="step-pill" id="sp-3" data-en="4 · Complaint" data-es="4 · Motivo">4 · Complaint</div>
+    <div class="step-pill" id="sp-4" data-en="5 · Health Focus" data-es="5 · Enfoque Clínico">5 · Health Focus</div>
+    <div class="step-pill" id="sp-5" data-en="6 · Health History" data-es="6 · Historial">6 · Health History</div>
+    <div class="step-pill" id="sp-6" data-en="7 · Consent" data-es="7 · Consentimiento">7 · Consent</div>
+  </div>
+
+  <!-- STEP 0 — SERVICE PICKER -->
+  <div class="step active" id="step-0">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 1 of 7" data-es="Paso 1 de 7">Step 1 of 7</div>
+      <div class="phase-title" data-en="What brings you in today?" data-es="¿Qué lo trae hoy?">What brings you in today?</div>
+      <div class="phase-desc" data-en="Select all services that apply — you can pick more than one." data-es="Seleccione todos los servicios que apliquen — puede elegir más de uno.">Select all services that apply — you can pick more than one.</div>
+    </div>
+
+    <div class="svc-count-bar" id="svc-count-bar" data-en-prefix="You've selected: " data-es-prefix="Ha seleccionado: ">
+      You've selected: <span id="svc-count-txt"></span>
+    </div>
+
+    <div class="svc-grid">
+      <div class="svc-card" data-svc="chiro" onclick="togSvc(this)">
+        <div class="svc-check">✓</div>
+        <div class="svc-icon">🦴</div>
+        <div class="svc-name" data-en="Chiropractic" data-es="Quiropráctica">Chiropractic</div>
+        <div class="svc-desc" data-en="Back, neck, joint pain · adjustments · rehab" data-es="Dolor de espalda, cuello, articulaciones · ajustes · rehabilitación">Back, neck, joint pain · adjustments · rehab</div>
+      </div>
+      <div class="svc-card" data-svc="sw" onclick="togSvc(this)">
+        <div class="svc-check">✓</div>
+        <div class="svc-icon">⚡</div>
+        <div class="svc-name" data-en="Shockwave Therapy" data-es="Terapia de Ondas de Choque">Shockwave Therapy</div>
+        <div class="svc-desc" data-en="Tendonitis · plantar fasciitis · chronic pain" data-es="Tendinitis · fascitis plantar · dolor crónico">Tendonitis · plantar fasciitis · chronic pain</div>
+      </div>
+      <div class="svc-card" data-svc="np" onclick="togSvc(this)">
+        <div class="svc-check">✓</div>
+        <div class="svc-icon">🧠</div>
+        <div class="svc-name" data-en="NeuroPath" data-es="NeuroPath">NeuroPath</div>
+        <div class="svc-desc" data-en="Numbness · tingling · burning · neuropathy" data-es="Entumecimiento · hormigueo · ardor · neuropatía">Numbness · tingling · burning · neuropathy</div>
+      </div>
+      <div class="svc-card" data-svc="wl" onclick="togSvc(this)">
+        <div class="svc-check">✓</div>
+        <div class="svc-icon">⚖️</div>
+        <div class="svc-name" data-en="Weight Loss" data-es="Pérdida de Peso">Weight Loss</div>
+        <div class="svc-desc" data-en="PARTS Method · metabolic · coaching" data-es="Método PARTS · metabólico · coaching">PARTS Method · metabolic · coaching</div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <div class="spacer"></div>
+      <button class="btn btn-p btn-lg" id="btn-svc-continue" onclick="goStep(1)" disabled data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 1 — DEMOGRAPHICS -->
+  <div class="step" id="step-1">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 2 of 7" data-es="Paso 2 de 7">Step 2 of 7</div>
+      <div class="phase-title" data-en="About You" data-es="Sobre Usted">About You</div>
+      <div class="phase-desc" data-en="Your information is kept strictly confidential under HIPAA." data-es="Su información se mantiene estrictamente confidencial bajo HIPAA.">Your information is kept strictly confidential under HIPAA.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Personal Information" data-es="Información Personal">Personal Information</div>
+      <div class="row">
+        <div class="field" id="f-first"><label data-en="First Name" data-es="Nombre">First Name<span class="req">*</span></label><input id="pt-first" placeholder="First" oninput="validateField('first')"><div class="field-err" data-en="Required" data-es="Requerido">Required</div></div>
+        <div class="field" id="f-last"><label data-en="Last Name" data-es="Apellido">Last Name<span class="req">*</span></label><input id="pt-last" placeholder="Last" oninput="validateField('last')"><div class="field-err" data-en="Required" data-es="Requerido">Required</div></div>
+      </div>
+      <div class="row r3">
+        <div class="field" id="f-dob"><label data-en="Date of Birth" data-es="Fecha de Nacimiento">Date of Birth<span class="req">*</span></label><input type="date" id="pt-dob" oninput="validateField('dob')"><div class="field-err" data-en="Required" data-es="Requerido">Required</div></div>
+        <div class="field"><label data-en="Sex" data-es="Sexo">Sex</label><select id="pt-sex"><option value="">—</option><option data-en="Male" data-es="Masculino">Male</option><option data-en="Female" data-es="Femenino">Female</option><option data-en="Other" data-es="Otro">Other</option></select></div>
+        <div class="field"><label data-en="Preferred Language" data-es="Idioma Preferido">Preferred Language</label><select id="pt-lang"><option>English</option><option>Spanish / Español</option><option>Other</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field" id="f-phone"><label data-en="Phone Number" data-es="Teléfono">Phone Number<span class="req">*</span></label><input type="tel" id="pt-phone" placeholder="(817) 000-0000" oninput="validateField('phone')"><div class="field-err" data-en="Required" data-es="Requerido">Required</div></div>
+        <div class="field"><label data-en="Email Address" data-es="Correo Electrónico">Email Address</label><input type="email" id="pt-email" placeholder="email@example.com"></div>
+      </div>
+      <div class="row r1">
+        <div class="field"><label data-en="Home Address" data-es="Dirección">Home Address</label><input id="pt-addr" placeholder="Street, City, State, ZIP"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label data-en="How did you hear about us?" data-es="¿Cómo nos encontró?">How did you hear about us?</label>
+          <select id="pt-source" onchange="onSourceChange()">
+            <option value="">—</option>
+            <option value="Google" data-en="Google Search" data-es="Búsqueda de Google">Google Search</option>
+            <option value="Facebook" data-en="Facebook Ad or Post" data-es="Anuncio o Publicación de Facebook">Facebook Ad or Post</option>
+            <option value="Instagram" data-en="Instagram Ad or Post" data-es="Anuncio o Publicación de Instagram">Instagram Ad or Post</option>
+            <option value="FriendFamily" data-en="Friend / Family Referral" data-es="Referido por Amigo / Familia">Friend / Family Referral</option>
+            <option value="Doctor" data-en="Doctor Referral" data-es="Referido por Médico">Doctor Referral</option>
+            <option value="DroveBy" data-en="Drove by / saw sign" data-es="Pasé por aquí / vi el letrero">Drove by / saw sign</option>
+            <option value="Other" data-en="Other" data-es="Otro">Other</option>
+          </select>
+        </div>
+        <div class="field"><label data-en="Occupation" data-es="Ocupación">Occupation</label><input id="pt-occ" placeholder=""></div>
+      </div>
+      <!-- Smart referral follow-ups -->
+      <div class="row r1" id="source-followup-wrap" style="display:none;">
+        <div class="field">
+          <label id="source-followup-label" data-en="Tell us more:" data-es="Cuéntenos más:">Tell us more:</label>
+          <input id="pt-source-detail" placeholder="">
+          <div style="font-size:.72rem;color:var(--ink-sm);margin-top:3px;font-style:italic;" id="source-followup-hint"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Emergency Contact" data-es="Contacto de Emergencia">Emergency Contact</div>
+      <div class="row r3">
+        <div class="field"><label data-en="Contact Name" data-es="Nombre del Contacto">Contact Name</label><input id="ec-name" placeholder=""></div>
+        <div class="field"><label data-en="Relationship" data-es="Relación">Relationship</label>
+          <select id="ec-rel">
+            <option value="">—</option>
+            <option data-en="Spouse" data-es="Esposo/a">Spouse</option>
+            <option data-en="Parent" data-es="Padre/Madre">Parent</option>
+            <option data-en="Child" data-es="Hijo/a">Child</option>
+            <option data-en="Sibling" data-es="Hermano/a">Sibling</option>
+            <option data-en="Friend" data-es="Amigo/a">Friend</option>
+            <option data-en="Other" data-es="Otro">Other</option>
+          </select>
+        </div>
+        <div class="field"><label data-en="Phone" data-es="Teléfono">Phone</label><input type="tel" id="ec-phone" placeholder="(817) 000-0000"></div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(0)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p" onclick="nextFromDemographics()" data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 — INSURANCE -->
+  <div class="step" id="step-2">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 3 of 7" data-es="Paso 3 de 7">Step 3 of 7</div>
+      <div class="phase-title" data-en="Insurance &amp; Billing" data-es="Seguro y Facturación">Insurance &amp; Billing</div>
+      <div class="phase-desc" data-en="If you don't have insurance or prefer cash-pay, just leave this section blank." data-es="Si no tiene seguro o prefiere pagar en efectivo, deje esta sección en blanco.">If you don't have insurance or prefer cash-pay, just leave this section blank.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Case Type" data-es="Tipo de Caso">Case Type</div>
+      <div class="row r1">
+        <div class="field"><label data-en="What type of case is this?" data-es="¿Qué tipo de caso es?">What type of case is this?</label>
+          <select id="case-type" onchange="toggleCaseType()">
+            <option value="General" data-en="General / Self-Pay" data-es="General / Pago Propio">General / Self-Pay</option>
+            <option value="Insurance" data-en="Insurance" data-es="Seguro">Insurance</option>
+            <option value="MVA" data-en="Auto Accident (MVA)" data-es="Accidente Automovilístico (MVA)">Auto Accident (MVA)</option>
+            <option value="WorkComp" data-en="Work Injury / Workers Comp" data-es="Lesión Laboral / Compensación">Work Injury / Workers Comp</option>
+          </select>
+        </div>
+      </div>
+      <div id="case-extra" style="display:none;">
+        <div class="callout gold"><div class="callout-icon">📋</div><div data-en="For MVA or Work Injury cases, please provide your attorney or case manager information below." data-es="Para casos de MVA o lesiones laborales, proporcione la información de su abogado o administrador de casos.">For MVA or Work Injury cases, please provide your attorney or case manager information below.</div></div>
+        <div class="row">
+          <div class="field"><label data-en="Attorney / Case Manager Name" data-es="Nombre del Abogado / Administrador">Attorney / Case Manager Name</label><input id="att-name" placeholder=""></div>
+          <div class="field"><label data-en="Attorney Phone" data-es="Teléfono del Abogado">Attorney Phone</label><input type="tel" id="att-phone" placeholder="(817) 000-0000"></div>
+        </div>
+        <div class="row r1">
+          <div class="field"><label data-en="Date of Incident" data-es="Fecha del Incidente">Date of Incident</label><input type="date" id="incident-date"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Primary Insurance" data-es="Seguro Principal">Primary Insurance <span class="sub" data-en="Optional if cash-pay" data-es="Opcional si paga en efectivo">Optional if cash-pay</span></div>
+      <div class="row">
+        <div class="field"><label data-en="Insurance Carrier" data-es="Aseguradora">Insurance Carrier</label><input id="ins-carrier" placeholder="e.g. BCBS Texas"></div>
+        <div class="field"><label data-en="Policy / Member ID" data-es="Número de Póliza">Policy / Member ID</label><input id="ins-policy" placeholder=""></div>
+      </div>
+      <div class="row r3">
+        <div class="field"><label data-en="Group Number" data-es="Número de Grupo">Group Number</label><input id="ins-group" placeholder=""></div>
+        <div class="field"><label data-en="Subscriber Name" data-es="Titular">Subscriber Name</label><input id="ins-sub-name" placeholder="If different from patient"></div>
+        <div class="field"><label data-en="Subscriber DOB" data-es="Fecha Nac. Titular">Subscriber DOB</label><input type="date" id="ins-sub-dob"></div>
+      </div>
+      <div class="row r1">
+        <div class="field"><label data-en="Primary Care Physician (Name &amp; Phone)" data-es="Médico de Cabecera (Nombre y Teléfono)">Primary Care Physician (Name &amp; Phone)</label><input id="pcp" placeholder=""></div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(1)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p" onclick="goStep(3)" data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 — CHIEF COMPLAINT (NEW) -->
+  <div class="step" id="step-3">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 4 of 7" data-es="Paso 4 de 7">Step 4 of 7</div>
+      <div class="phase-title" data-en="What's Bothering You?" data-es="¿Qué Le Está Molestando?">What's Bothering You?</div>
+      <div class="phase-desc" data-en="Help us understand what you're dealing with so we can focus on what matters most to you." data-es="Ayúdenos a entender lo que está experimentando para que podamos enfocarnos en lo que más le importa.">Help us understand what you're dealing with so we can focus on what matters most to you.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Where Does It Hurt?" data-es="¿Dónde Le Duele?">Where Does It Hurt? <span class="sub" data-en="Select all that apply" data-es="Seleccione todas las que apliquen">Select all that apply</span></div>
+      <div class="region-grid" id="region-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Per-region pain ratings (dynamically rendered when regions are selected) -->
+    <div class="card" id="pain-ratings-card" style="display:none;">
+      <div class="card-title" data-en="How Bad Is The Pain?" data-es="¿Qué Tan Fuerte Es El Dolor?">How Bad Is The Pain? <span class="sub" data-en="0 = no pain · 10 = worst ever" data-es="0 = sin dolor · 10 = lo peor">0 = no pain · 10 = worst ever</span></div>
+      <div id="pain-ratings-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="When Did It Start?" data-es="¿Cuándo Comenzó?">When Did It Start?</div>
+      <div class="chips" id="onset-chips">
+        <div class="chip" data-val="today" data-en="Today" data-es="Hoy">Today</div>
+        <div class="chip" data-val="this-week" data-en="This Week" data-es="Esta Semana">This Week</div>
+        <div class="chip" data-val="2-4-wk" data-en="2–4 Weeks Ago" data-es="Hace 2–4 Semanas">2–4 Weeks Ago</div>
+        <div class="chip" data-val="1-3-mo" data-en="1–3 Months Ago" data-es="Hace 1–3 Meses">1–3 Months Ago</div>
+        <div class="chip" data-val="3-plus-mo" data-en="3+ Months Ago" data-es="Hace 3+ Meses">3+ Months Ago</div>
+        <div class="chip" data-val="chronic" data-en="Chronic (1+ year)" data-es="Crónico (más de 1 año)">Chronic (1+ year)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="How Did It Start?" data-es="¿Cómo Comenzó?">How Did It Start?</div>
+      <div class="chips" id="mechanism-chips">
+        <div class="chip" data-val="gradual" data-en="Gradually over time" data-es="Gradualmente con el tiempo">Gradually over time</div>
+        <div class="chip" data-val="sudden" data-en="Sudden onset (no cause)" data-es="Inicio súbito (sin causa)">Sudden onset (no cause)</div>
+        <div class="chip" data-val="mva" data-en="Auto accident (MVA)" data-es="Accidente automovilístico">Auto accident (MVA)</div>
+        <div class="chip" data-val="work" data-en="Work injury" data-es="Lesión laboral">Work injury</div>
+        <div class="chip" data-val="sports" data-en="Sports / exercise" data-es="Deportes / ejercicio">Sports / exercise</div>
+        <div class="chip" data-val="lifting" data-en="Lifting / bending" data-es="Levantando / inclinándome">Lifting / bending</div>
+        <div class="chip" data-val="fall" data-en="Fall / slip" data-es="Caída / resbalón">Fall / slip</div>
+        <div class="chip" data-val="unknown" data-en="Not sure" data-es="No estoy seguro">Not sure</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <div class="card-title" data-en="What Makes It WORSE?" data-es="¿Qué Lo EMPEORA?">What Makes It WORSE?</div>
+        <div class="chips" id="agg-chips">
+          <div class="chip" data-val="sitting" data-en="Sitting" data-es="Estar sentado">Sitting</div>
+          <div class="chip" data-val="standing" data-en="Standing" data-es="Estar de pie">Standing</div>
+          <div class="chip" data-val="walking" data-en="Walking" data-es="Caminar">Walking</div>
+          <div class="chip" data-val="bending" data-en="Bending" data-es="Agacharme">Bending</div>
+          <div class="chip" data-val="lifting" data-en="Lifting" data-es="Levantar peso">Lifting</div>
+          <div class="chip" data-val="sleeping" data-en="Sleeping" data-es="Dormir">Sleeping</div>
+          <div class="chip" data-val="mornings" data-en="Mornings" data-es="Las mañanas">Mornings</div>
+          <div class="chip" data-val="exercise" data-en="Exercise" data-es="Ejercicio">Exercise</div>
+          <div class="chip" data-val="driving" data-en="Driving" data-es="Manejar">Driving</div>
+          <div class="chip" data-val="stairs" data-en="Stairs" data-es="Escaleras">Stairs</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" data-en="What Makes It BETTER?" data-es="¿Qué Lo MEJORA?">What Makes It BETTER?</div>
+        <div class="chips" id="rel-chips">
+          <div class="chip" data-val="rest" data-en="Rest" data-es="Descanso">Rest</div>
+          <div class="chip" data-val="ice" data-en="Ice" data-es="Hielo">Ice</div>
+          <div class="chip" data-val="heat" data-en="Heat" data-es="Calor">Heat</div>
+          <div class="chip" data-val="movement" data-en="Movement" data-es="Movimiento">Movement</div>
+          <div class="chip" data-val="stretching" data-en="Stretching" data-es="Estiramiento">Stretching</div>
+          <div class="chip" data-val="medication" data-en="Medication" data-es="Medicamentos">Medication</div>
+          <div class="chip" data-val="nothing" data-en="Nothing helps" data-es="Nada ayuda">Nothing helps</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="What Have You Tried So Far?" data-es="¿Qué Ha Intentado Hasta Ahora?">What Have You Tried So Far?</div>
+      <div class="chips" id="prior-tx-chips">
+        <div class="chip" data-val="nothing" data-en="Nothing yet" data-es="Nada todavía">Nothing yet</div>
+        <div class="chip" data-val="rest" data-en="Rest" data-es="Descanso">Rest</div>
+        <div class="chip" data-val="nsaids" data-en="NSAIDs (Advil, Aleve)" data-es="Antiinflamatorios (Advil, Aleve)">NSAIDs (Advil, Aleve)</div>
+        <div class="chip" data-val="other-chiro" data-en="Another chiropractor" data-es="Otro quiropráctico">Another chiropractor</div>
+        <div class="chip" data-val="pt" data-en="Physical therapy" data-es="Terapia física">Physical therapy</div>
+        <div class="chip" data-val="massage" data-en="Massage" data-es="Masaje">Massage</div>
+        <div class="chip" data-val="injections" data-en="Cortisone injections" data-es="Inyecciones de cortisona">Cortisone injections</div>
+        <div class="chip" data-val="surgery" data-en="Surgery" data-es="Cirugía">Surgery</div>
+        <div class="chip" data-val="imaging" data-en="Had X-ray/MRI" data-es="Tuve radiografía/MRI">Had X-ray/MRI</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Your Goal For This Visit" data-es="Su Objetivo Para Esta Visita">Your Goal For This Visit <span class="sub" data-en="Optional" data-es="Opcional">Optional</span></div>
+      <div class="field">
+        <textarea id="cc-goal" placeholder="" data-en-ph="What would you like to be able to do again? (e.g., 'play with my kids without back pain', 'run a 5K', 'sleep through the night')" data-es-ph="¿Qué le gustaría volver a poder hacer? (ej. 'jugar con mis hijos sin dolor de espalda', 'correr 5K', 'dormir toda la noche')"></textarea>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(2)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p" onclick="goStep(4)" data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+  <!-- STEP 4 — HEALTH FOCUS (MSK Shared + Service Specialty Blocks) -->
+  <div class="step" id="step-4">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 5 of 7" data-es="Paso 5 de 7">Step 5 of 7</div>
+      <div class="phase-title" data-en="A Few More Questions About Your Health" data-es="Unas Preguntas Más Sobre Su Salud">A Few More Questions About Your Health</div>
+      <div class="phase-desc" data-en="These help your provider focus on what matters most and ensure we deliver the safest care." data-es="Estas preguntas ayudan a su proveedor a enfocarse en lo más importante y asegurar la atención más segura.">These help your provider focus on what matters most and ensure we deliver the safest care.</div>
+    </div>
+
+    <!-- MSK SHARED BLOCK — all patients -->
+    <div class="card">
+      <div class="card-title" data-en="Nerve-Related Symptoms" data-es="Síntomas Relacionados con los Nervios">Nerve-Related Symptoms <span class="sub" data-en="Check anything you've experienced" data-es="Marque lo que haya experimentado">Check anything you've experienced</span></div>
+      <div class="callout" style="margin-bottom:12px;">
+        <div class="callout-icon">💡</div>
+        <div data-en="These symptoms suggest nerve involvement. Don't worry — they're common and treatable. Just check what applies." data-es="Estos síntomas sugieren afectación nerviosa. No se preocupe — son comunes y tratables. Solo marque lo que aplique.">These symptoms suggest nerve involvement. Don't worry — they're common and treatable. Just check what applies.</div>
+      </div>
+      <div class="check-grid" id="neuro-grid"></div>
+      <div class="row r1" id="neuro-where-wrap" style="display:none;margin-top:12px;">
+        <div class="field">
+          <label data-en="Where exactly? (which arm/leg, which fingers/toes, etc.)" data-es="¿Dónde exactamente? (qué brazo/pierna, qué dedos, etc.)">Where exactly? (which arm/leg, which fingers/toes, etc.)</label>
+          <input id="neuro-where" placeholder="">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Important Safety Questions" data-es="Preguntas Importantes de Seguridad">Important Safety Questions <span class="sub" data-en="Please answer honestly" data-es="Por favor responda con honestidad">Please answer honestly</span></div>
+      <div class="callout gold" style="margin-bottom:14px;">
+        <div class="callout-icon">⚠️</div>
+        <div data-en="These questions help us rule out serious conditions that need immediate medical attention. Answering YES does NOT disqualify you from care — it just helps us make the right plan for you." data-es="Estas preguntas nos ayudan a descartar condiciones graves que requieren atención médica inmediata. Responder SÍ no lo descalifica de la atención — nos ayuda a hacer el plan correcto para usted.">These questions help us rule out serious conditions that need immediate medical attention. Answering YES does NOT disqualify you from care — it just helps us make the right plan for you.</div>
+      </div>
+      <div class="check-grid" id="redflag-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="What Would Success Look Like?" data-es="¿Cómo Sería el Éxito?">What Would Success Look Like? <span class="sub" data-en="Check all that apply" data-es="Marque todas las que apliquen">Check all that apply</span></div>
+      <div class="check-grid" id="goals-grid"></div>
+    </div>
+
+    <!-- SHOCKWAVE SPECIALTY BLOCK (shown only if SW selected) -->
+    <div id="sw-specialty" style="display:none;">
+      <div class="card" style="border-left:4px solid var(--gold);">
+        <div class="card-title" style="color:var(--gold-dk);">⚡ <span data-en="Shockwave Therapy Details" data-es="Detalles de Terapia de Ondas de Choque">Shockwave Therapy Details</span></div>
+        <div class="callout gold" style="margin-bottom:14px;">
+          <div class="callout-icon">ℹ️</div>
+          <div data-en="Shockwave therapy works best for chronic tendon and soft-tissue conditions. These questions help us confirm you're a good candidate." data-es="La terapia de ondas de choque funciona mejor para condiciones crónicas de tendones y tejidos blandos. Estas preguntas nos ayudan a confirmar que usted es un buen candidato.">Shockwave therapy works best for chronic tendon and soft-tissue conditions. These questions help us confirm you're a good candidate.</div>
+        </div>
+
+        <div class="sec-lbl" data-en="Have you had any of these for this condition?" data-es="¿Ha tenido alguno de estos para esta condición?">Have you had any of these for this condition?</div>
+        <div class="chips" id="sw-prior-chips">
+          <div class="chip" data-val="cortisone-recent" data-en="Cortisone injection in last 6 weeks" data-es="Inyección de cortisona en últimas 6 semanas">Cortisone injection in last 6 weeks</div>
+          <div class="chip" data-val="cortisone-past" data-en="Cortisone injection (older than 6 wks)" data-es="Inyección de cortisona (más de 6 semanas)">Cortisone injection (older than 6 wks)</div>
+          <div class="chip" data-val="prp" data-en="PRP injection" data-es="Inyección de PRP">PRP injection</div>
+          <div class="chip" data-val="mri" data-en="MRI of this area" data-es="MRI de esta área">MRI of this area</div>
+          <div class="chip" data-val="ultrasound" data-en="Ultrasound imaging" data-es="Ultrasonido de imagen">Ultrasound imaging</div>
+          <div class="chip" data-val="xray" data-en="X-ray" data-es="Radiografía">X-ray</div>
+          <div class="chip" data-val="none" data-en="None of these" data-es="Ninguna de estas">None of these</div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <div class="field">
+            <label data-en="Number of cortisone injections (lifetime, this area)" data-es="Número de inyecciones de cortisona (de por vida, esta área)">Number of cortisone injections (lifetime, this area)</label>
+            <select id="sw-cort-count">
+              <option value="">—</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4+">4 or more</option>
+            </select>
+          </div>
+          <div class="field">
+            <label data-en="Most recent injection date (approximate)" data-es="Fecha aproximada de la inyección más reciente">Most recent injection date (approximate)</label>
+            <input type="date" id="sw-cort-date">
+          </div>
+        </div>
+
+        <div class="row r1" style="margin-top:10px;">
+          <div class="field">
+            <label data-en="Imaging findings (if you know them)" data-es="Hallazgos de imagen (si los conoce)">Imaging findings (if you know them)</label>
+            <textarea id="sw-imaging-notes" placeholder="" data-en-ph="e.g., 'Plantar fascia thickened', 'Partial-thickness rotator cuff tear', 'No findings'" data-es-ph="ej., 'Fascia plantar engrosada', 'Desgarro parcial del manguito rotador', 'Sin hallazgos'"></textarea>
+          </div>
+        </div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="What activities does this limit?" data-es="¿Qué actividades le limita esto?">What activities does this limit?</div>
+        <div class="chips" id="sw-limits-chips">
+          <div class="chip" data-val="walking" data-en="Walking / standing" data-es="Caminar / estar de pie">Walking / standing</div>
+          <div class="chip" data-val="running" data-en="Running" data-es="Correr">Running</div>
+          <div class="chip" data-val="lifting" data-en="Lifting" data-es="Levantar peso">Lifting</div>
+          <div class="chip" data-val="reaching" data-en="Reaching overhead" data-es="Alcanzar hacia arriba">Reaching overhead</div>
+          <div class="chip" data-val="gripping" data-en="Gripping / turning handles" data-es="Agarrar / girar manijas">Gripping / turning handles</div>
+          <div class="chip" data-val="sleep" data-en="Sleep (wakes me up)" data-es="Dormir (me despierta)">Sleep (wakes me up)</div>
+          <div class="chip" data-val="work" data-en="Work tasks" data-es="Tareas de trabajo">Work tasks</div>
+          <div class="chip" data-val="sports" data-en="Sports / hobbies" data-es="Deportes / pasatiempos">Sports / hobbies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEUROPATH SPECIALTY (Part 2B will build out) -->
+    <div id="np-specialty" style="display:none;">
+      <div class="card" style="border-left:4px solid #6a4a8f;">
+        <div class="card-title" style="color:#6a4a8f;">🧠 <span data-en="NeuroPath Questions" data-es="Preguntas de NeuroPath">NeuroPath Questions</span></div>
+        <div class="callout" style="background:#f3ecf7;border-left-color:#6a4a8f;">
+          <div class="callout-icon">🚧</div>
+          <div data-en="Full NeuroPath screening coming in Part 2B — will include the Michigan Neuropathy Screening Instrument." data-es="La evaluación completa de NeuroPath viene en la Parte 2B — incluirá el Instrumento de Detección de Neuropatía de Michigan.">Full NeuroPath screening coming in Part 2B — will include the Michigan Neuropathy Screening Instrument.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEIGHT LOSS SPECIALTY (Part 2B will build out) -->
+    <div id="wl-specialty" style="display:none;">
+      <div class="card" style="border-left:4px solid var(--teal);">
+        <div class="card-title" style="color:var(--teal);">⚖️ <span data-en="Weight Loss Questions" data-es="Preguntas de Pérdida de Peso">Weight Loss Questions</span></div>
+        <div class="callout teal">
+          <div class="callout-icon">🚧</div>
+          <div data-en="Full metabolic intake coming in Part 2B." data-es="Entrada metabólica completa viene en la Parte 2B.">Full metabolic intake coming in Part 2B.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(3)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p" onclick="goStep(5)" data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 — HEALTH HISTORY -->
+  <div class="step" id="step-5">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 6 of 7" data-es="Paso 6 de 7">Step 6 of 7</div>
+      <div class="phase-title" data-en="Health History" data-es="Historial de Salud">Health History</div>
+      <div class="phase-desc" data-en="This helps your provider deliver the safest, most effective care." data-es="Esto ayuda a su proveedor a brindar la atención más segura y efectiva.">This helps your provider deliver the safest, most effective care.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Medications &amp; Allergies" data-es="Medicamentos y Alergias">Medications &amp; Allergies</div>
+      <div class="row">
+        <div class="field">
+          <label data-en="Current Medications" data-es="Medicamentos Actuales">Current Medications</label>
+          <textarea id="meds" placeholder="" data-en-ph="List all medications and dosages..." data-es-ph="Lista de medicamentos y dosis..."></textarea>
+          <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('meds').value='None'" data-en="None" data-es="Ninguno">None</span>
+        </div>
+        <div class="field">
+          <label data-en="Drug Allergies" data-es="Alergias a Medicamentos">Drug Allergies</label>
+          <textarea id="allergies" placeholder="" data-en-ph="List allergies and reactions..." data-es-ph="Lista de alergias y reacciones..."></textarea>
+          <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('allergies').value='NKDA'">NKDA</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label data-en="Past Surgeries" data-es="Cirugías Previas">Past Surgeries</label>
+          <textarea id="surgeries" placeholder="" data-en-ph="Surgery type and year..." data-es-ph="Tipo de cirugía y año..."></textarea>
+          <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('surgeries').value='None'" data-en="None" data-es="Ninguna">None</span>
+        </div>
+        <div class="field">
+          <label data-en="Prior Injuries / Fractures" data-es="Lesiones / Fracturas Previas">Prior Injuries / Fractures</label>
+          <textarea id="injuries" placeholder="" data-en-ph="Prior injuries, fractures, accidents..." data-es-ph="Lesiones, fracturas, accidentes previos..."></textarea>
+          <span class="chip" style="margin-top:6px;font-size:.74rem;display:inline-block;width:fit-content;" onclick="document.getElementById('injuries').value='None'" data-en="None" data-es="Ninguna">None</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Health Conditions" data-es="Condiciones de Salud">Health Conditions <span class="sub" data-en="Check all that apply" data-es="Marque todas las que apliquen">Check all that apply</span></div>
+      <div class="check-grid" id="hx-grid">
+        <!-- Populated by JS to keep markup clean -->
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(4)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p" onclick="goStep(6)" data-en="Continue →" data-es="Continuar →">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6 — CONSENT & SIGNATURE -->
+  <div class="step" id="step-6">
+    <div class="phase-hdr">
+      <div class="phase-lbl" data-en="Step 7 of 7" data-es="Paso 7 de 7">Step 7 of 7</div>
+      <div class="phase-title" data-en="Authorization &amp; Consent" data-es="Autorización y Consentimiento">Authorization &amp; Consent</div>
+      <div class="phase-desc" data-en="Please read, acknowledge, and sign below. Ask our staff if you have any questions." data-es="Por favor lea, reconozca y firme a continuación. Pregunte a nuestro personal si tiene alguna duda.">Please read, acknowledge, and sign below. Ask our staff if you have any questions.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="HIPAA Notice of Privacy Practices" data-es="Aviso de Privacidad HIPAA">HIPAA Notice of Privacy Practices</div>
+      <div class="consent-box" id="consent-hipaa">
+        <span data-en-block><strong>Colleyville Chiropractic | CVC Spine &amp; Sport</strong> is committed to protecting your health information in accordance with the Health Insurance Portability and Accountability Act (HIPAA). We collect and use your personal health information to provide treatment, process payment, and conduct healthcare operations. You have the right to inspect, copy, and request amendments to your records. You have the right to request a restriction on certain uses and disclosures. A full copy of our Notice of Privacy Practices is available at the front desk or upon request. <strong>By checking below, you acknowledge that you have received and understand our HIPAA Notice of Privacy Practices.</strong></span>
+        <span data-es-block style="display:none;"><strong>Colleyville Chiropractic | CVC Spine &amp; Sport</strong> se compromete a proteger su información de salud de acuerdo con la Ley de Portabilidad y Responsabilidad del Seguro Médico (HIPAA). Recopilamos y usamos su información personal de salud para brindar tratamiento, procesar pagos y realizar operaciones de atención médica. Tiene derecho a inspeccionar, copiar y solicitar modificaciones a sus registros. Tiene derecho a solicitar restricciones sobre ciertos usos y divulgaciones. Una copia completa de nuestro Aviso de Prácticas de Privacidad está disponible en la recepción o previa solicitud. <strong>Al marcar a continuación, reconoce que ha recibido y comprende nuestro Aviso de Prácticas de Privacidad HIPAA.</strong></span>
+      </div>
+      <label class="ci" onclick="toggleCi(this)">
+        <input type="checkbox" id="chk-hipaa">
+        <span data-en="I have received and understand the HIPAA Notice of Privacy Practices." data-es="He recibido y comprendo el Aviso de Prácticas de Privacidad HIPAA.">I have received and understand the HIPAA Notice of Privacy Practices.</span>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Consent to Examination &amp; Treatment" data-es="Consentimiento para Examen y Tratamiento">Consent to Examination &amp; Treatment</div>
+      <div class="consent-box">
+        <span data-en-block>I voluntarily consent to chiropractic examination and any treatment deemed clinically appropriate by the treating provider at Colleyville Chiropractic. I understand that care may include, but is not limited to: <strong>chiropractic spinal manipulation and adjustments, soft tissue therapy, electrical stimulation, ultrasound therapy, shockwave therapy (RPWT), therapeutic exercise, kinesio taping, red light therapy, NeuroPath peripheral nerve wellness protocols, weight loss coaching, and other clinically indicated modalities.</strong> The provider will recommend a diagnosis and treatment plan based on examination findings. I have the right to review, discuss, and decline any recommended treatment. I consent to release of medical information necessary for treatment coordination, billing, and insurance verification. <strong>No guarantees of specific outcomes have been made.</strong></span>
+        <span data-es-block style="display:none;">Consiento voluntariamente al examen quiropráctico y a cualquier tratamiento que sea clínicamente apropiado según lo determine el proveedor tratante en Colleyville Chiropractic. Entiendo que la atención puede incluir, entre otros: <strong>manipulación y ajustes quiroprácticos de la columna vertebral, terapia de tejidos blandos, estimulación eléctrica, terapia de ultrasonido, terapia de ondas de choque (RPWT), ejercicio terapéutico, vendaje kinesiológico, terapia de luz roja, protocolos de bienestar de nervios periféricos NeuroPath, coaching de pérdida de peso y otras modalidades clínicamente indicadas.</strong> El proveedor recomendará un diagnóstico y plan de tratamiento basado en los hallazgos del examen. Tengo derecho a revisar, discutir y rechazar cualquier tratamiento recomendado. Consiento a la divulgación de información médica necesaria para la coordinación del tratamiento, facturación y verificación de seguro. <strong>No se han hecho garantías de resultados específicos.</strong></span>
+      </div>
+      <label class="ci" onclick="toggleCi(this)">
+        <input type="checkbox" id="chk-tx">
+        <span data-en="I consent to examination, treatment, and release of records as described above." data-es="Consiento al examen, tratamiento y divulgación de registros como se describe anteriormente.">I consent to examination, treatment, and release of records as described above.</span>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Financial Responsibility" data-es="Responsabilidad Financiera">Financial Responsibility</div>
+      <div class="consent-box">
+        <span data-en-block>I understand that I am financially responsible for all services rendered. I authorize my insurance benefits to be paid directly to Colleyville Chiropractic. I understand that <strong>insurance is a contract between me and my insurance company, not between my provider and my insurance company.</strong> I am responsible for any balance not covered by insurance, including deductibles, copays, coinsurance, and non-covered services. <strong>Shockwave therapy, NeuroPath programs, weight loss services, and supplement products are cash-pay services not submitted to insurance.</strong> Payment is due at the time of service unless other arrangements have been made.</span>
+        <span data-es-block style="display:none;">Entiendo que soy financieramente responsable por todos los servicios prestados. Autorizo que los beneficios de mi seguro sean pagados directamente a Colleyville Chiropractic. Entiendo que <strong>el seguro es un contrato entre yo y mi compañía de seguros, no entre mi proveedor y mi compañía de seguros.</strong> Soy responsable de cualquier saldo no cubierto por el seguro, incluyendo deducibles, copagos, coseguros y servicios no cubiertos. <strong>La terapia de ondas de choque, los programas NeuroPath, los servicios de pérdida de peso y los productos suplementarios son servicios de pago en efectivo que no se envían al seguro.</strong> El pago se debe al momento del servicio a menos que se hayan hecho otros arreglos.</span>
+      </div>
+      <label class="ci" onclick="toggleCi(this)">
+        <input type="checkbox" id="chk-fin">
+        <span data-en="I accept financial responsibility for services rendered." data-es="Acepto la responsabilidad financiera por los servicios prestados.">I accept financial responsibility for services rendered.</span>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-en="Patient Signature" data-es="Firma del Paciente">Patient Signature</div>
+      <div class="row">
+        <div class="field"><label data-en="Printed Name" data-es="Nombre en Letra de Molde">Printed Name<span class="req">*</span></label><input id="sig-print-name" placeholder=""></div>
+        <div class="field"><label data-en="Date" data-es="Fecha">Date</label><input type="date" id="sig-date"></div>
+      </div>
+      <div class="sec-lbl" data-en="Sign with finger or stylus" data-es="Firme con el dedo o lápiz digital">Sign with finger or stylus</div>
+      <div class="sig-wrap">
+        <div class="sig-bar">
+          <span data-en="Patient Signature" data-es="Firma del Paciente">Patient Signature</span>
+          <button class="sig-clear" onclick="clearSig('pt-sig')" data-en="Clear" data-es="Borrar">Clear</button>
+        </div>
+        <canvas class="sig-canvas" id="pt-sig" width="820" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="status-bar" id="submit-status"></div>
+
+    <div class="brow">
+      <button class="btn btn-h" onclick="goStep(5)" data-en="← Back" data-es="← Atrás">← Back</button>
+      <div class="spacer"></div>
+      <button class="btn btn-p btn-lg" id="btn-submit" onclick="submitIntake()" data-en="Submit &amp; Hand to Staff →" data-es="Enviar y Entregar al Personal →">Submit &amp; Hand to Staff →</button>
+    </div>
+  </div>
+
+</div><!-- /patient-app -->
+
+<!-- ══════════════════════════════
+     PROVIDER PLACEHOLDER (Part 2)
+     ══════════════════════════════ -->
+<div class="app" id="provider-app" style="display:none;">
+  <div class="phase-hdr">
+    <div class="phase-lbl">Staff — Patient Queue</div>
+    <div class="phase-title">Provider Waiting Room</div>
+    <div class="phase-desc">Patients who completed intake today. Tap to pick up and run the exam.</div>
+  </div>
+  <div class="callout gold">
+    <div class="callout-icon">🚧</div>
+    <div><strong>Part 1 foundation.</strong> Provider exam flow is in Part 3. For now, you can verify: patient intakes are saving to Sheets + Drive. Check your Sheet and Drive folder after any test submission.</div>
+  </div>
+  <div class="brow">
+    <button class="btn btn-h" onclick="goLanding()">← Back to Landing</button>
+    <button class="btn btn-p" onclick="openSettings()">⚙ Open Settings</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     HANDOFF SCREEN (post-submit)
+     ══════════════════════════════ -->
+<div class="handoff" id="handoff">
+  <div class="ho-icon">✓</div>
+  <div class="ho-title" data-en="Thank You!" data-es="¡Gracias!">Thank You!</div>
+  <div class="ho-sub" data-en="Your information has been securely saved. Please hand this tablet back to our front desk staff." data-es="Su información ha sido guardada de forma segura. Por favor, devuelva este tablet a nuestro personal de recepción.">Your information has been securely saved. Please hand this tablet back to our front desk staff.</div>
+  <div class="ho-timer" data-en="Returning to start in 30 seconds…" data-es="Regresando al inicio en 30 segundos…">Returning to start in 30 seconds…</div>
+  <div class="ho-progress"><div class="ho-progress-bar" id="ho-bar"></div></div>
+  <button class="btn btn-gold" style="margin-top:18px;" onclick="resetToLanding()" data-en="Start Next Patient" data-es="Iniciar Próximo Paciente">Start Next Patient</button>
+</div>
+
+<!-- ══════════════════════════════
+     PIN MODAL (staff unlock)
+     ══════════════════════════════ -->
+<div class="modal-ov" id="pin-modal">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <div class="modal-title">Staff PIN</div>
+    <div class="modal-sub">Enter 4-digit PIN to access provider tools</div>
+    <div class="pin-row">
+      <input class="pin-box" id="pin-0" maxlength="1" type="password" inputmode="numeric" oninput="pinInput(0)" onkeydown="pinKey(event,0)">
+      <input class="pin-box" id="pin-1" maxlength="1" type="password" inputmode="numeric" oninput="pinInput(1)" onkeydown="pinKey(event,1)">
+      <input class="pin-box" id="pin-2" maxlength="1" type="password" inputmode="numeric" oninput="pinInput(2)" onkeydown="pinKey(event,2)">
+      <input class="pin-box" id="pin-3" maxlength="1" type="password" inputmode="numeric" oninput="pinInput(3)" onkeydown="pinKey(event,3)">
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+    <div class="modal-footer">
+      <button class="btn btn-h btn-sm" onclick="closePinModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SETTINGS MODAL
+     ══════════════════════════════ -->
+<div class="modal-ov" id="settings-modal">
+  <div class="modal">
+    <div class="modal-title">Settings</div>
+    <div class="modal-sub">Configure clinic, Google integration, and staff PIN. Changes save to this device.</div>
+
+    <div class="sec-lbl">Clinic Info</div>
+    <div class="row">
+      <div class="field"><label>Clinic Name</label><input id="s-clinic" placeholder="Colleyville Chiropractic"></div>
+      <div class="field"><label>Provider Name</label><input id="s-provider" placeholder="Dr. Rudy Urrutia, DC"></div>
+    </div>
+    <div class="row r1">
+      <div class="field"><label>Clinic Address</label><input id="s-addr" placeholder="1001 Glade Rd Ste 120, Colleyville TX 76034"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Clinic Phone</label><input id="s-phone" placeholder="(817) 420-7696"></div>
+      <div class="field"><label>Staff PIN (4 digits)</label><input id="s-pin" maxlength="4" placeholder="1234" type="password"></div>
+    </div>
+
+    <div class="sec-lbl">Google Integration</div>
+    <div class="callout" style="font-size:.78rem;">
+      <div class="callout-icon">🔑</div>
+      <div>Create OAuth Client ID at <strong>console.cloud.google.com</strong>. Add <code>https://drrhude.github.io</code> as an authorized origin. Drive folder ID and Sheet ID come from the URL of each file in Google.</div>
+    </div>
+    <div class="row r1">
+      <div class="field"><label>Google OAuth Client ID</label><input id="s-cid" placeholder="xxxxxxxx.apps.googleusercontent.com"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Google Drive Folder ID</label><input id="s-fid" placeholder="Folder ID from Drive URL"></div>
+      <div class="field"><label>Google Sheet ID</label><input id="s-sid" placeholder="Sheet ID from Sheets URL"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-h btn-sm" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-o btn-sm" onclick="connectDrive()" id="drive-connect-btn">Connect Drive</button>
+      <button class="btn btn-p btn-sm" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═════════════════════════════════════════════════
+   STATE
+   ═════════════════════════════════════════════════ */
+const S = {
+  role: null,         // 'patient' | 'provider'
+  lang: 'en',
+  currentStep: 0,
+  selectedSvcs: [],   // ['chiro','sw','wl','np']
+  pendingKey: null,   // unique key per patient submission
+};
+
+const SVC_META = {
+  chiro: {en:'Chiropractic', es:'Quiropráctica', tag:'CHIRO', emoji:'🦴'},
+  sw:    {en:'Shockwave',    es:'Ondas de Choque', tag:'SW',    emoji:'⚡'},
+  np:    {en:'NeuroPath',    es:'NeuroPath',       tag:'NP',    emoji:'🧠'},
+  wl:    {en:'Weight Loss',  es:'Pérdida de Peso', tag:'WL',    emoji:'⚖️'},
+};
+
+const HX_CONDITIONS = [
+  {id:'hx-dm',  en:'Diabetes',                          es:'Diabetes'},
+  {id:'hx-htn', en:'High Blood Pressure',               es:'Presión Arterial Alta'},
+  {id:'hx-heart',en:'Heart Disease',                    es:'Enfermedad Cardíaca'},
+  {id:'hx-pace',en:'Pacemaker / Implanted Device',      es:'Marcapasos / Dispositivo Implantado'},
+  {id:'hx-cancer',en:'Cancer (active or history)',      es:'Cáncer (activo o historial)'},
+  {id:'hx-osteo',en:'Osteoporosis / Osteopenia',        es:'Osteoporosis / Osteopenia'},
+  {id:'hx-ra',  en:'Rheumatoid Arthritis',              es:'Artritis Reumatoide'},
+  {id:'hx-clot',en:'Blood Clotting Disorder',           es:'Trastorno de Coagulación'},
+  {id:'hx-thin',en:'Currently on Blood Thinners',       es:'Actualmente Toma Anticoagulantes'},
+  {id:'hx-preg',en:'Pregnancy (current)',               es:'Embarazo (actual)'},
+  {id:'hx-neuro',en:'Peripheral Neuropathy',            es:'Neuropatía Periférica'},
+  {id:'hx-infect',en:'Active Infection / Open Wound',   es:'Infección Activa / Herida Abierta'},
+  {id:'hx-cort',en:'Cortisone Injection (past 6 wks)',  es:'Inyección de Cortisona (últimas 6 sem)'},
+  {id:'hx-thyroid',en:'Thyroid Condition',              es:'Condición Tiroidea'},
+  {id:'hx-autoimm',en:'Autoimmune Condition',           es:'Condición Autoinmune'},
+  {id:'hx-gi',  en:'GI Disorder / IBS',                 es:'Trastorno GI / SII'},
+  {id:'hx-depr',en:'Depression / Anxiety',              es:'Depresión / Ansiedad'},
+  {id:'hx-none',en:'None of the Above',                 es:'Ninguna de las Anteriores'},
+];
+
+// Body regions for chief complaint
+// bilateral: true means we can specify L/R side
+const BODY_REGIONS = [
+  {id:'head',     en:'Head / Headache',      es:'Cabeza / Dolor de Cabeza', icon:'🧠', bilateral:false},
+  {id:'neck',     en:'Neck',                 es:'Cuello',                   icon:'🧑',  bilateral:false},
+  {id:'shoulder', en:'Shoulder',             es:'Hombro',                   icon:'💪', bilateral:true},
+  {id:'upper-back',en:'Upper Back',          es:'Espalda Superior',         icon:'🙂', bilateral:false},
+  {id:'mid-back', en:'Mid Back',             es:'Espalda Media',            icon:'🫂', bilateral:false},
+  {id:'low-back', en:'Low Back',             es:'Espalda Baja',             icon:'🦴', bilateral:false},
+  {id:'hip',      en:'Hip / Pelvis',         es:'Cadera / Pelvis',          icon:'🦵', bilateral:true},
+  {id:'elbow',    en:'Elbow',                es:'Codo',                     icon:'💪', bilateral:true},
+  {id:'wrist',    en:'Wrist / Hand',         es:'Muñeca / Mano',            icon:'🖐️', bilateral:true},
+  {id:'knee',     en:'Knee',                 es:'Rodilla',                  icon:'🦵', bilateral:true},
+  {id:'ankle',    en:'Ankle / Foot',         es:'Tobillo / Pie',            icon:'🦶', bilateral:true},
+  {id:'arm',      en:'Arm (general)',        es:'Brazo (general)',          icon:'💪', bilateral:true},
+  {id:'leg',      en:'Leg (general)',        es:'Pierna (general)',         icon:'🦵', bilateral:true},
+  {id:'jaw',      en:'Jaw / TMJ',            es:'Mandíbula / ATM',          icon:'🗣️', bilateral:false},
+];
+
+// State for chief complaint
+S.complaint = {
+  regions: {},      // {regionId: {sides: ['L'|'R'|'B'], pain: 0-10}}
+  onset: null,
+  mechanism: null,
+  aggravating: [],
+  relieving: [],
+  priorTx: [],
+  goal: '',
+  sourceDetail: '',
+};
+
+// ═══════════════════════════════════════════════════════
+// MSK SHARED BLOCK — NEURO SYMPTOMS
+// Evidence: Radicular/neuropathic symptom screening per
+// Bogduk 2009 (moderate-strong evidence for dermatomal pattern
+// predicting nerve root involvement)
+// ═══════════════════════════════════════════════════════
+const NEURO_SYMPTOMS = [
+  {id:'neuro-num',    en:'Numbness',                    es:'Entumecimiento'},
+  {id:'neuro-tingle', en:'Tingling / pins & needles',   es:'Hormigueo / alfileres y agujas'},
+  {id:'neuro-burn',   en:'Burning sensation',           es:'Sensación de ardor'},
+  {id:'neuro-shoot',  en:'Shooting / shock-like pain',  es:'Dolor punzante / como descarga eléctrica'},
+  {id:'neuro-weak',   en:'Muscle weakness',             es:'Debilidad muscular'},
+  {id:'neuro-drop',   en:'Dropping things / clumsy',    es:'Se me caen cosas / torpeza'},
+  {id:'neuro-cramp',  en:'Muscle cramps',               es:'Calambres musculares'},
+  {id:'neuro-cold',   en:'Cold/hot sensitivity',        es:'Sensibilidad al frío/calor'},
+  {id:'neuro-none',   en:'None of the above',           es:'Ninguno de los anteriores'},
+];
+
+// ═══════════════════════════════════════════════════════
+// RED FLAG SCREENING — essential safety screen
+// Evidence: Chou et al. 2007, NICE 2020, ACP guidelines
+// Strong recommendation — screen ALL MSK presentations
+// ═══════════════════════════════════════════════════════
+const RED_FLAGS = [
+  {id:'rf-bowel',   en:'Recent loss of bladder or bowel control', es:'Pérdida reciente del control de vejiga o intestinos', severity:'critical'},
+  {id:'rf-saddle',  en:'Numbness in groin or inner thighs',       es:'Entumecimiento en la ingle o parte interna de los muslos', severity:'critical'},
+  {id:'rf-weight',  en:'Unexplained weight loss (10+ lbs)',       es:'Pérdida de peso inexplicable (10+ lbs)', severity:'high'},
+  {id:'rf-fever',   en:'Recent fever with back/spine pain',       es:'Fiebre reciente con dolor de espalda/columna', severity:'high'},
+  {id:'rf-night',   en:'Severe pain waking me at night',          es:'Dolor severo que me despierta en la noche', severity:'moderate'},
+  {id:'rf-cancer',  en:'History of cancer',                       es:'Historial de cáncer', severity:'high'},
+  {id:'rf-trauma',  en:'Major recent injury (fall, car crash)',   es:'Lesión mayor reciente (caída, accidente automovilístico)', severity:'moderate'},
+  {id:'rf-steroid', en:'Long-term steroid use',                   es:'Uso prolongado de esteroides', severity:'moderate'},
+  {id:'rf-iv-drug', en:'IV drug use (now or past)',               es:'Uso de drogas intravenosas (ahora o pasado)', severity:'high'},
+  {id:'rf-immune',  en:'Immune system weakness (HIV, transplant)', es:'Debilidad del sistema inmunológico (VIH, trasplante)', severity:'moderate'},
+  {id:'rf-none',    en:'None of the above',                       es:'Ninguno de los anteriores', severity:'none'},
+];
+
+// ═══════════════════════════════════════════════════════
+// FUNCTIONAL GOALS — patient-centered outcomes
+// Maps to validated PROMs in Part 3 (PSFS, ODI, NDI)
+// ═══════════════════════════════════════════════════════
+const FUNCTIONAL_GOALS = [
+  {id:'goal-work',    en:'Get back to work without pain',         es:'Volver al trabajo sin dolor'},
+  {id:'goal-sleep',   en:'Sleep through the night',               es:'Dormir toda la noche'},
+  {id:'goal-lift',    en:'Lift my kids / grandkids',              es:'Cargar a mis hijos / nietos'},
+  {id:'goal-sit',     en:'Sit for long periods',                  es:'Sentarme por períodos largos'},
+  {id:'goal-walk',    en:'Walk longer distances',                 es:'Caminar distancias más largas'},
+  {id:'goal-sport',   en:'Return to sports / hobbies',            es:'Regresar a deportes / pasatiempos'},
+  {id:'goal-garden',  en:'Garden / yard work',                    es:'Jardinería / trabajo de patio'},
+  {id:'goal-drive',   en:'Drive comfortably',                     es:'Manejar cómodamente'},
+  {id:'goal-stairs',  en:'Climb stairs without pain',             es:'Subir escaleras sin dolor'},
+  {id:'goal-travel',  en:'Travel / vacation',                     es:'Viajar / vacaciones'},
+  {id:'goal-off-meds',en:'Reduce or eliminate pain medication',   es:'Reducir o eliminar medicamentos para el dolor'},
+  {id:'goal-function',en:'Just feel normal again',                es:'Solo sentirme normal de nuevo'},
+];
+
+// State for Health Focus step
+S.health = {
+  neuroSymptoms: [],       // IDs of checked neuro symptoms
+  neuroWhere: '',          // free-text "where exactly"
+  redFlags: [],            // IDs of checked red flags
+  redFlagCriticalHit: false, // true if any critical-severity flag is checked
+  goals: [],               // IDs of checked functional goals
+  // Shockwave specialty data
+  sw: {
+    prior: [],             // chip values (cortisone-recent, prp, etc.)
+    cortCount: '',
+    cortDate: '',
+    imagingNotes: '',
+    limits: [],
+  },
+};
+
+/* ═════════════════════════════════════════════════
+   CONFIG / SETTINGS
+   ═════════════════════════════════════════════════ */
+let cfg = {};
+function loadCfg(){
+  try { cfg = JSON.parse(localStorage.getItem('cvc_suite_cfg') || '{}'); }
+  catch(e){ cfg = {}; }
+}
+function saveSettings(){
+  cfg = {
+    clinicName: getVal('s-clinic') || 'Colleyville Chiropractic | CVC Spine & Sport',
+    providerName: getVal('s-provider') || 'Dr. Rudy Urrutia, DC',
+    clinicAddr: getVal('s-addr') || '1001 Glade Rd Ste 120, Colleyville TX 76034',
+    clinicPhone: getVal('s-phone') || '(817) 420-7696',
+    pin: getVal('s-pin') || '1234',
+    oauthClientId: getVal('s-cid'),
+    driveFolderId: getVal('s-fid'),
+    sheetId: getVal('s-sid'),
+  };
+  localStorage.setItem('cvc_suite_cfg', JSON.stringify(cfg));
+  closeSettings();
+  alert('Settings saved.');
+}
+function openSettings(){
+  loadCfg();
+  setVal('s-clinic', cfg.clinicName||'');
+  setVal('s-provider', cfg.providerName||'');
+  setVal('s-addr', cfg.clinicAddr||'');
+  setVal('s-phone', cfg.clinicPhone||'');
+  setVal('s-pin', cfg.pin||'');
+  setVal('s-cid', cfg.oauthClientId||'');
+  setVal('s-fid', cfg.driveFolderId||'');
+  setVal('s-sid', cfg.sheetId||'');
+  document.getElementById('settings-modal').classList.add('show');
+}
+function closeSettings(){ document.getElementById('settings-modal').classList.remove('show'); }
+
+function getVal(id){ return document.getElementById(id)?.value?.trim() || ''; }
+function setVal(id, v){ const el = document.getElementById(id); if(el) el.value = v; }
+
+/* ═════════════════════════════════════════════════
+   LANGUAGE ENGINE
+   ═════════════════════════════════════════════════ */
+function setLang(lang){
+  S.lang = lang;
+  document.getElementById('lb-en').className = 'lang-btn' + (lang==='en'?' active':'');
+  document.getElementById('lb-es').className = 'lang-btn' + (lang==='es'?' active':'');
+
+  // Swap all data-en / data-es text nodes (but preserve child elements like <strong>)
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+    const text = el.dataset[lang] || el.dataset.en;
+    if(text !== undefined) el.textContent = text;
+  });
+  // Placeholder swap
+  document.querySelectorAll('[data-en-ph]').forEach(el=>{
+    const ph = el.dataset[lang + 'Ph'] || el.dataset.enPh;
+    if(ph !== undefined) el.placeholder = ph;
+  });
+  // Block swap for consent boxes (multi-paragraph HTML)
+  document.querySelectorAll('[data-en-block]').forEach(el => el.style.display = lang==='en' ? '' : 'none');
+  document.querySelectorAll('[data-es-block]').forEach(el => el.style.display = lang==='es' ? '' : 'none');
+
+  // Service count bar prefix
+  updateSvcCountBar();
+}
+
+/* ═════════════════════════════════════════════════
+   NAVIGATION
+   ═════════════════════════════════════════════════ */
+function goLanding(){
+  document.getElementById('landing').classList.add('show');
+  document.getElementById('patient-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = 'none';
+  document.body.dataset.role = '';
+}
+function enterPatient(){
+  S.role = 'patient';
+  document.body.dataset.role = 'patient';
+  document.getElementById('landing').classList.remove('show');
+  document.getElementById('patient-app').style.display = '';
+  document.getElementById('provider-app').style.display = 'none';
+  goStep(0);
+}
+function enterStaff(){
+  openPinModal();
+}
+function openPinModal(){
+  ['pin-0','pin-1','pin-2','pin-3'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('pin-modal').classList.add('show');
+  setTimeout(() => document.getElementById('pin-0').focus(), 100);
+}
+function closePinModal(){ document.getElementById('pin-modal').classList.remove('show'); }
+function pinInput(i){
+  const val = document.getElementById('pin-'+i).value;
+  if(val.length === 1 && i < 3) document.getElementById('pin-'+(i+1)).focus();
+  if(i === 3 && val.length === 1) checkPin();
+}
+function pinKey(e, i){
+  if(e.key === 'Backspace' && !document.getElementById('pin-'+i).value && i > 0){
+    document.getElementById('pin-'+(i-1)).focus();
+  }
+}
+function checkPin(){
+  loadCfg();
+  const entered = ['pin-0','pin-1','pin-2','pin-3'].map(id => document.getElementById(id).value).join('');
+  const expected = cfg.pin || '1234';
+  if(entered === expected){
+    closePinModal();
+    enterProvider();
+  } else {
+    document.getElementById('pin-err').textContent = 'Incorrect PIN. Try again.';
+    ['pin-0','pin-1','pin-2','pin-3'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pin-0').focus();
+  }
+}
+function enterProvider(){
+  S.role = 'provider';
+  document.body.dataset.role = 'provider';
+  document.getElementById('landing').classList.remove('show');
+  document.getElementById('patient-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = '';
+  // Force English on provider side
+  setLang('en');
+}
+
+function goStep(n){
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  document.querySelectorAll('.step-pill').forEach((p,i) => {
+    p.classList.remove('active','done');
+    if(i < n) p.classList.add('done');
+    else if(i === n) p.classList.add('active');
+  });
+  S.currentStep = n;
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // Show/hide service-specific specialty blocks when entering Health Focus step
+  if(n === 4){
+    showRelevantSpecialtyBlocks();
+  }
+
+  // LAZY: initialize signature canvas only when the consent step becomes visible.
+  // Canvas is display:none until this step is active, so getBoundingClientRect() returns 0 before now.
+  if(n === 6){
+    // Two attempts: immediate (in case paint already happened) + requestAnimationFrame (after layout)
+    initSig('pt-sig');
+    requestAnimationFrame(() => initSig('pt-sig'));
+    setTimeout(() => initSig('pt-sig'), 120);
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   SERVICE PICKER
+   ═════════════════════════════════════════════════ */
+function togSvc(el){
+  el.classList.toggle('sel');
+  const svc = el.dataset.svc;
+  if(el.classList.contains('sel')){
+    if(!S.selectedSvcs.includes(svc)) S.selectedSvcs.push(svc);
+  } else {
+    S.selectedSvcs = S.selectedSvcs.filter(x => x !== svc);
+  }
+  updateSvcCountBar();
+  updateSvcPills();
+  document.getElementById('btn-svc-continue').disabled = S.selectedSvcs.length === 0;
+}
+function updateSvcCountBar(){
+  const bar = document.getElementById('svc-count-bar');
+  const txt = document.getElementById('svc-count-txt');
+  if(S.selectedSvcs.length === 0){
+    bar.classList.remove('show');
+    return;
+  }
+  bar.classList.add('show');
+  const names = S.selectedSvcs.map(s => SVC_META[s][S.lang] || SVC_META[s].en).join(' · ');
+  const prefix = bar.dataset[S.lang + 'Prefix'] || bar.dataset.enPrefix;
+  txt.textContent = names;
+  bar.firstChild.textContent = prefix;
+}
+function updateSvcPills(){
+  const el = document.getElementById('tb-svc-pills');
+  el.innerHTML = S.selectedSvcs.map(s =>
+    `<span class="svc-pill ${s}">${SVC_META[s].tag}</span>`
+  ).join('');
+}
+
+/* ═════════════════════════════════════════════════
+   FORM VALIDATION
+   ═════════════════════════════════════════════════ */
+function validateField(name){
+  const field = document.getElementById('f-' + name);
+  const input = document.getElementById('pt-' + name);
+  if(!field || !input) return true;
+  const val = input.value.trim();
+  if(val){
+    field.classList.remove('has-err');
+    field.querySelector('.field-err')?.classList.remove('show');
+    return true;
+  }
+  return false;
+}
+function nextFromDemographics(){
+  const required = ['first','last','dob','phone'];
+  let ok = true;
+  required.forEach(n => {
+    const field = document.getElementById('f-'+n);
+    const input = document.getElementById('pt-'+n);
+    if(!input.value.trim()){
+      field.classList.add('has-err');
+      field.querySelector('.field-err')?.classList.add('show');
+      ok = false;
+    } else {
+      field.classList.remove('has-err');
+      field.querySelector('.field-err')?.classList.remove('show');
+    }
+  });
+  if(ok) goStep(2);
+  else window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ═════════════════════════════════════════════════
+   CASE TYPE TOGGLE
+   ═════════════════════════════════════════════════ */
+function toggleCaseType(){
+  const t = getVal('case-type');
+  document.getElementById('case-extra').style.display = (t === 'MVA' || t === 'WorkComp') ? '' : 'none';
+}
+
+/* ═════════════════════════════════════════════════
+   HX GRID POPULATION
+   ═════════════════════════════════════════════════ */
+function buildHxGrid(){
+  const grid = document.getElementById('hx-grid');
+  grid.innerHTML = HX_CONDITIONS.map(c =>
+    `<label class="ci" onclick="toggleCi(this)">
+       <input type="checkbox" id="${c.id}">
+       <span data-en="${c.en}" data-es="${c.es}">${c.en}</span>
+     </label>`
+  ).join('');
+}
+function toggleCi(el){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+}
+
+/* ═════════════════════════════════════════════════
+   CHIEF COMPLAINT — BODY REGIONS + PAIN
+   ═════════════════════════════════════════════════ */
+function buildRegionGrid(){
+  const grid = document.getElementById('region-grid');
+  grid.innerHTML = BODY_REGIONS.map(r => {
+    const sidesHtml = r.bilateral ? `
+      <div class="region-sides" onclick="event.stopPropagation()">
+        <div class="side-btn" data-side="L" onclick="togSide('${r.id}','L')">L</div>
+        <div class="side-btn" data-side="R" onclick="togSide('${r.id}','R')">R</div>
+        <div class="side-btn" data-side="B" onclick="togSide('${r.id}','B')" data-en="Both" data-es="Ambos">B</div>
+      </div>` : '';
+    return `
+      <div class="region-tile" data-region="${r.id}" onclick="togRegion('${r.id}')">
+        <div class="region-tile-icon">${r.icon}</div>
+        <div class="region-tile-label" data-en="${r.en}" data-es="${r.es}">${r.en}</div>
+        ${sidesHtml}
+      </div>`;
+  }).join('');
+}
+function togRegion(id){
+  const tile = document.querySelector(`.region-tile[data-region="${id}"]`);
+  const region = BODY_REGIONS.find(r => r.id === id);
+  if(S.complaint.regions[id]){
+    // Deselect
+    delete S.complaint.regions[id];
+    tile.classList.remove('sel');
+  } else {
+    // Select — default to bilateral 'both' if bilateral, null side if not
+    S.complaint.regions[id] = {
+      side: region.bilateral ? 'B' : null,
+      pain: 5,
+    };
+    tile.classList.add('sel');
+    if(region.bilateral){
+      // Mark the 'B' button as active by default
+      const btn = tile.querySelector('.side-btn[data-side="B"]');
+      if(btn) btn.classList.add('active');
+    }
+  }
+  renderPainRatings();
+}
+function togSide(regionId, side){
+  if(!S.complaint.regions[regionId]) return;
+  S.complaint.regions[regionId].side = side;
+  const tile = document.querySelector(`.region-tile[data-region="${regionId}"]`);
+  tile.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+  tile.querySelector(`.side-btn[data-side="${side}"]`)?.classList.add('active');
+  renderPainRatings();
+}
+function renderPainRatings(){
+  const card = document.getElementById('pain-ratings-card');
+  const list = document.getElementById('pain-ratings-list');
+  const regionIds = Object.keys(S.complaint.regions);
+  if(regionIds.length === 0){
+    card.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+  card.style.display = '';
+  list.innerHTML = regionIds.map(id => {
+    const region = BODY_REGIONS.find(r => r.id === id);
+    const data = S.complaint.regions[id];
+    const sideLabel = data.side === 'L' ? ' (Left)' : data.side === 'R' ? ' (Right)' : data.side === 'B' ? ' (Both)' : '';
+    const sideLabelEs = data.side === 'L' ? ' (Izquierdo)' : data.side === 'R' ? ' (Derecho)' : data.side === 'B' ? ' (Ambos)' : '';
+    const label = (S.lang === 'es' ? region.es : region.en) + (S.lang === 'es' ? sideLabelEs : sideLabel);
+    return `
+      <div class="pain-row">
+        <div class="pain-label">${label}</div>
+        <div class="pain-slider-wrap">
+          <input type="range" class="pain-slider" min="0" max="10" step="1" value="${data.pain}"
+                 oninput="setPain('${id}', this.value)">
+          <div class="pain-value" id="pv-${id}">${data.pain}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+function setPain(regionId, val){
+  if(S.complaint.regions[regionId]){
+    S.complaint.regions[regionId].pain = parseInt(val, 10);
+    const pv = document.getElementById('pv-' + regionId);
+    if(pv) pv.textContent = val;
+  }
+}
+
+/* Generic single-select chip group (used by onset, mechanism) */
+function initSingleSelectChips(groupId, stateKey){
+  const grp = document.getElementById(groupId);
+  if(!grp) return;
+  grp.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      grp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+      chip.classList.add('sel');
+      S.complaint[stateKey] = chip.dataset.val;
+    });
+  });
+}
+/* Generic multi-select chip group (used by aggravating, relieving, prior-tx) */
+function initMultiSelectChips(groupId, stateKey){
+  const grp = document.getElementById(groupId);
+  if(!grp) return;
+  grp.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.val;
+      if(chip.classList.contains('sel')){
+        chip.classList.remove('sel');
+        S.complaint[stateKey] = S.complaint[stateKey].filter(v => v !== val);
+      } else {
+        chip.classList.add('sel');
+        if(!S.complaint[stateKey].includes(val)) S.complaint[stateKey].push(val);
+      }
+    });
+  });
+}
+
+/* ═════════════════════════════════════════════════
+   HEALTH FOCUS — MSK SHARED + SPECIALTY BLOCKS
+   ═════════════════════════════════════════════════ */
+function buildHealthFocusGrids(){
+  // Neuro symptoms
+  const nGrid = document.getElementById('neuro-grid');
+  if(nGrid){
+    nGrid.innerHTML = NEURO_SYMPTOMS.map(s =>
+      `<label class="ci" onclick="toggleNeuroSymptom(this,'${s.id}')">
+         <input type="checkbox" id="${s.id}">
+         <span data-en="${s.en}" data-es="${s.es}">${s.en}</span>
+       </label>`
+    ).join('');
+  }
+  // Red flags
+  const rfGrid = document.getElementById('redflag-grid');
+  if(rfGrid){
+    rfGrid.innerHTML = RED_FLAGS.map(r =>
+      `<label class="ci" onclick="toggleRedFlag(this,'${r.id}','${r.severity}')">
+         <input type="checkbox" id="${r.id}">
+         <span data-en="${r.en}" data-es="${r.es}">${r.en}</span>
+       </label>`
+    ).join('');
+  }
+  // Functional goals
+  const gGrid = document.getElementById('goals-grid');
+  if(gGrid){
+    gGrid.innerHTML = FUNCTIONAL_GOALS.map(g =>
+      `<label class="ci" onclick="toggleGoal(this,'${g.id}')">
+         <input type="checkbox" id="${g.id}">
+         <span data-en="${g.en}" data-es="${g.es}">${g.en}</span>
+       </label>`
+    ).join('');
+  }
+}
+
+function toggleNeuroSymptom(el, id){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+
+  // Update state
+  if(el.classList.contains('checked')){
+    if(!S.health.neuroSymptoms.includes(id)) S.health.neuroSymptoms.push(id);
+    // If user picked "none", clear all others
+    if(id === 'neuro-none'){
+      NEURO_SYMPTOMS.forEach(s => {
+        if(s.id !== 'neuro-none'){
+          const otherEl = document.getElementById(s.id);
+          if(otherEl && otherEl.checked){
+            otherEl.checked = false;
+            otherEl.parentElement.classList.remove('checked');
+          }
+        }
+      });
+      S.health.neuroSymptoms = ['neuro-none'];
+    } else {
+      // If picking a real symptom, clear "none"
+      const noneEl = document.getElementById('neuro-none');
+      if(noneEl && noneEl.checked){
+        noneEl.checked = false;
+        noneEl.parentElement.classList.remove('checked');
+        S.health.neuroSymptoms = S.health.neuroSymptoms.filter(s => s !== 'neuro-none');
+      }
+    }
+  } else {
+    S.health.neuroSymptoms = S.health.neuroSymptoms.filter(s => s !== id);
+  }
+
+  // Show "where exactly" input if any real symptom checked
+  const anyReal = S.health.neuroSymptoms.some(s => s !== 'neuro-none');
+  const wrap = document.getElementById('neuro-where-wrap');
+  if(wrap) wrap.style.display = anyReal ? '' : 'none';
+}
+
+function toggleRedFlag(el, id, severity){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+
+  if(el.classList.contains('checked')){
+    if(!S.health.redFlags.includes(id)) S.health.redFlags.push(id);
+    // "None" is mutually exclusive
+    if(id === 'rf-none'){
+      RED_FLAGS.forEach(r => {
+        if(r.id !== 'rf-none'){
+          const otherEl = document.getElementById(r.id);
+          if(otherEl && otherEl.checked){
+            otherEl.checked = false;
+            otherEl.parentElement.classList.remove('checked');
+          }
+        }
+      });
+      S.health.redFlags = ['rf-none'];
+    } else {
+      const noneEl = document.getElementById('rf-none');
+      if(noneEl && noneEl.checked){
+        noneEl.checked = false;
+        noneEl.parentElement.classList.remove('checked');
+        S.health.redFlags = S.health.redFlags.filter(r => r !== 'rf-none');
+      }
+    }
+  } else {
+    S.health.redFlags = S.health.redFlags.filter(r => r !== id);
+  }
+
+  // Track if any critical-severity flag is set
+  S.health.redFlagCriticalHit = S.health.redFlags.some(rfId => {
+    const rf = RED_FLAGS.find(r => r.id === rfId);
+    return rf && rf.severity === 'critical';
+  });
+
+  // Visual warning for critical red flags
+  const card = el.closest('.card');
+  if(S.health.redFlagCriticalHit){
+    card.style.boxShadow = '0 0 0 3px rgba(192,57,43,.25)';
+  } else {
+    card.style.boxShadow = '';
+  }
+}
+
+function toggleGoal(el, id){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+  if(el.classList.contains('checked')){
+    if(!S.health.goals.includes(id)) S.health.goals.push(id);
+  } else {
+    S.health.goals = S.health.goals.filter(g => g !== id);
+  }
+}
+
+// Called when user navigates to step 4 — shows/hides specialty blocks based on services picked
+function showRelevantSpecialtyBlocks(){
+  const sw = S.selectedSvcs.includes('sw');
+  const np = S.selectedSvcs.includes('np');
+  const wl = S.selectedSvcs.includes('wl');
+  const swBlock = document.getElementById('sw-specialty');
+  const npBlock = document.getElementById('np-specialty');
+  const wlBlock = document.getElementById('wl-specialty');
+  if(swBlock) swBlock.style.display = sw ? '' : 'none';
+  if(npBlock) npBlock.style.display = np ? '' : 'none';
+  if(wlBlock) wlBlock.style.display = wl ? '' : 'none';
+}
+
+// Wire Shockwave chip handlers (multi-select for prior + limits)
+function initShockwaveChips(){
+  const prior = document.getElementById('sw-prior-chips');
+  if(prior){
+    prior.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(val === 'none'){
+          // "None" is mutually exclusive
+          prior.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+          chip.classList.add('sel');
+          S.health.sw.prior = ['none'];
+        } else {
+          // Deselect "none" if it was picked
+          const noneChip = prior.querySelector('.chip[data-val="none"]');
+          if(noneChip) noneChip.classList.remove('sel');
+          S.health.sw.prior = S.health.sw.prior.filter(v => v !== 'none');
+
+          if(chip.classList.contains('sel')){
+            chip.classList.remove('sel');
+            S.health.sw.prior = S.health.sw.prior.filter(v => v !== val);
+          } else {
+            chip.classList.add('sel');
+            if(!S.health.sw.prior.includes(val)) S.health.sw.prior.push(val);
+          }
+        }
+      });
+    });
+  }
+  const limits = document.getElementById('sw-limits-chips');
+  if(limits){
+    limits.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(chip.classList.contains('sel')){
+          chip.classList.remove('sel');
+          S.health.sw.limits = S.health.sw.limits.filter(v => v !== val);
+        } else {
+          chip.classList.add('sel');
+          if(!S.health.sw.limits.includes(val)) S.health.sw.limits.push(val);
+        }
+      });
+    });
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   SMART REFERRAL SOURCE FOLLOW-UP
+   ═════════════════════════════════════════════════ */
+function onSourceChange(){
+  const source = getVal('pt-source');
+  const wrap = document.getElementById('source-followup-wrap');
+  const label = document.getElementById('source-followup-label');
+  const hint = document.getElementById('source-followup-hint');
+  const input = document.getElementById('pt-source-detail');
+
+  const followups = {
+    Google: {
+      label_en: "What did you search for on Google?",
+      label_es: "¿Qué buscó en Google?",
+      hint_en: "e.g., 'chiropractor near me', 'shockwave therapy Colleyville', 'neuropathy treatment DFW'",
+      hint_es: "ej., 'quiropráctico cerca de mí', 'terapia de ondas de choque Colleyville'"
+    },
+    Facebook: {
+      label_en: "Do you remember what the ad or post was about?",
+      label_es: "¿Recuerda de qué se trataba el anuncio o publicación?",
+      hint_en: "e.g., 'Shockwave quiz', 'back pain ad', 'weight loss post'",
+      hint_es: "ej., 'cuestionario de ondas de choque', 'anuncio de dolor de espalda'"
+    },
+    Instagram: {
+      label_en: "Do you remember what the ad or post was about?",
+      label_es: "¿Recuerda de qué se trataba el anuncio o publicación?",
+      hint_en: "e.g., 'Shockwave quiz', 'back pain ad', 'Dr. Rudy reel'",
+      hint_es: "ej., 'cuestionario de ondas de choque', 'reel de Dr. Rudy'"
+    },
+    FriendFamily: {
+      label_en: "Who referred you? We'd love to thank them!",
+      label_es: "¿Quién lo refirió? ¡Nos encantaría agradecerles!",
+      hint_en: "Their full name helps us give proper credit (and sometimes a reward!)",
+      hint_es: "Su nombre completo nos ayuda a darles crédito (¡y a veces una recompensa!)"
+    },
+    Doctor: {
+      label_en: "Which doctor or office referred you?",
+      label_es: "¿Qué médico u oficina lo refirió?",
+      hint_en: "Doctor's name and/or practice name",
+      hint_es: "Nombre del médico y/o nombre de la práctica"
+    },
+    Other: {
+      label_en: "Please tell us how you found us:",
+      label_es: "Por favor díganos cómo nos encontró:",
+      hint_en: "",
+      hint_es: ""
+    },
+  };
+
+  if(followups[source]){
+    wrap.style.display = '';
+    const f = followups[source];
+    label.dataset.en = f.label_en;
+    label.dataset.es = f.label_es;
+    label.textContent = S.lang === 'es' ? f.label_es : f.label_en;
+    hint.textContent = S.lang === 'es' ? f.hint_es : f.hint_en;
+    input.value = '';
+    input.placeholder = '';
+  } else {
+    wrap.style.display = 'none';
+    input.value = '';
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   SIGNATURE PAD
+   ═════════════════════════════════════════════════ */
+function initSig(id){
+  const c = document.getElementById(id);
+  if(!c) return;
+  // Get live size — if canvas is hidden (display:none), width will be 0
+  const rect = c.getBoundingClientRect();
+  if(rect.width < 20){
+    // Canvas is hidden or not laid out yet — bail out, try again later
+    c._init = false;
+    return;
+  }
+  // Already initialized at correct size? Don't re-wire events
+  if(c._init && c._initWidth === Math.round(rect.width)) return;
+
+  // Size canvas internal buffer to display size × DPR for crisp rendering
+  const dpr = window.devicePixelRatio || 1;
+  c.width = rect.width * dpr;
+  c.height = 140 * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#182820';
+
+  // Only wire event listeners once per element
+  if(!c._eventsBound){
+    c._eventsBound = true;
+    let drawing = false, lx = 0, ly = 0;
+    function pos(e){
+      const r = c.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+      return {x, y};
+    }
+    function down(e){ e.preventDefault(); drawing = true; const p = pos(e); lx = p.x; ly = p.y; }
+    function move(e){
+      if(!drawing) return;
+      e.preventDefault();
+      const p = pos(e);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      lx = p.x; ly = p.y;
+    }
+    function up(){ drawing = false; }
+    c.addEventListener('mousedown', down);
+    c.addEventListener('mousemove', move);
+    c.addEventListener('mouseup', up);
+    c.addEventListener('mouseleave', up);
+    c.addEventListener('touchstart', down, {passive:false});
+    c.addEventListener('touchmove', move, {passive:false});
+    c.addEventListener('touchend', up);
+  }
+
+  c._init = true;
+  c._initWidth = Math.round(rect.width);
+}
+function clearSig(id){
+  const c = document.getElementById(id);
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+}
+function isSigEmpty(id){
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  const data = ctx.getImageData(0, 0, c.width, c.height).data;
+  for(let i = 3; i < data.length; i += 4){
+    if(data[i] !== 0) return false;
+  }
+  return true;
+}
+
+/* ═════════════════════════════════════════════════
+   GOOGLE API / DRIVE / SHEETS
+   ═════════════════════════════════════════════════ */
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+let gapiReady = false, gisReady = false;
+let driveToken = null, tokenRefreshTimer = null;
+
+function gapiLoaded(){
+  gapi.load('client', async () => {
+    try {
+      await gapi.client.init({
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+      });
+      gapiReady = true;
+      tryRestoreDriveToken();
+    } catch(e){ console.warn('gapi init error:', e); }
+  });
+}
+function gisLoaded(){
+  gisReady = true;
+  if(gapiReady) tryRestoreDriveToken();
+}
+function tryRestoreDriveToken(){
+  loadCfg();
+  const saved = localStorage.getItem('cvc_drive_token');
+  const expiry = parseInt(localStorage.getItem('cvc_drive_token_expiry') || '0');
+  const clientId = localStorage.getItem('cvc_drive_client_id') || cfg.oauthClientId || '';
+  if(!saved || !clientId) return;
+  if(Date.now() < expiry){
+    driveToken = saved;
+    window._driveClientId = clientId;
+    gapi.client.setToken({access_token: driveToken});
+    const remaining = expiry - Date.now();
+    clearTimeout(tokenRefreshTimer);
+    tokenRefreshTimer = setTimeout(silentRefreshDrive, remaining);
+    setDriveStatus(true);
+  } else if(clientId && gisReady){
+    window._driveClientId = clientId;
+    silentRefreshDrive();
+  }
+}
+function silentRefreshDrive(){
+  if(!window._driveClientId || !gisReady) return;
+  try {
+    const silent = google.accounts.oauth2.initTokenClient({
+      client_id: window._driveClientId,
+      scope: DRIVE_SCOPE,
+      callback: resp => {
+        if(resp.error){ console.warn('Silent refresh failed:', resp.error); return; }
+        driveToken = resp.access_token;
+        gapi.client.setToken({access_token: driveToken});
+        const expiry = Date.now() + (55 * 60 * 1000);
+        localStorage.setItem('cvc_drive_token', driveToken);
+        localStorage.setItem('cvc_drive_token_expiry', String(expiry));
+        clearTimeout(tokenRefreshTimer);
+        tokenRefreshTimer = setTimeout(silentRefreshDrive, 55 * 60 * 1000);
+        setDriveStatus(true);
+      }
+    });
+    silent.requestAccessToken({prompt:''});
+  } catch(e){ console.warn('silentRefreshDrive error:', e); }
+}
+function connectDrive(){
+  loadCfg();
+  const clientId = getVal('s-cid') || cfg.oauthClientId;
+  if(!clientId){ alert('Enter OAuth Client ID in Settings first, then Save.'); return; }
+  if(!gisReady){ alert('Google services still loading. Please wait a few seconds and try again.'); return; }
+  window._driveClientId = clientId;
+  const tc = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: DRIVE_SCOPE,
+    callback: resp => {
+      if(resp.error){ alert('Drive auth failed: ' + resp.error); return; }
+      driveToken = resp.access_token;
+      gapi.client.setToken({access_token: driveToken});
+      const expiry = Date.now() + (55 * 60 * 1000);
+      localStorage.setItem('cvc_drive_token', driveToken);
+      localStorage.setItem('cvc_drive_token_expiry', String(expiry));
+      localStorage.setItem('cvc_drive_client_id', clientId);
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = setTimeout(silentRefreshDrive, 55 * 60 * 1000);
+      setDriveStatus(true);
+      alert('Drive connected successfully.');
+    }
+  });
+  tc.requestAccessToken({prompt:'consent'});
+}
+function setDriveStatus(connected){
+  const ind = document.getElementById('drive-ind');
+  const lbl = document.getElementById('drive-label');
+  ind.className = 'drive-ind ' + (connected ? 'on' : 'off');
+  lbl.textContent = connected ? (S.lang==='es' ? 'Drive Conectado' : 'Drive Connected')
+                              : (S.lang==='es' ? 'Drive Desconectado' : 'Drive Disconnected');
+}
+
+/* ═════════════════════════════════════════════════
+   SHEET — ENSURE TAB + APPEND ROW
+   ═════════════════════════════════════════════════ */
+async function sheetsEnsureTab(tabName){
+  if(!driveToken || !cfg.sheetId) return;
+  try {
+    const resp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}`,
+      { headers: {'Authorization': 'Bearer ' + driveToken} });
+    const meta = await resp.json();
+    const exists = (meta.sheets || []).some(s => s.properties.title === tabName);
+    if(!exists){
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}:batchUpdate`, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json'},
+        body: JSON.stringify({requests: [{addSheet: {properties: {title: tabName}}}]})
+      });
+      // Add header row
+      const headers = ['Key','Timestamp','Last','First','DOB','Phone','Services','Status','PDFLink','PayloadJSON'];
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${tabName}!A1?valueInputOption=USER_ENTERED`, {
+        method: 'PUT',
+        headers: {'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json'},
+        body: JSON.stringify({values: [headers]})
+      });
+    }
+  } catch(e){ console.warn('sheetsEnsureTab error:', e); }
+}
+async function sheetsAppendRow(tabName, row){
+  const resp = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${tabName}!A:A:append?valueInputOption=USER_ENTERED`,
+    {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json'},
+      body: JSON.stringify({values: [row]})
+    }
+  );
+  if(!resp.ok) throw new Error('Sheets append failed: ' + resp.status);
+  return resp.json();
+}
+
+/* ═════════════════════════════════════════════════
+   PDF GENERATION (intake)
+   ═════════════════════════════════════════════════ */
+function buildIntakePdfBlob(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'pt', format:'letter'});
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 50;
+  let y = margin;
+
+  const sage = [47, 92, 67];
+  const sageLt = [184, 216, 196];
+  const ink = [24, 40, 32];
+  const inkMd = [59, 78, 65];
+  const inkSm = [103, 122, 110];
+
+  // Header band
+  doc.setFillColor(...sage);
+  doc.rect(0, 0, W, 78, 'F');
+  doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport', margin, 30);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...sageLt);
+  doc.text((cfg.clinicAddr || '1001 Glade Rd Ste 120, Colleyville TX 76034') + '  •  ' + (cfg.clinicPhone || '(817) 420-7696'), margin, 46);
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('NEW PATIENT INTAKE', margin, 64);
+  y = 100;
+
+  // Patient block
+  const ptName = `${getVal('pt-first')} ${getVal('pt-last')}`.trim();
+  const dob = getVal('pt-dob');
+  const today = new Date().toLocaleDateString('en-US');
+
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...inkSm);
+  doc.text('PATIENT', margin, y);
+  doc.text('DOB', 250, y);
+  doc.text('INTAKE DATE', 380, y);
+  doc.text('SERVICES', 470, y);
+  y += 14;
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...ink);
+  doc.text(ptName || '—', margin, y);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(...inkMd);
+  doc.text(dob || '—', 250, y);
+  doc.text(today, 380, y);
+  doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+  doc.text(S.selectedSvcs.map(s => SVC_META[s].tag).join(', ') || '—', 470, y);
+
+  y += 12;
+  doc.setDrawColor(200, 220, 208); doc.setLineWidth(0.5);
+  doc.line(margin, y, W - margin, y);
+  y += 18;
+
+  // SECTION HELPER
+  function sectionHeader(title){
+    if(y > H - 120){ doc.addPage(); y = margin; }
+    doc.setFillColor(234, 244, 238);
+    doc.rect(margin, y - 11, W - margin*2, 17, 'F');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+    doc.text(title, margin + 5, y);
+    y += 14;
+  }
+  function field(label, val, x1, x2){
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...inkSm);
+    doc.text(label, x1, y);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(...inkMd);
+    const lines = doc.splitTextToSize(String(val || '—'), (x2 - x1) - 6);
+    doc.text(lines, x1, y + 10);
+    return lines.length * 10 + 14;
+  }
+
+  // Demographics section
+  sectionHeader('DEMOGRAPHICS');
+  const colA = margin, colB = margin + 180, colC = margin + 340;
+  const rowH = Math.max(
+    field('Phone', getVal('pt-phone'), colA, colB),
+    field('Email', getVal('pt-email'), colB, colC),
+    field('Sex', getVal('pt-sex'), colC, W - margin)
+  );
+  y += rowH;
+
+  y += field('Address', getVal('pt-addr'), margin, W - margin);
+
+  const rowH2 = Math.max(
+    field('Occupation', getVal('pt-occ'), colA, colB),
+    field('Language', getVal('pt-lang'), colB, colC),
+    field('Referred By', getVal('pt-source'), colC, W - margin)
+  );
+  y += rowH2;
+
+  // Referral detail (only if provided)
+  const srcDetail = getVal('pt-source-detail');
+  if(srcDetail){
+    y += field('Referral Detail', srcDetail, margin, W - margin);
+  }
+
+  // Emergency contact
+  sectionHeader('EMERGENCY CONTACT');
+  const rowE = Math.max(
+    field('Name', getVal('ec-name'), colA, colB),
+    field('Relationship', getVal('ec-rel'), colB, colC),
+    field('Phone', getVal('ec-phone'), colC, W - margin)
+  );
+  y += rowE;
+
+  // Insurance
+  sectionHeader('INSURANCE & BILLING');
+  y += field('Case Type', getVal('case-type'), margin, W - margin);
+  const caseType = getVal('case-type');
+  if(caseType === 'MVA' || caseType === 'WorkComp'){
+    const attRow = Math.max(
+      field('Attorney / Case Mgr', getVal('att-name'), colA, colB),
+      field('Attorney Phone', getVal('att-phone'), colB, colC),
+      field('Incident Date', getVal('incident-date'), colC, W - margin)
+    );
+    y += attRow;
+  }
+  const insRow = Math.max(
+    field('Primary Carrier', getVal('ins-carrier'), colA, colB),
+    field('Policy ID', getVal('ins-policy'), colB, colC),
+    field('Group #', getVal('ins-group'), colC, W - margin)
+  );
+  y += insRow;
+  const subRow = Math.max(
+    field('Subscriber Name', getVal('ins-sub-name'), colA, colB),
+    field('Subscriber DOB', getVal('ins-sub-dob'), colB, colC),
+    field('PCP', getVal('pcp'), colC, W - margin)
+  );
+  y += subRow;
+
+  // ═══════════════════════════════════════
+  // CHIEF COMPLAINT
+  // ═══════════════════════════════════════
+  if(y > H - 220){ doc.addPage(); y = margin; }
+  sectionHeader('CHIEF COMPLAINT');
+
+  // Build region+pain summary string
+  const regionIds = Object.keys(S.complaint.regions || {});
+  let regionSummary = 'None reported';
+  if(regionIds.length){
+    regionSummary = regionIds.map(id => {
+      const r = BODY_REGIONS.find(x => x.id === id);
+      const d = S.complaint.regions[id];
+      const sideTxt = d.side === 'L' ? ' (L)' : d.side === 'R' ? ' (R)' : d.side === 'B' ? ' (Bilateral)' : '';
+      return `${r ? r.en : id}${sideTxt} — ${d.pain}/10`;
+    }).join('; ');
+  }
+  y += field('Pain Regions', regionSummary, margin, W - margin);
+
+  // Friendly readable maps for enum-like values
+  const ONSET_LABELS = {
+    'today':'Today','this-week':'This week','2-4-wk':'2–4 weeks ago',
+    '1-3-mo':'1–3 months ago','3-plus-mo':'3+ months ago','chronic':'Chronic (1+ year)'
+  };
+  const MECH_LABELS = {
+    'gradual':'Gradually over time','sudden':'Sudden (no cause)',
+    'mva':'Auto accident (MVA)','work':'Work injury','sports':'Sports/exercise',
+    'lifting':'Lifting/bending','fall':'Fall/slip','unknown':'Unknown'
+  };
+  const AGG_LABELS = {
+    sitting:'Sitting',standing:'Standing',walking:'Walking',bending:'Bending',
+    lifting:'Lifting',sleeping:'Sleeping',mornings:'Mornings',exercise:'Exercise',
+    driving:'Driving',stairs:'Stairs'
+  };
+  const REL_LABELS = {
+    rest:'Rest',ice:'Ice',heat:'Heat',movement:'Movement',
+    stretching:'Stretching',medication:'Medication',nothing:'Nothing helps'
+  };
+  const TX_LABELS = {
+    nothing:'Nothing yet',rest:'Rest','nsaids':'NSAIDs',
+    'other-chiro':'Another chiropractor',pt:'Physical therapy',
+    massage:'Massage',injections:'Cortisone injections',surgery:'Surgery',
+    imaging:'X-ray/MRI'
+  };
+  const mapList = (arr, m) => (arr || []).map(v => m[v] || v).join(', ') || '—';
+
+  const onsetRow = Math.max(
+    field('Onset', ONSET_LABELS[S.complaint.onset] || '—', colA, colB),
+    field('Mechanism', MECH_LABELS[S.complaint.mechanism] || '—', colB, W - margin)
+  );
+  y += onsetRow;
+
+  y += field('Aggravating Factors', mapList(S.complaint.aggravating, AGG_LABELS), margin, W - margin);
+  y += field('Relieving Factors', mapList(S.complaint.relieving, REL_LABELS), margin, W - margin);
+  y += field('Prior Treatment Tried', mapList(S.complaint.priorTx, TX_LABELS), margin, W - margin);
+
+  const goalTxt = getVal('cc-goal');
+  if(goalTxt){
+    y += field('Patient Goal', goalTxt, margin, W - margin);
+  }
+
+  // ═══════════════════════════════════════
+  // HEALTH FOCUS — MSK Shared + Specialty blocks
+  // ═══════════════════════════════════════
+  if(y > H - 220){ doc.addPage(); y = margin; }
+  sectionHeader('HEALTH FOCUS — NEURO + SAFETY SCREEN');
+
+  // Neuro symptoms (with "where" if provided)
+  const neuroLabels = S.health.neuroSymptoms.map(id => {
+    const s = NEURO_SYMPTOMS.find(x => x.id === id);
+    return s ? s.en : id;
+  });
+  const neuroTxt = neuroLabels.length ? neuroLabels.join(', ') : 'None reported';
+  y += field('Neuro / Radicular Symptoms', neuroTxt, margin, W - margin);
+  const neuroWhere = getVal('neuro-where');
+  if(neuroWhere){
+    y += field('Distribution / Location', neuroWhere, margin, W - margin);
+  }
+
+  // Red flags — render with color warning if critical severity hit
+  const rfLabels = S.health.redFlags
+    .filter(id => id !== 'rf-none')
+    .map(id => {
+      const r = RED_FLAGS.find(x => x.id === id);
+      return r ? r.en : id;
+    });
+  if(S.health.redFlagCriticalHit){
+    // Make this REALLY visible in the PDF — critical red flag warning
+    doc.setFillColor(253, 236, 234); // red-lt
+    doc.rect(margin, y - 4, W - margin*2, 18, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(192, 57, 43);
+    doc.text('⚠ CRITICAL RED FLAG — Evaluate before treatment', margin + 5, y + 8);
+    y += 22;
+  }
+  const rfTxt = rfLabels.length ? rfLabels.join('; ') : 'None reported';
+  y += field('Red Flag Screen', rfTxt, margin, W - margin);
+
+  // Functional goals
+  const goalLabels = S.health.goals.map(id => {
+    const g = FUNCTIONAL_GOALS.find(x => x.id === id);
+    return g ? g.en : id;
+  });
+  const goalsTxt = goalLabels.length ? goalLabels.join(', ') : '—';
+  y += field('Functional Goals', goalsTxt, margin, W - margin);
+
+  // Shockwave specialty block — only shown if SW selected
+  if(S.selectedSvcs.includes('sw')){
+    if(y > H - 180){ doc.addPage(); y = margin; }
+    sectionHeader('SHOCKWAVE — CANDIDACY DATA');
+
+    const SW_PRIOR_LABELS = {
+      'cortisone-recent':'Cortisone <6 wks',
+      'cortisone-past':'Cortisone >6 wks',
+      'prp':'PRP injection',
+      'mri':'MRI',
+      'ultrasound':'Ultrasound',
+      'xray':'X-ray',
+      'none':'None'
+    };
+    const SW_LIMITS_LABELS = {
+      walking:'Walking/standing',running:'Running',lifting:'Lifting',
+      reaching:'Reaching overhead',gripping:'Gripping',sleep:'Sleep',
+      work:'Work tasks',sports:'Sports/hobbies'
+    };
+    const priorList = (S.health.sw.prior || []).map(v => SW_PRIOR_LABELS[v] || v).join(', ') || '—';
+    y += field('Prior Interventions', priorList, margin, W - margin);
+
+    const cortRow = Math.max(
+      field('Cortisone Injections (lifetime)', getVal('sw-cort-count') || '—', colA, colB),
+      field('Most Recent Injection Date', getVal('sw-cort-date') || '—', colB, W - margin)
+    );
+    y += cortRow;
+
+    const imgNotes = getVal('sw-imaging-notes');
+    if(imgNotes){
+      y += field('Imaging Findings (patient-reported)', imgNotes, margin, W - margin);
+    }
+
+    const limitList = (S.health.sw.limits || []).map(v => SW_LIMITS_LABELS[v] || v).join(', ') || '—';
+    y += field('Functional Limitations', limitList, margin, W - margin);
+
+    // Clinical chronicity flag — from complaint.onset data
+    const isChronic = ['1-3-mo','3-plus-mo','chronic'].includes(S.complaint.onset);
+    doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.setTextColor(...(isChronic ? [26,107,58] : [212,134,10])); // green or amber
+    doc.text(
+      isChronic ? '✓ Chronicity criterion met (≥1 month) — good SW candidate'
+                : '⚠ Acute presentation (<1 month) — SW typically indicated for chronic tendinopathy (≥3 months)',
+      margin, y
+    );
+    y += 16;
+  }
+
+  // Health history
+  if(y > H - 200){ doc.addPage(); y = margin; }
+  sectionHeader('HEALTH HISTORY');
+  y += field('Current Medications', getVal('meds'), margin, W - margin);
+  y += field('Allergies', getVal('allergies'), margin, W - margin);
+  y += field('Past Surgeries', getVal('surgeries'), margin, W - margin);
+  y += field('Prior Injuries', getVal('injuries'), margin, W - margin);
+
+  // Conditions checked
+  const conditions = HX_CONDITIONS
+    .filter(c => document.getElementById(c.id)?.checked)
+    .map(c => c.en);
+  y += field('Conditions', conditions.length ? conditions.join(', ') : 'None reported', margin, W - margin);
+
+  // Consents
+  if(y > H - 180){ doc.addPage(); y = margin; }
+  sectionHeader('CONSENTS SIGNED');
+  const consents = [
+    {k: 'HIPAA Notice of Privacy Practices', v: document.getElementById('chk-hipaa')?.checked ? '✓ Acknowledged' : '✗ NOT SIGNED'},
+    {k: 'Consent to Examination & Treatment', v: document.getElementById('chk-tx')?.checked ? '✓ Signed' : '✗ NOT SIGNED'},
+    {k: 'Financial Responsibility', v: document.getElementById('chk-fin')?.checked ? '✓ Accepted' : '✗ NOT SIGNED'},
+  ];
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  consents.forEach(c => {
+    doc.setTextColor(...inkSm); doc.setFont('helvetica','normal');
+    doc.text(c.k, margin, y);
+    doc.setTextColor(...(c.v.startsWith('✓') ? [26,107,58] : [192,57,43]));
+    doc.setFont('helvetica','bold');
+    doc.text(c.v, W - margin, y, {align:'right'});
+    y += 13;
+  });
+
+  y += 12;
+  if(y > H - 120){ doc.addPage(); y = margin; }
+
+  // Signature
+  sectionHeader('PATIENT SIGNATURE');
+  const sigCanvas = document.getElementById('pt-sig');
+  try {
+    const sigData = sigCanvas.toDataURL('image/png');
+    doc.addImage(sigData, 'PNG', margin, y, 240, 60);
+  } catch(e){}
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...inkSm);
+  doc.text('Signed by: ' + (getVal('sig-print-name') || '—'), margin, y + 75);
+  doc.text('Date: ' + (getVal('sig-date') || today), margin, y + 88);
+
+  // Footer
+  const fy = H - 24;
+  doc.setDrawColor(200, 220, 208);
+  doc.line(margin, fy - 8, W - margin, fy - 8);
+  doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...inkSm);
+  doc.text(
+    `${cfg.clinicName || 'Colleyville Chiropractic | CVC Spine & Sport'}  •  ${cfg.clinicAddr || '1001 Glade Rd Ste 120, Colleyville TX 76034'}  •  ${cfg.clinicPhone || '(817) 420-7696'}  •  CONFIDENTIAL PATIENT RECORD`,
+    W/2, fy, {align:'center'}
+  );
+
+  return doc.output('blob');
+}
+
+/* ═════════════════════════════════════════════════
+   DRIVE UPLOAD
+   ═════════════════════════════════════════════════ */
+async function uploadToDrive(blob, fileName){
+  if(!cfg.driveFolderId) throw new Error('No Drive folder ID set in Settings.');
+  const meta = JSON.stringify({
+    name: fileName,
+    mimeType: 'application/pdf',
+    parents: [cfg.driveFolderId]
+  });
+  const form = new FormData();
+  form.append('metadata', new Blob([meta], {type: 'application/json'}));
+  form.append('file', blob);
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + driveToken},
+    body: form
+  });
+  if(!res.ok){
+    if(res.status === 401){ driveToken = null; localStorage.removeItem('cvc_drive_token'); setDriveStatus(false); throw new Error('Drive session expired — please reconnect in Settings.'); }
+    const err = await res.text();
+    throw new Error('Drive upload failed: ' + err);
+  }
+  return res.json();
+}
+
+/* ═════════════════════════════════════════════════
+   SUBMIT FLOW
+   ═════════════════════════════════════════════════ */
+async function submitIntake(){
+  const status = document.getElementById('submit-status');
+  const btn = document.getElementById('btn-submit');
+
+  try {
+    // VALIDATION
+    const errors = [];
+    ['first','last','dob','phone'].forEach(n => {
+      if(!getVal('pt-' + n)) errors.push(n + ' required');
+    });
+    if(!document.getElementById('chk-hipaa')?.checked) errors.push('HIPAA consent required');
+    if(!document.getElementById('chk-tx')?.checked) errors.push('Treatment consent required');
+    if(!document.getElementById('chk-fin')?.checked) errors.push('Financial consent required');
+    if(!getVal('sig-print-name')) errors.push('Printed name required');
+    if(isSigEmpty('pt-sig')) errors.push('Signature required');
+
+    if(errors.length){
+      showStatus('error', (S.lang==='es' ? '⚠ Faltan campos requeridos: ' : '⚠ Missing required fields: ') + errors.join(', '));
+      // Scroll TO the status bar (not all the way to bottom, which may overshoot)
+      setTimeout(() => {
+        status.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 50);
+      return;
+    }
+
+    // HARD FAIL if Drive not connected
+    loadCfg();
+    if(!driveToken || !cfg.driveFolderId || !cfg.sheetId){
+      showStatus('error', '⚠ Google Drive is not connected. Please have front desk staff open Settings and connect Drive before submitting.');
+      setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
+      return;
+    }
+
+    btn.disabled = true;
+    showStatus('loading', S.lang==='es' ? 'Guardando su información…' : 'Saving your information…');
+
+    try {
+      // Generate PDF
+      const blob = buildIntakePdfBlob();
+
+      // Filename format: LastName_FirstName_YYYY-MM-DD_INTAKE_SVCS.pdf
+      const last = getVal('pt-last').replace(/[^a-zA-Z0-9]/g,'');
+      const first = getVal('pt-first').replace(/[^a-zA-Z0-9]/g,'');
+      const date = new Date().toISOString().slice(0,10);
+      const svcTag = S.selectedSvcs.map(s => SVC_META[s].tag).join('-') || 'NONE';
+      const fileName = `${last}_${first}_${date}_INTAKE_${svcTag}.pdf`;
+
+      // Upload to Drive
+      showStatus('loading', S.lang==='es' ? 'Subiendo a Drive…' : 'Uploading to Drive…');
+      const driveFile = await uploadToDrive(blob, fileName);
+
+      // Ensure Sheet tab and append row
+      showStatus('loading', S.lang==='es' ? 'Registrando datos…' : 'Logging data…');
+      await sheetsEnsureTab('NewPatient_Intake');
+
+      const key = `NP_${last}_${first}_${Date.now()}`;
+      S.pendingKey = key;
+
+      const payload = collectFullPayload();
+      payload.driveFileId = driveFile.id;
+      payload.driveFileLink = driveFile.webViewLink;
+
+      await sheetsAppendRow('NewPatient_Intake', [
+        key,
+        new Date().toLocaleString(),
+        getVal('pt-last'),
+        getVal('pt-first'),
+        getVal('pt-dob'),
+        getVal('pt-phone'),
+        S.selectedSvcs.map(s => SVC_META[s].tag).join(', '),
+        'pending',
+        driveFile.webViewLink || '',
+        JSON.stringify(payload)
+      ]);
+
+      // Success → handoff
+      showStatus('success', S.lang==='es' ? '✓ ¡Guardado con éxito!' : '✓ Saved successfully!');
+      setTimeout(showHandoff, 800);
+
+    } catch(e){
+      console.error('Submit inner error:', e);
+      btn.disabled = false;
+      showStatus('error', (S.lang==='es' ? 'Error: ' : 'Error: ') + (e.message || String(e)));
+      setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
+    }
+  } catch(outerErr){
+    console.error('Submit outer error:', outerErr);
+    btn.disabled = false;
+    showStatus('error', 'Unexpected error: ' + (outerErr.message || String(outerErr)) + ' — please try again or refresh.');
+    setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
+  }
+}
+
+function collectFullPayload(){
+  const p = {};
+  // Services
+  p.services = S.selectedSvcs.slice();
+  // Demographics
+  ['first','last','dob','sex','lang','phone','email','addr','source','occ'].forEach(k =>
+    p[k] = getVal('pt-' + k)
+  );
+  p.sourceDetail = getVal('pt-source-detail');
+  // Emergency contact
+  p.ec = {
+    name: getVal('ec-name'),
+    rel: getVal('ec-rel'),
+    phone: getVal('ec-phone'),
+  };
+  // Insurance
+  p.insurance = {
+    caseType: getVal('case-type'),
+    carrier: getVal('ins-carrier'),
+    policy: getVal('ins-policy'),
+    group: getVal('ins-group'),
+    subName: getVal('ins-sub-name'),
+    subDob: getVal('ins-sub-dob'),
+    pcp: getVal('pcp'),
+    attName: getVal('att-name'),
+    attPhone: getVal('att-phone'),
+    incidentDate: getVal('incident-date'),
+  };
+  // Chief complaint (NEW)
+  p.complaint = {
+    regions: JSON.parse(JSON.stringify(S.complaint.regions)),  // deep clone
+    onset: S.complaint.onset,
+    mechanism: S.complaint.mechanism,
+    aggravating: S.complaint.aggravating.slice(),
+    relieving: S.complaint.relieving.slice(),
+    priorTx: S.complaint.priorTx.slice(),
+    goal: getVal('cc-goal'),
+  };
+  // Health focus (MSK shared + specialty blocks) — NEW in Part 2A
+  p.health = {
+    neuroSymptoms: S.health.neuroSymptoms.slice(),
+    neuroSymptomsLabels: S.health.neuroSymptoms.map(id => {
+      const s = NEURO_SYMPTOMS.find(x => x.id === id);
+      return s ? s.en : id;
+    }),
+    neuroWhere: getVal('neuro-where'),
+    redFlags: S.health.redFlags.slice(),
+    redFlagsLabels: S.health.redFlags.map(id => {
+      const r = RED_FLAGS.find(x => x.id === id);
+      return r ? r.en : id;
+    }),
+    redFlagCritical: S.health.redFlagCriticalHit,
+    goals: S.health.goals.slice(),
+    goalsLabels: S.health.goals.map(id => {
+      const g = FUNCTIONAL_GOALS.find(x => x.id === id);
+      return g ? g.en : id;
+    }),
+  };
+  // Shockwave specialty data (only populated if SW was selected)
+  if(S.selectedSvcs.includes('sw')){
+    p.health.sw = {
+      prior: S.health.sw.prior.slice(),
+      cortCount: getVal('sw-cort-count'),
+      cortDate: getVal('sw-cort-date'),
+      imagingNotes: getVal('sw-imaging-notes'),
+      limits: S.health.sw.limits.slice(),
+    };
+  }
+  // Health history
+  p.hx = {
+    meds: getVal('meds'),
+    allergies: getVal('allergies'),
+    surgeries: getVal('surgeries'),
+    injuries: getVal('injuries'),
+    conditions: HX_CONDITIONS.filter(c => document.getElementById(c.id)?.checked).map(c => c.en),
+  };
+  // Consents
+  p.consents = {
+    hipaa: document.getElementById('chk-hipaa')?.checked || false,
+    tx: document.getElementById('chk-tx')?.checked || false,
+    fin: document.getElementById('chk-fin')?.checked || false,
+    printName: getVal('sig-print-name'),
+    sigDate: getVal('sig-date'),
+    sigDataUrl: document.getElementById('pt-sig').toDataURL('image/png'),
+  };
+  p.submittedAt = new Date().toISOString();
+  p.submittedLang = S.lang;
+  return p;
+}
+
+function showStatus(type, msg){
+  const el = document.getElementById('submit-status');
+  el.className = 'status-bar show ' + type;
+  el.innerHTML = (type==='loading' ? '<div class="spinner"></div>' : '') + msg;
+}
+
+/* ═════════════════════════════════════════════════
+   HANDOFF + RESET
+   ═════════════════════════════════════════════════ */
+function showHandoff(){
+  document.getElementById('handoff').classList.add('show');
+  // Restart progress bar animation
+  const bar = document.getElementById('ho-bar');
+  bar.style.animation = 'none';
+  void bar.offsetWidth;
+  bar.style.animation = '';
+  // Auto-reset after 30s
+  clearTimeout(window._hoTimer);
+  window._hoTimer = setTimeout(resetToLanding, 30000);
+}
+function resetToLanding(){
+  clearTimeout(window._hoTimer);
+  document.getElementById('handoff').classList.remove('show');
+  // Clear all form fields
+  document.querySelectorAll('#patient-app input, #patient-app textarea').forEach(el => {
+    if(el.type === 'checkbox') el.checked = false;
+    else el.value = '';
+  });
+  document.querySelectorAll('#patient-app select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('.ci.checked').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.svc-card.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.field.has-err').forEach(el => el.classList.remove('has-err'));
+  document.querySelectorAll('.field-err.show').forEach(el => el.classList.remove('show'));
+
+  // Clear chief complaint state + UI
+  document.querySelectorAll('.region-tile.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.side-btn.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#step-3 .chip.sel').forEach(el => el.classList.remove('sel'));
+  S.complaint = {
+    regions: {},
+    onset: null,
+    mechanism: null,
+    aggravating: [],
+    relieving: [],
+    priorTx: [],
+    goal: '',
+    sourceDetail: '',
+  };
+  // Hide dynamic sub-cards
+  const painCard = document.getElementById('pain-ratings-card');
+  if(painCard) painCard.style.display = 'none';
+  const painList = document.getElementById('pain-ratings-list');
+  if(painList) painList.innerHTML = '';
+  const srcWrap = document.getElementById('source-followup-wrap');
+  if(srcWrap) srcWrap.style.display = 'none';
+
+  // Clear Health Focus state + UI (Part 2A)
+  document.querySelectorAll('#step-4 .chip.sel').forEach(el => el.classList.remove('sel'));
+  // Clear red flag critical warning highlight
+  document.querySelectorAll('#step-4 .card').forEach(el => el.style.boxShadow = '');
+  S.health = {
+    neuroSymptoms: [],
+    neuroWhere: '',
+    redFlags: [],
+    redFlagCriticalHit: false,
+    goals: [],
+    sw: { prior: [], cortCount: '', cortDate: '', imagingNotes: '', limits: [] },
+  };
+  // Hide "where exactly" input
+  const neuroWhereWrap = document.getElementById('neuro-where-wrap');
+  if(neuroWhereWrap) neuroWhereWrap.style.display = 'none';
+  // Hide all specialty blocks (will be re-shown on next patient based on their services)
+  ['sw-specialty','np-specialty','wl-specialty'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+
+  clearSig('pt-sig');
+  S.selectedSvcs = [];
+  S.pendingKey = null;
+  updateSvcCountBar();
+  updateSvcPills();
+  document.getElementById('btn-svc-continue').disabled = true;
+  document.getElementById('btn-submit').disabled = false;
+  document.getElementById('submit-status').className = 'status-bar';
+  document.getElementById('case-extra').style.display = 'none';
+
+  // Reset sig date default
+  const today = new Date().toISOString().split('T')[0];
+  const sigDateEl = document.getElementById('sig-date');
+  if(sigDateEl) sigDateEl.value = today;
+
+  goStep(0);
+  goLanding();
+  setLang('en');
+}
+
+/* ═════════════════════════════════════════════════
+   INIT
+   ═════════════════════════════════════════════════ */
+function init(){
+  loadCfg();
+  buildHxGrid();
+  buildRegionGrid();
+  buildHealthFocusGrids();
+  initShockwaveChips();
+
+  // Wire chief complaint chip groups
+  initSingleSelectChips('onset-chips', 'onset');
+  initSingleSelectChips('mechanism-chips', 'mechanism');
+  initMultiSelectChips('agg-chips', 'aggravating');
+  initMultiSelectChips('rel-chips', 'relieving');
+  initMultiSelectChips('prior-tx-chips', 'priorTx');
+
+  // Default the signature date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sig-date').value = today;
+
+  // Signature pad is initialized lazily when the user navigates to Step 5 (see goStep).
+  // This prevents getBoundingClientRect() from returning 0 on a hidden canvas.
+
+  // Landing is already showing by default (class .show on #landing)
+}
+document.addEventListener('DOMContentLoaded', init);
+
+// Re-init signature canvas on window resize (otherwise stretched canvas = distorted drawing).
+// The new initSig() is safely re-runnable and will preserve width/dimensions properly.
+window.addEventListener('resize', () => {
+  const c = document.getElementById('pt-sig');
+  if(c && c._init){
+    // Force re-check dimensions on next paint
+    c._initWidth = 0;
+    initSig('pt-sig');
+  }
+});
+
+</script>
+</body>
+</html>

@@ -517,6 +517,83 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 }
 
 /* ═════════════════════════════════════════════════
+   MNSI YES/NO QUESTIONNAIRE (NeuroPath)
+   ═════════════════════════════════════════════════ */
+.mnsi-grid{display:flex;flex-direction:column;gap:7px;}
+.mnsi-item{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  background:var(--cream);border:1.5px solid var(--border);border-radius:var(--rs);
+  transition:all .15s;
+}
+.mnsi-item.answered{border-color:#6a4a8f;background:#f8f4fb;}
+.mnsi-item-num{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  background:#6a4a8f;color:white;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;
+}
+.mnsi-item-q{flex:1;font-size:.85rem;line-height:1.5;color:var(--ink);}
+.mnsi-item-yn{display:flex;gap:6px;flex-shrink:0;}
+.mnsi-yn-btn{
+  padding:7px 14px;border-radius:7px;border:1.5px solid var(--border);
+  background:white;font-size:.78rem;font-weight:700;cursor:pointer;
+  transition:all .13s;color:var(--ink-sm);min-width:54px;
+}
+.mnsi-yn-btn.yes-sel{background:#6a4a8f;border-color:#6a4a8f;color:white;}
+.mnsi-yn-btn.no-sel{background:var(--sage);border-color:var(--sage);color:white;}
+.mnsi-yn-btn:hover:not(.yes-sel):not(.no-sel){border-color:#6a4a8f;color:#6a4a8f;}
+
+/* Score card */
+.mnsi-score-card{
+  margin-top:16px;padding:14px 18px;border-radius:var(--r);
+  background:linear-gradient(135deg,#f3ecf7,#ede2f3);border:1.5px solid #c5a9dd;
+}
+.mnsi-score-top{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;
+}
+.mnsi-score-lbl{
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#6a4a8f;margin-bottom:3px;
+}
+.mnsi-score-val{
+  font-family:'DM Serif Display',serif;font-size:1.8rem;color:#4a2d6a;line-height:1;
+}
+.mnsi-score-interp{
+  padding:6px 11px;border-radius:20px;font-size:.75rem;font-weight:700;
+  letter-spacing:.04em;white-space:nowrap;
+}
+.mnsi-score-interp.low{background:var(--green-lt);color:var(--green);}
+.mnsi-score-interp.mod{background:var(--amber-lt);color:var(--amber);}
+.mnsi-score-interp.high{background:var(--red-lt);color:var(--red);}
+.mnsi-score-bar{
+  height:8px;background:rgba(106,74,143,.15);border-radius:4px;overflow:hidden;margin-bottom:8px;
+}
+.mnsi-score-fill{
+  height:100%;background:linear-gradient(to right,var(--green) 0%,var(--amber) 50%,var(--red) 100%);
+  border-radius:4px;transition:width .4s ease;
+}
+.mnsi-score-note{font-size:.76rem;color:var(--ink-md);line-height:1.5;font-style:italic;}
+
+/* ═════════════════════════════════════════════════
+   BMI DISPLAY (Weight Loss)
+   ═════════════════════════════════════════════════ */
+.bmi-display{
+  margin-top:10px;padding:11px 15px;border-radius:var(--rs);
+  display:flex;align-items:center;gap:14px;
+  background:var(--teal-lt);border-left:3px solid var(--teal);
+}
+.bmi-value{
+  font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--teal);line-height:1;
+}
+.bmi-label{
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:2px;
+}
+.bmi-category{
+  flex:1;font-size:.82rem;color:var(--ink-md);line-height:1.4;
+}
+.bmi-category strong{color:var(--ink);}
+
+/* ═════════════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════════════ */
 @media (max-width:640px){
@@ -531,6 +608,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
   .pain-row{flex-direction:column;align-items:stretch;gap:8px;}
   .pain-label{min-width:0;}
   .region-grid{grid-template-columns:1fr 1fr;}
+  .mnsi-item{flex-wrap:wrap;}
+  .mnsi-item-q{min-width:100%;order:2;}
+  .mnsi-item-yn{order:3;margin-left:auto;}
 }
 
 /* Hide language toggle on provider/staff pages */
@@ -986,24 +1066,151 @@ body[data-role="provider"] .lang-toggle{display:none;}
       </div>
     </div>
 
-    <!-- NEUROPATH SPECIALTY (Part 2B will build out) -->
+    <!-- NEUROPATH SPECIALTY — Full MNSI screening -->
     <div id="np-specialty" style="display:none;">
       <div class="card" style="border-left:4px solid #6a4a8f;">
-        <div class="card-title" style="color:#6a4a8f;">🧠 <span data-en="NeuroPath Questions" data-es="Preguntas de NeuroPath">NeuroPath Questions</span></div>
-        <div class="callout" style="background:#f3ecf7;border-left-color:#6a4a8f;">
-          <div class="callout-icon">🚧</div>
-          <div data-en="Full NeuroPath screening coming in Part 2B — will include the Michigan Neuropathy Screening Instrument." data-es="La evaluación completa de NeuroPath viene en la Parte 2B — incluirá el Instrumento de Detección de Neuropatía de Michigan.">Full NeuroPath screening coming in Part 2B — will include the Michigan Neuropathy Screening Instrument.</div>
+        <div class="card-title" style="color:#6a4a8f;">🧠 <span data-en="NeuroPath — Nerve Symptom Screening" data-es="NeuroPath — Evaluación de Síntomas Nerviosos">NeuroPath — Nerve Symptom Screening</span></div>
+        <div class="callout" style="background:#f3ecf7;border-left-color:#6a4a8f;margin-bottom:14px;">
+          <div class="callout-icon">📋</div>
+          <div data-en="The following is a standardized questionnaire used in neurology clinics. Please answer YES or NO for each question based on how you've been feeling recently." data-es="El siguiente es un cuestionario estandarizado utilizado en clínicas de neurología. Por favor responda SÍ o NO para cada pregunta basado en cómo se ha sentido recientemente.">The following is a standardized questionnaire used in neurology clinics. Please answer YES or NO for each question based on how you've been feeling recently.</div>
         </div>
+
+        <div class="sec-lbl" data-en="Michigan Neuropathy Screening Instrument (Part A)" data-es="Instrumento de Evaluación de Neuropatía de Michigan (Parte A)">Michigan Neuropathy Screening Instrument (Part A)</div>
+        <div id="mnsi-grid" class="mnsi-grid"></div>
+
+        <!-- Auto-calculated score display (appears after answering ≥1 item) -->
+        <div id="mnsi-score-card" class="mnsi-score-card" style="display:none;">
+          <div class="mnsi-score-top">
+            <div>
+              <div class="mnsi-score-lbl" data-en="MNSI Score" data-es="Puntuación MNSI">MNSI Score</div>
+              <div class="mnsi-score-val"><span id="mnsi-score-num">0</span> / 13</div>
+            </div>
+            <div class="mnsi-score-interp" id="mnsi-score-interp"></div>
+          </div>
+          <div class="mnsi-score-bar"><div class="mnsi-score-fill" id="mnsi-score-fill"></div></div>
+          <div class="mnsi-score-note" id="mnsi-score-note"></div>
+        </div>
+
+        <div class="sec-lbl" style="margin-top:18px;" data-en="Diabetic Status" data-es="Estado Diabético">Diabetic Status</div>
+        <div class="chips" id="np-diabetic-chips">
+          <div class="chip" data-val="no"          data-en="No diabetes"                   data-es="Sin diabetes">No diabetes</div>
+          <div class="chip" data-val="prediabetic" data-en="Prediabetic / borderline"      data-es="Prediabético / limítrofe">Prediabetic / borderline</div>
+          <div class="chip" data-val="type2"       data-en="Type 2 Diabetes"               data-es="Diabetes Tipo 2">Type 2 Diabetes</div>
+          <div class="chip" data-val="type1"       data-en="Type 1 Diabetes"               data-es="Diabetes Tipo 1">Type 1 Diabetes</div>
+          <div class="chip" data-val="not-sure"    data-en="Not sure"                      data-es="No estoy seguro">Not sure</div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <div class="field">
+            <label data-en="Most Recent HbA1c (if known)" data-es="HbA1c Más Reciente (si lo sabe)">Most Recent HbA1c (if known)</label>
+            <input id="np-hba1c" placeholder="e.g., 7.2 or 'not sure'">
+          </div>
+          <div class="field">
+            <label data-en="Do symptoms wake you at night?" data-es="¿Los síntomas lo despiertan por la noche?">Do symptoms wake you at night?</label>
+            <select id="np-nocturnal">
+              <option value="">—</option>
+              <option value="no"        data-en="No"                    data-es="No">No</option>
+              <option value="sometimes" data-en="Sometimes"             data-es="A veces">Sometimes</option>
+              <option value="often"     data-en="Often / most nights"   data-es="A menudo / la mayoría de las noches">Often / most nights</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Falls in the Past Year" data-es="Caídas en el Último Año">Falls in the Past Year</div>
+        <div class="chips" id="np-falls-chips">
+          <div class="chip" data-val="none" data-en="None"              data-es="Ninguna">None</div>
+          <div class="chip" data-val="1"    data-en="1 fall"            data-es="1 caída">1 fall</div>
+          <div class="chip" data-val="2-3"  data-en="2–3 falls"         data-es="2–3 caídas">2–3 falls</div>
+          <div class="chip" data-val="4+"   data-en="4 or more falls"   data-es="4 o más caídas">4 or more falls</div>
+        </div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Current Medications for Nerve Symptoms" data-es="Medicamentos Actuales para Síntomas Nerviosos">Current Medications for Nerve Symptoms</div>
+        <div class="chips" id="np-meds-chips"></div>
       </div>
     </div>
 
-    <!-- WEIGHT LOSS SPECIALTY (Part 2B will build out) -->
+    <!-- WEIGHT LOSS SPECIALTY — Full metabolic intake -->
     <div id="wl-specialty" style="display:none;">
       <div class="card" style="border-left:4px solid var(--teal);">
-        <div class="card-title" style="color:var(--teal);">⚖️ <span data-en="Weight Loss Questions" data-es="Preguntas de Pérdida de Peso">Weight Loss Questions</span></div>
-        <div class="callout teal">
-          <div class="callout-icon">🚧</div>
-          <div data-en="Full metabolic intake coming in Part 2B." data-es="Entrada metabólica completa viene en la Parte 2B.">Full metabolic intake coming in Part 2B.</div>
+        <div class="card-title" style="color:var(--teal);">⚖️ <span data-en="Weight Loss — Metabolic Intake" data-es="Pérdida de Peso — Evaluación Metabólica">Weight Loss — Metabolic Intake</span></div>
+        <div class="callout teal" style="margin-bottom:14px;">
+          <div class="callout-icon">💡</div>
+          <div data-en="The more honest you are here, the better we can build a program that actually works for YOU. No judgment — just information." data-es="Mientras más honesto sea aquí, mejor podemos construir un programa que realmente funcione para USTED. Sin juicios — solo información.">The more honest you are here, the better we can build a program that actually works for YOU. No judgment — just information.</div>
+        </div>
+
+        <div class="sec-lbl" data-en="Current Measurements" data-es="Medidas Actuales">Current Measurements</div>
+        <div class="row r3">
+          <div class="field">
+            <label data-en="Current Weight (lbs)" data-es="Peso Actual (lbs)">Current Weight (lbs)</label>
+            <input type="number" id="wl-current-weight" placeholder="e.g., 180" min="50" max="600" oninput="updateBMI()">
+          </div>
+          <div class="field">
+            <label data-en="Goal Weight (lbs)" data-es="Peso Meta (lbs)">Goal Weight (lbs)</label>
+            <input type="number" id="wl-goal-weight" placeholder="e.g., 150" min="50" max="600">
+          </div>
+          <div class="field">
+            <label data-en="Height" data-es="Estatura">Height</label>
+            <div style="display:flex;gap:6px;">
+              <input type="number" id="wl-height-ft" placeholder="ft" min="3" max="7" style="flex:1;" oninput="updateBMI()">
+              <input type="number" id="wl-height-in" placeholder="in" min="0" max="11" style="flex:1;" oninput="updateBMI()">
+            </div>
+          </div>
+        </div>
+
+        <!-- BMI display (auto-calculated) -->
+        <div id="bmi-display" class="bmi-display" style="display:none;"></div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Weight Loss History — What have you tried?" data-es="Historial de Pérdida de Peso — ¿Qué ha intentado?">Weight Loss History — What have you tried?</div>
+        <div class="chips" id="wl-prior-chips"></div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Medical Conditions That May Affect Weight" data-es="Condiciones Médicas Que Pueden Afectar el Peso">Medical Conditions That May Affect Weight <span class="sub" data-en="Check all that apply" data-es="Marque todas las que apliquen">Check all that apply</span></div>
+        <div class="check-grid" id="wl-metabolic-grid"></div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Eating Patterns" data-es="Patrones Alimenticios">Eating Patterns <span class="sub" data-en="Check all that apply" data-es="Marque todas las que apliquen">Check all that apply</span></div>
+        <div class="chips" id="wl-eating-chips"></div>
+
+        <div class="sec-lbl" style="margin-top:14px;" data-en="Current Activity Level" data-es="Nivel de Actividad Actual">Current Activity Level</div>
+        <div class="chips" id="wl-activity-chips">
+          <div class="chip" data-val="sedentary"    data-en="Sedentary (little/no exercise)"             data-es="Sedentario (poco/sin ejercicio)">Sedentary (little/no exercise)</div>
+          <div class="chip" data-val="light"        data-en="Light (1–3 days/week)"                     data-es="Ligero (1–3 días/semana)">Light (1–3 days/week)</div>
+          <div class="chip" data-val="moderate"     data-en="Moderate (3–5 days/week)"                  data-es="Moderado (3–5 días/semana)">Moderate (3–5 days/week)</div>
+          <div class="chip" data-val="active"       data-en="Active (6–7 days/week)"                    data-es="Activo (6–7 días/semana)">Active (6–7 days/week)</div>
+          <div class="chip" data-val="very-active"  data-en="Very Active (physical job + training)"     data-es="Muy Activo (trabajo físico + entrenamiento)">Very Active (physical job + training)</div>
+        </div>
+
+        <div class="row" style="margin-top:16px;">
+          <div class="card" style="padding:12px 16px;margin-bottom:0;background:var(--cream);">
+            <div class="sec-lbl" style="margin:0 0 8px;" data-en="Sleep Quality" data-es="Calidad del Sueño">Sleep Quality</div>
+            <div class="pain-slider-wrap" style="padding:4px 0;">
+              <input type="range" class="pain-slider" id="wl-sleep-slider" min="1" max="10" step="1" value="5" oninput="updateWLSlider('sleep', this.value)">
+              <div class="pain-value" id="wl-sleep-val">5</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--ink-sm);text-align:center;" data-en="1 = terrible · 10 = excellent" data-es="1 = terrible · 10 = excelente">1 = terrible · 10 = excellent</div>
+          </div>
+          <div class="card" style="padding:12px 16px;margin-bottom:0;background:var(--cream);">
+            <div class="sec-lbl" style="margin:0 0 8px;" data-en="Stress Level" data-es="Nivel de Estrés">Stress Level</div>
+            <div class="pain-slider-wrap" style="padding:4px 0;">
+              <input type="range" class="pain-slider" id="wl-stress-slider" min="1" max="10" step="1" value="5" oninput="updateWLSlider('stress', this.value)">
+              <div class="pain-value" id="wl-stress-val">5</div>
+            </div>
+            <div style="font-size:.7rem;color:var(--ink-sm);text-align:center;" data-en="1 = very calm · 10 = overwhelmed" data-es="1 = muy tranquilo · 10 = abrumado">1 = very calm · 10 = overwhelmed</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:14px 16px;margin-top:12px;margin-bottom:0;background:var(--teal-lt);border-left:3px solid var(--teal);">
+          <div class="sec-lbl" style="margin:0 0 8px;color:var(--teal);" data-en="How ready are you to make changes?" data-es="¿Qué tan listo está para hacer cambios?">How ready are you to make changes?</div>
+          <div class="pain-slider-wrap" style="padding:4px 0;">
+            <input type="range" class="pain-slider" id="wl-readiness-slider" min="1" max="10" step="1" value="5" oninput="updateWLSlider('readiness', this.value)">
+            <div class="pain-value" id="wl-readiness-val" style="color:var(--teal);">5</div>
+          </div>
+          <div style="font-size:.72rem;color:var(--ink-sm);text-align:center;" data-en="1 = not ready yet · 10 = 100% ready to start today" data-es="1 = aún no estoy listo · 10 = 100% listo para empezar hoy">1 = not ready yet · 10 = 100% ready to start today</div>
+        </div>
+
+        <div class="row r1" style="margin-top:14px;">
+          <div class="field">
+            <label data-en="What's your biggest barrier to weight loss?" data-es="¿Cuál es su mayor obstáculo para la pérdida de peso?">What's your biggest barrier to weight loss? <span style="color:var(--ink-sm);font-weight:400;font-style:italic;font-size:.7rem;">(optional)</span></label>
+            <textarea id="wl-barrier" placeholder="" data-en-ph="e.g., 'Too busy to meal prep', 'Stress eating at night', 'Hate cooking', 'Can't afford gym'" data-es-ph="ej., 'Muy ocupado para preparar comidas', 'Como por estrés en la noche'"></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -1356,6 +1563,86 @@ const FUNCTIONAL_GOALS = [
   {id:'goal-function',en:'Just feel normal again',                es:'Solo sentirme normal de nuevo'},
 ];
 
+// ═══════════════════════════════════════════════════════
+// MICHIGAN NEUROPATHY SCREENING INSTRUMENT — Part A
+// 15-item validated self-report questionnaire
+// Score: 1 point per YES (except items 7 & 13 which reverse-score)
+// Threshold: ≥7 = high probability of peripheral neuropathy
+// Evidence: Feldman et al. 1994 (Diabetes Care); Moghtaderi 2006
+// Validation: Strong evidence for screening peripheral neuropathy
+// ═══════════════════════════════════════════════════════
+const MNSI_ITEMS = [
+  {id:'mnsi-1',  en:'Are your legs and/or feet numb?',                              es:'¿Siente sus piernas y/o pies entumecidos?',                            reverse:false},
+  {id:'mnsi-2',  en:'Do you ever have any burning pain in your legs and/or feet?', es:'¿Alguna vez siente dolor ardiente en las piernas y/o pies?',           reverse:false},
+  {id:'mnsi-3',  en:'Are your feet too sensitive to touch?',                       es:'¿Están sus pies demasiado sensibles al tacto?',                        reverse:false},
+  {id:'mnsi-4',  en:'Do you get muscle cramps in your legs and/or feet?',          es:'¿Le dan calambres musculares en las piernas y/o pies?',                reverse:false},
+  {id:'mnsi-5',  en:'Do you ever have any prickling feelings in your legs or feet?', es:'¿Alguna vez siente sensaciones de pinchazos en piernas o pies?',     reverse:false},
+  {id:'mnsi-6',  en:'Does it hurt when the bed covers touch your skin?',           es:'¿Le duele cuando las sábanas tocan su piel?',                          reverse:false},
+  {id:'mnsi-7',  en:'When you get in the tub or shower, are you able to tell the hot water from the cold water?', es:'Cuando se mete en la ducha o bañera, ¿puede distinguir el agua caliente de la fría?', reverse:true},
+  {id:'mnsi-8',  en:'Have you ever had an open sore on your foot?',                es:'¿Alguna vez ha tenido una llaga abierta en el pie?',                   reverse:false},
+  {id:'mnsi-9',  en:'Has your doctor ever told you that you have diabetic neuropathy?', es:'¿Su médico le ha dicho alguna vez que tiene neuropatía diabética?', reverse:false},
+  {id:'mnsi-10', en:'Do you feel weak all over most of the time?',                 es:'¿Se siente débil en todo el cuerpo la mayor parte del tiempo?',        reverse:false},
+  {id:'mnsi-11', en:'Are your symptoms worse at night?',                           es:'¿Sus síntomas empeoran de noche?',                                     reverse:false},
+  {id:'mnsi-12', en:'Do your legs hurt when you walk?',                            es:'¿Le duelen las piernas cuando camina?',                                reverse:false},
+  {id:'mnsi-13', en:'Are you able to sense your feet when you walk?',              es:'¿Puede sentir sus pies cuando camina?',                                reverse:true},
+  {id:'mnsi-14', en:'Is the skin on your feet so dry that it cracks open?',        es:'¿La piel de sus pies está tan seca que se agrieta?',                   reverse:false},
+  {id:'mnsi-15', en:'Have you ever had an amputation?',                            es:'¿Alguna vez ha tenido una amputación?',                                reverse:false},
+];
+
+// Neuropathy medications chip data
+const NEURO_MEDS = [
+  {val:'gabapentin',    en:'Gabapentin (Neurontin)',        es:'Gabapentina (Neurontin)'},
+  {val:'pregabalin',    en:'Pregabalin (Lyrica)',           es:'Pregabalina (Lyrica)'},
+  {val:'duloxetine',    en:'Duloxetine (Cymbalta)',         es:'Duloxetina (Cymbalta)'},
+  {val:'amitriptyline', en:'Amitriptyline (Elavil)',        es:'Amitriptilina (Elavil)'},
+  {val:'alpha-lipoic',  en:'Alpha-Lipoic Acid (supplement)', es:'Ácido Alfa-Lipoico (suplemento)'},
+  {val:'b-complex',     en:'B-Complex vitamins',            es:'Vitaminas del Complejo B'},
+  {val:'metformin',     en:'Metformin',                     es:'Metformina'},
+  {val:'insulin',       en:'Insulin',                       es:'Insulina'},
+  {val:'none',          en:'None / not currently taking',   es:'Ninguno / no tomo actualmente'},
+];
+
+// Weight loss — prior methods tried
+const WL_PRIOR_METHODS = [
+  {val:'diet',          en:'Dieting on my own',             es:'Dieta por mi cuenta'},
+  {val:'exercise',      en:'Exercise only',                 es:'Solo ejercicio'},
+  {val:'commercial',    en:'Weight Watchers / Noom / etc.', es:'Weight Watchers / Noom / etc.'},
+  {val:'keto',          en:'Keto / low-carb',               es:'Keto / bajo en carbohidratos'},
+  {val:'intermittent',  en:'Intermittent fasting',          es:'Ayuno intermitente'},
+  {val:'semaglutide',   en:'Ozempic / Wegovy / Mounjaro',   es:'Ozempic / Wegovy / Mounjaro'},
+  {val:'phentermine',   en:'Phentermine or similar',        es:'Fentermina o similar'},
+  {val:'surgery',       en:'Bariatric surgery',             es:'Cirugía bariátrica'},
+  {val:'supplements',   en:'Over-the-counter supplements',  es:'Suplementos de venta libre'},
+  {val:'personal-trainer', en:'Personal trainer / gym',     es:'Entrenador personal / gimnasio'},
+  {val:'meal-prep',     en:'Meal prep / delivery services', es:'Preparación / servicios de comidas'},
+  {val:'none',          en:'Never really tried',            es:'Nunca lo he intentado realmente'},
+];
+
+// Weight loss — metabolic red flags
+const WL_METABOLIC_FLAGS = [
+  {id:'met-thyroid',    en:'Thyroid condition (hypo or hyper)', es:'Condición tiroidea (hipo o hiper)'},
+  {id:'met-pcos',       en:'PCOS (Polycystic Ovary Syndrome)',  es:'SOP (Síndrome de Ovario Poliquístico)'},
+  {id:'met-insulin',    en:'Insulin resistance / prediabetes',  es:'Resistencia a la insulina / prediabetes'},
+  {id:'met-t2dm',       en:'Type 2 Diabetes',                   es:'Diabetes Tipo 2'},
+  {id:'met-sleep',      en:'Sleep apnea',                       es:'Apnea del sueño'},
+  {id:'met-depression', en:'Depression or anxiety',             es:'Depresión o ansiedad'},
+  {id:'met-menopause',  en:'Menopause / perimenopause',         es:'Menopausia / perimenopausia'},
+  {id:'met-cushings',   en:'Cushing\'s syndrome',               es:'Síndrome de Cushing'},
+  {id:'met-none',       en:'None of the above',                 es:'Ninguna de las anteriores'},
+];
+
+// Weight loss — eating patterns
+const WL_EATING_PATTERNS = [
+  {val:'3-meals',       en:'3 regular meals per day',       es:'3 comidas regulares por día'},
+  {val:'small-frequent',en:'4+ small meals / grazing',      es:'4+ comidas pequeñas / picoteo'},
+  {val:'skip-breakfast',en:'I skip breakfast',              es:'Me salto el desayuno'},
+  {val:'late-night',    en:'I eat late at night',           es:'Como tarde en la noche'},
+  {val:'emotional',     en:'I eat when stressed / emotional', es:'Como cuando estoy estresado / emocional'},
+  {val:'portions',      en:'I struggle with portion control', es:'Lucho con el control de porciones'},
+  {val:'fast-food',     en:'Fast food 3+ times/week',       es:'Comida rápida 3+ veces/semana'},
+  {val:'sugary-drinks', en:'Sugary drinks / soda daily',    es:'Bebidas azucaradas / soda diariamente'},
+];
+
 // State for Health Focus step
 S.health = {
   neuroSymptoms: [],       // IDs of checked neuro symptoms
@@ -1370,6 +1657,32 @@ S.health = {
     cortDate: '',
     imagingNotes: '',
     limits: [],
+  },
+  // NeuroPath specialty data (Part 2B)
+  np: {
+    mnsiAnswers: {},       // {mnsi-1: 'yes'|'no', ...}
+    mnsiScore: 0,          // auto-calculated
+    mnsiInterpretation: '', // 'low', 'moderate', 'high'
+    diabeticStatus: '',    // 'type1', 'type2', 'prediabetic', 'no', 'not-sure'
+    hba1c: '',             // patient-reported
+    meds: [],              // selected med chip values
+    fallsLastYear: '',     // 'none', '1', '2-3', '4+'
+    nocturnalSymptoms: '', // 'yes', 'no'
+  },
+  // Weight Loss specialty data (Part 2B)
+  wl: {
+    currentWeight: '',     // lbs (patient can enter, we store as number)
+    goalWeight: '',        // lbs
+    heightFt: '',
+    heightIn: '',
+    priorMethods: [],      // chip values
+    metabolicFlags: [],    // IDs of checked metabolic condition flags
+    eatingPatterns: [],    // chip values
+    sleepQuality: 5,       // 1-10
+    stressLevel: 5,        // 1-10
+    activityLevel: '',     // 'sedentary', 'light', 'moderate', 'active', 'very-active'
+    readinessToChange: 5,  // 1-10
+    biggestBarrier: '',    // free text
   },
 };
 
@@ -1925,6 +2238,306 @@ function initShockwaveChips(){
       });
     });
   }
+}
+
+/* ═════════════════════════════════════════════════
+   NEUROPATH — MNSI QUESTIONNAIRE
+   ═════════════════════════════════════════════════ */
+function buildMNSIGrid(){
+  const grid = document.getElementById('mnsi-grid');
+  if(!grid) return;
+  grid.innerHTML = MNSI_ITEMS.map((item, idx) =>
+    `<div class="mnsi-item" id="${item.id}-row">
+       <div class="mnsi-item-num">${idx + 1}</div>
+       <div class="mnsi-item-q" data-en="${item.en.replace(/"/g,'&quot;')}" data-es="${item.es.replace(/"/g,'&quot;')}">${item.en}</div>
+       <div class="mnsi-item-yn">
+         <button class="mnsi-yn-btn" data-val="yes" onclick="setMNSIAnswer('${item.id}','yes')" data-en="Yes" data-es="Sí">Yes</button>
+         <button class="mnsi-yn-btn" data-val="no"  onclick="setMNSIAnswer('${item.id}','no')"  data-en="No"  data-es="No">No</button>
+       </div>
+     </div>`
+  ).join('');
+}
+
+function setMNSIAnswer(itemId, answer){
+  S.health.np.mnsiAnswers[itemId] = answer;
+  const row = document.getElementById(itemId + '-row');
+  if(row){
+    row.classList.add('answered');
+    row.querySelectorAll('.mnsi-yn-btn').forEach(b => {
+      b.classList.remove('yes-sel','no-sel');
+      if(b.dataset.val === answer){
+        b.classList.add(answer === 'yes' ? 'yes-sel' : 'no-sel');
+      }
+    });
+  }
+  recalculateMNSI();
+}
+
+function recalculateMNSI(){
+  let score = 0;
+  let answered = 0;
+  MNSI_ITEMS.forEach(item => {
+    const ans = S.health.np.mnsiAnswers[item.id];
+    if(!ans) return;
+    answered++;
+    // Score: YES = 1 point for normal items, NO = 1 point for reverse items (7, 13)
+    if(item.reverse){
+      if(ans === 'no') score++;
+    } else {
+      if(ans === 'yes') score++;
+    }
+  });
+  S.health.np.mnsiScore = score;
+  // Interpretation per Feldman 1994: ≥7 = high probability; 4-6 = moderate; <4 = low
+  if(score >= 7){
+    S.health.np.mnsiInterpretation = 'high';
+  } else if(score >= 4){
+    S.health.np.mnsiInterpretation = 'moderate';
+  } else {
+    S.health.np.mnsiInterpretation = 'low';
+  }
+
+  // Update UI score card
+  const card = document.getElementById('mnsi-score-card');
+  if(!card) return;
+  if(answered > 0){
+    card.style.display = '';
+    document.getElementById('mnsi-score-num').textContent = score;
+    // Max possible score is 13 (items 9 "doctor told you" excluded from score traditionally, but we display /13 per Feldman)
+    // Using /13 as clinical reference even though we have 15 questions — items 7 & 13 are reverse-scored, item 15 (amputation) is history-only
+    const pct = Math.min(100, (score / 13) * 100);
+    const fill = document.getElementById('mnsi-score-fill');
+    if(fill) fill.style.width = pct + '%';
+    const interp = document.getElementById('mnsi-score-interp');
+    const note = document.getElementById('mnsi-score-note');
+    if(interp && note){
+      if(S.health.np.mnsiInterpretation === 'high'){
+        interp.className = 'mnsi-score-interp high';
+        interp.textContent = S.lang === 'es' ? 'ALTA PROBABILIDAD' : 'HIGH PROBABILITY';
+        note.textContent = S.lang === 'es'
+          ? 'Puntuación ≥7 sugiere alta probabilidad de neuropatía periférica. El proveedor correlacionará con el examen físico.'
+          : 'Score ≥7 suggests high probability of peripheral neuropathy. Provider will correlate with physical exam findings.';
+      } else if(S.health.np.mnsiInterpretation === 'moderate'){
+        interp.className = 'mnsi-score-interp mod';
+        interp.textContent = S.lang === 'es' ? 'PROBABILIDAD MODERADA' : 'MODERATE PROBABILITY';
+        note.textContent = S.lang === 'es'
+          ? 'Puntuación 4–6 indica síntomas presentes. El examen ayudará a confirmar el diagnóstico.'
+          : 'Score 4–6 indicates some symptoms present. Exam will help confirm.';
+      } else {
+        interp.className = 'mnsi-score-interp low';
+        interp.textContent = S.lang === 'es' ? 'PROBABILIDAD BAJA' : 'LOW PROBABILITY';
+        note.textContent = S.lang === 'es'
+          ? 'Puntuación <4 sugiere baja probabilidad de neuropatía sintomática.'
+          : 'Score <4 suggests low probability of symptomatic neuropathy.';
+      }
+    }
+  }
+}
+
+function initNeuroPathControls(){
+  // Diabetic status chips (single-select)
+  const diabGrp = document.getElementById('np-diabetic-chips');
+  if(diabGrp){
+    diabGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        diabGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.health.np.diabeticStatus = chip.dataset.val;
+      });
+    });
+  }
+  // Falls chips (single-select)
+  const fallsGrp = document.getElementById('np-falls-chips');
+  if(fallsGrp){
+    fallsGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        fallsGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.health.np.fallsLastYear = chip.dataset.val;
+      });
+    });
+  }
+  // Meds chip grid (multi-select with "none" exclusivity)
+  const medsGrp = document.getElementById('np-meds-chips');
+  if(medsGrp){
+    medsGrp.innerHTML = NEURO_MEDS.map(m =>
+      `<div class="chip" data-val="${m.val}" data-en="${m.en.replace(/"/g,'&quot;')}" data-es="${m.es.replace(/"/g,'&quot;')}">${m.en}</div>`
+    ).join('');
+    medsGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(val === 'none'){
+          medsGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+          chip.classList.add('sel');
+          S.health.np.meds = ['none'];
+        } else {
+          const noneChip = medsGrp.querySelector('.chip[data-val="none"]');
+          if(noneChip) noneChip.classList.remove('sel');
+          S.health.np.meds = S.health.np.meds.filter(v => v !== 'none');
+          if(chip.classList.contains('sel')){
+            chip.classList.remove('sel');
+            S.health.np.meds = S.health.np.meds.filter(v => v !== val);
+          } else {
+            chip.classList.add('sel');
+            if(!S.health.np.meds.includes(val)) S.health.np.meds.push(val);
+          }
+        }
+      });
+    });
+  }
+}
+
+/* ═════════════════════════════════════════════════
+   WEIGHT LOSS — METABOLIC INTAKE
+   ═════════════════════════════════════════════════ */
+function initWeightLossControls(){
+  // Prior methods chips (multi-select)
+  const priorGrp = document.getElementById('wl-prior-chips');
+  if(priorGrp){
+    priorGrp.innerHTML = WL_PRIOR_METHODS.map(m =>
+      `<div class="chip" data-val="${m.val}" data-en="${m.en.replace(/"/g,'&quot;')}" data-es="${m.es.replace(/"/g,'&quot;')}">${m.en}</div>`
+    ).join('');
+    priorGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(val === 'none'){
+          priorGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+          chip.classList.add('sel');
+          S.health.wl.priorMethods = ['none'];
+        } else {
+          const noneChip = priorGrp.querySelector('.chip[data-val="none"]');
+          if(noneChip) noneChip.classList.remove('sel');
+          S.health.wl.priorMethods = S.health.wl.priorMethods.filter(v => v !== 'none');
+          if(chip.classList.contains('sel')){
+            chip.classList.remove('sel');
+            S.health.wl.priorMethods = S.health.wl.priorMethods.filter(v => v !== val);
+          } else {
+            chip.classList.add('sel');
+            if(!S.health.wl.priorMethods.includes(val)) S.health.wl.priorMethods.push(val);
+          }
+        }
+      });
+    });
+  }
+  // Metabolic flags grid (check-grid, multi-select, "none" exclusive)
+  const metGrid = document.getElementById('wl-metabolic-grid');
+  if(metGrid){
+    metGrid.innerHTML = WL_METABOLIC_FLAGS.map(f =>
+      `<label class="ci" onclick="toggleWLMetabolic(this,'${f.id}')">
+         <input type="checkbox" id="${f.id}">
+         <span data-en="${f.en.replace(/"/g,'&quot;')}" data-es="${f.es.replace(/"/g,'&quot;')}">${f.en}</span>
+       </label>`
+    ).join('');
+  }
+  // Eating patterns chips (multi-select)
+  const eatGrp = document.getElementById('wl-eating-chips');
+  if(eatGrp){
+    eatGrp.innerHTML = WL_EATING_PATTERNS.map(p =>
+      `<div class="chip" data-val="${p.val}" data-en="${p.en.replace(/"/g,'&quot;')}" data-es="${p.es.replace(/"/g,'&quot;')}">${p.en}</div>`
+    ).join('');
+    eatGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.dataset.val;
+        if(chip.classList.contains('sel')){
+          chip.classList.remove('sel');
+          S.health.wl.eatingPatterns = S.health.wl.eatingPatterns.filter(v => v !== val);
+        } else {
+          chip.classList.add('sel');
+          if(!S.health.wl.eatingPatterns.includes(val)) S.health.wl.eatingPatterns.push(val);
+        }
+      });
+    });
+  }
+  // Activity chips (single-select)
+  const actGrp = document.getElementById('wl-activity-chips');
+  if(actGrp){
+    actGrp.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        actGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        S.health.wl.activityLevel = chip.dataset.val;
+      });
+    });
+  }
+}
+
+function toggleWLMetabolic(el, id){
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type=checkbox]');
+  if(cb) cb.checked = el.classList.contains('checked');
+  if(el.classList.contains('checked')){
+    if(id === 'met-none'){
+      // mutually exclusive
+      WL_METABOLIC_FLAGS.forEach(f => {
+        if(f.id !== 'met-none'){
+          const other = document.getElementById(f.id);
+          if(other && other.checked){
+            other.checked = false;
+            other.parentElement.classList.remove('checked');
+          }
+        }
+      });
+      S.health.wl.metabolicFlags = ['met-none'];
+    } else {
+      const noneEl = document.getElementById('met-none');
+      if(noneEl && noneEl.checked){
+        noneEl.checked = false;
+        noneEl.parentElement.classList.remove('checked');
+        S.health.wl.metabolicFlags = S.health.wl.metabolicFlags.filter(f => f !== 'met-none');
+      }
+      if(!S.health.wl.metabolicFlags.includes(id)) S.health.wl.metabolicFlags.push(id);
+    }
+  } else {
+    S.health.wl.metabolicFlags = S.health.wl.metabolicFlags.filter(f => f !== id);
+  }
+}
+
+function updateWLSlider(which, val){
+  const num = parseInt(val, 10);
+  const valEl = document.getElementById('wl-' + which + '-val');
+  if(valEl) valEl.textContent = num;
+  if(which === 'sleep') S.health.wl.sleepQuality = num;
+  else if(which === 'stress') S.health.wl.stressLevel = num;
+  else if(which === 'readiness') S.health.wl.readinessToChange = num;
+}
+
+function updateBMI(){
+  const wLbs = parseFloat(getVal('wl-current-weight'));
+  const ft   = parseFloat(getVal('wl-height-ft'));
+  const inch = parseFloat(getVal('wl-height-in')) || 0;
+  const display = document.getElementById('bmi-display');
+  if(!display) return;
+
+  if(!wLbs || !ft || wLbs <= 0 || ft <= 0){
+    display.style.display = 'none';
+    return;
+  }
+  // BMI = (weight_lbs / (height_in)^2) × 703
+  const totalInches = (ft * 12) + inch;
+  if(totalInches <= 0){
+    display.style.display = 'none';
+    return;
+  }
+  const bmi = (wLbs / (totalInches * totalInches)) * 703;
+  const bmiRounded = bmi.toFixed(1);
+  let category, categoryEs, color;
+  if(bmi < 18.5)      { category = 'Underweight';   categoryEs = 'Bajo peso';    color = 'var(--cc)'; }
+  else if(bmi < 25)   { category = 'Normal weight'; categoryEs = 'Peso normal';  color = 'var(--green)'; }
+  else if(bmi < 30)   { category = 'Overweight';    categoryEs = 'Sobrepeso';    color = 'var(--amber)'; }
+  else if(bmi < 35)   { category = 'Obese Class I'; categoryEs = 'Obesidad I';   color = '#D4860A'; }
+  else if(bmi < 40)   { category = 'Obese Class II'; categoryEs = 'Obesidad II'; color = 'var(--red)'; }
+  else                { category = 'Obese Class III (severe)'; categoryEs = 'Obesidad III (severa)'; color = 'var(--red)'; }
+
+  display.style.display = '';
+  display.innerHTML = `
+    <div>
+      <div class="bmi-label" data-en="BMI" data-es="IMC">BMI</div>
+      <div class="bmi-value">${bmiRounded}</div>
+    </div>
+    <div class="bmi-category">
+      <span data-en="Category:" data-es="Categoría:">Category:</span>
+      <strong style="color:${color};" data-en="${category}" data-es="${categoryEs}">${S.lang === 'es' ? categoryEs : category}</strong>
+    </div>`;
 }
 
 /* ═════════════════════════════════════════════════
@@ -2533,6 +3146,174 @@ function buildIntakePdfBlob(){
     y += 16;
   }
 
+  // ═══════════════════════════════════════
+  // NEUROPATH — MNSI + Neuropathy data
+  // ═══════════════════════════════════════
+  if(S.selectedSvcs.includes('np')){
+    if(y > H - 260){ doc.addPage(); y = margin; }
+    sectionHeader('NEUROPATH — MICHIGAN NEUROPATHY SCREENING');
+
+    // Prominent score box
+    const score = S.health.np.mnsiScore;
+    const interp = S.health.np.mnsiInterpretation;
+    const scoreColor = interp === 'high' ? [192,57,43] : interp === 'moderate' ? [212,134,10] : [26,107,58];
+    const scoreLabel = interp === 'high' ? 'HIGH PROBABILITY' : interp === 'moderate' ? 'MODERATE PROBABILITY' : 'LOW PROBABILITY';
+
+    doc.setFillColor(248, 244, 251);
+    doc.rect(margin, y - 4, W - margin*2, 30, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(106, 74, 143);
+    doc.text('MNSI Score:', margin + 8, y + 8);
+    doc.setFontSize(14); doc.setTextColor(...scoreColor);
+    doc.text(score + ' / 13', margin + 65, y + 9);
+    doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text(scoreLabel, W - margin - 8, y + 8, {align:'right'});
+    y += 34;
+
+    // Clinical interpretation note
+    doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(103, 122, 110);
+    const interpNote = interp === 'high'
+      ? 'Feldman et al. 1994: Score ≥7 suggests high probability of peripheral neuropathy. Correlate with physical exam.'
+      : interp === 'moderate'
+      ? 'Score 4–6 indicates some neuropathic symptoms present. Examination findings will help confirm.'
+      : 'Score <4 suggests low probability of symptomatic peripheral neuropathy.';
+    const interpLines = doc.splitTextToSize(interpNote, W - margin*2);
+    doc.text(interpLines, margin, y);
+    y += interpLines.length * 10 + 6;
+
+    // Item-by-item responses (compact display)
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(103, 122, 110);
+    doc.text('MNSI RESPONSES', margin, y);
+    y += 10;
+    MNSI_ITEMS.forEach((item, idx) => {
+      if(y > H - 60){ doc.addPage(); y = margin; }
+      const ans = S.health.np.mnsiAnswers[item.id];
+      const ansTxt = ans ? ans.toUpperCase() : 'N/R';
+      const ansColor = !ans ? [175,175,175]
+                            : (item.reverse ? (ans === 'no' ? [192,57,43] : [103,122,110])
+                                            : (ans === 'yes' ? [192,57,43] : [103,122,110]));
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(59, 78, 65);
+      const qText = `${idx + 1}. ${item.en}${item.reverse ? ' (reverse)' : ''}`;
+      const qLines = doc.splitTextToSize(qText, W - margin - 70);
+      doc.text(qLines, margin, y);
+      doc.setFont('helvetica','bold'); doc.setTextColor(...ansColor);
+      doc.text(ansTxt, W - margin, y, {align:'right'});
+      y += qLines.length * 9 + 2;
+    });
+    y += 6;
+
+    if(y > H - 100){ doc.addPage(); y = margin; }
+
+    // Diabetic status, A1c, nocturnal, falls
+    const DIAB_LABELS = {
+      'no':'No diabetes','prediabetic':'Prediabetic','type2':'Type 2 Diabetes',
+      'type1':'Type 1 Diabetes','not-sure':'Not sure'
+    };
+    const FALLS_LABELS = { 'none':'None', '1':'1 fall', '2-3':'2–3 falls', '4+':'4+ falls' };
+    const NOCT_LABELS = { 'no':'No', 'sometimes':'Sometimes', 'often':'Often/most nights' };
+
+    const r1 = Math.max(
+      field('Diabetic Status', DIAB_LABELS[S.health.np.diabeticStatus] || '—', colA, colB),
+      field('HbA1c (patient-reported)', getVal('np-hba1c') || '—', colB, colC),
+      field('Nocturnal Symptoms', NOCT_LABELS[getVal('np-nocturnal')] || '—', colC, W - margin)
+    );
+    y += r1;
+
+    y += field('Falls in Past Year', FALLS_LABELS[S.health.np.fallsLastYear] || '—', margin, W - margin);
+
+    const medsLabels = (S.health.np.meds || []).map(v => {
+      const m = NEURO_MEDS.find(x => x.val === v);
+      return m ? m.en : v;
+    });
+    y += field('Current Neuropathy Medications', medsLabels.length ? medsLabels.join(', ') : '—', margin, W - margin);
+  }
+
+  // ═══════════════════════════════════════
+  // WEIGHT LOSS — Metabolic intake
+  // ═══════════════════════════════════════
+  if(S.selectedSvcs.includes('wl')){
+    if(y > H - 260){ doc.addPage(); y = margin; }
+    sectionHeader('WEIGHT LOSS — METABOLIC INTAKE');
+
+    const wLbs = parseFloat(getVal('wl-current-weight')) || null;
+    const gLbs = parseFloat(getVal('wl-goal-weight')) || null;
+    const ft = parseFloat(getVal('wl-height-ft')) || null;
+    const inch = parseFloat(getVal('wl-height-in')) || 0;
+
+    // Calculate BMI + category for the PDF
+    let bmiTxt = '—', bmiCat = '—';
+    if(wLbs && ft){
+      const totalInches = (ft * 12) + inch;
+      if(totalInches > 0){
+        const bmi = (wLbs / (totalInches * totalInches)) * 703;
+        bmiTxt = bmi.toFixed(1);
+        if(bmi < 18.5) bmiCat = 'Underweight';
+        else if(bmi < 25) bmiCat = 'Normal';
+        else if(bmi < 30) bmiCat = 'Overweight';
+        else if(bmi < 35) bmiCat = 'Obese Class I';
+        else if(bmi < 40) bmiCat = 'Obese Class II';
+        else bmiCat = 'Obese Class III';
+      }
+    }
+    const weightToLose = (wLbs && gLbs) ? (wLbs - gLbs).toFixed(0) : '—';
+
+    // Prominent BMI box
+    doc.setFillColor(228, 245, 245);
+    doc.rect(margin, y - 4, W - margin*2, 26, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(13, 115, 119);
+    doc.text(`Weight: ${wLbs || '—'} lbs`, margin + 8, y + 9);
+    doc.text(`Goal: ${gLbs || '—'} lbs (${weightToLose} lbs to lose)`, margin + 130, y + 9);
+    doc.text(`BMI: ${bmiTxt} (${bmiCat})`, W - margin - 8, y + 9, {align:'right'});
+    y += 30;
+
+    // Height
+    const heightStr = ft ? `${ft}' ${inch}"` : '—';
+    y += field('Height', heightStr, margin, W - margin);
+
+    // Prior methods
+    const priorLabels = (S.health.wl.priorMethods || []).map(v => {
+      const m = WL_PRIOR_METHODS.find(x => x.val === v);
+      return m ? m.en : v;
+    });
+    y += field('Prior Weight Loss Methods Tried', priorLabels.length ? priorLabels.join(', ') : '—', margin, W - margin);
+
+    // Metabolic flags
+    const metLabels = (S.health.wl.metabolicFlags || [])
+      .filter(id => id !== 'met-none')
+      .map(id => {
+        const f = WL_METABOLIC_FLAGS.find(x => x.id === id);
+        return f ? f.en : id;
+      });
+    y += field('Metabolic Conditions Reported', metLabels.length ? metLabels.join(', ') : 'None reported', margin, W - margin);
+
+    // Eating patterns
+    const EAT_LABELS = {
+      '3-meals':'3 regular meals/day','small-frequent':'4+ small meals/grazing',
+      'skip-breakfast':'Skips breakfast','late-night':'Late-night eating',
+      'emotional':'Emotional/stress eating','portions':'Portion control struggles',
+      'fast-food':'Fast food 3+/week','sugary-drinks':'Daily sugary drinks'
+    };
+    const eatLabels = (S.health.wl.eatingPatterns || []).map(v => EAT_LABELS[v] || v);
+    y += field('Eating Patterns', eatLabels.length ? eatLabels.join(', ') : '—', margin, W - margin);
+
+    const ACT_LABELS = {
+      'sedentary':'Sedentary','light':'Light (1–3 days)','moderate':'Moderate (3–5 days)',
+      'active':'Active (6–7 days)','very-active':'Very Active'
+    };
+    const r2 = Math.max(
+      field('Activity Level', ACT_LABELS[S.health.wl.activityLevel] || '—', colA, colB),
+      field('Sleep Quality', S.health.wl.sleepQuality + '/10', colB, colC),
+      field('Stress Level', S.health.wl.stressLevel + '/10', colC, W - margin)
+    );
+    y += r2;
+
+    y += field('Readiness to Change', S.health.wl.readinessToChange + '/10', margin, W - margin);
+
+    const barrier = getVal('wl-barrier');
+    if(barrier){
+      y += field('Biggest Barrier (patient-reported)', barrier, margin, W - margin);
+    }
+  }
+
   // Health history
   if(y > H - 200){ doc.addPage(); y = margin; }
   sectionHeader('HEALTH HISTORY');
@@ -2782,6 +3563,59 @@ function collectFullPayload(){
       limits: S.health.sw.limits.slice(),
     };
   }
+  // NeuroPath specialty data (only populated if NP was selected)
+  if(S.selectedSvcs.includes('np')){
+    p.health.np = {
+      mnsiAnswers: Object.assign({}, S.health.np.mnsiAnswers),
+      mnsiScore: S.health.np.mnsiScore,
+      mnsiInterpretation: S.health.np.mnsiInterpretation,
+      diabeticStatus: S.health.np.diabeticStatus,
+      hba1c: getVal('np-hba1c'),
+      nocturnal: getVal('np-nocturnal'),
+      fallsLastYear: S.health.np.fallsLastYear,
+      meds: S.health.np.meds.slice(),
+      medsLabels: S.health.np.meds.map(v => {
+        const m = NEURO_MEDS.find(x => x.val === v);
+        return m ? m.en : v;
+      }),
+    };
+  }
+  // Weight Loss specialty data (only populated if WL was selected)
+  if(S.selectedSvcs.includes('wl')){
+    const wLbs = parseFloat(getVal('wl-current-weight')) || null;
+    const gLbs = parseFloat(getVal('wl-goal-weight')) || null;
+    const ft = parseFloat(getVal('wl-height-ft')) || null;
+    const inch = parseFloat(getVal('wl-height-in')) || 0;
+    let bmi = null, heightInches = null;
+    if(wLbs && ft){
+      heightInches = (ft * 12) + inch;
+      if(heightInches > 0) bmi = parseFloat(((wLbs / (heightInches * heightInches)) * 703).toFixed(1));
+    }
+    p.health.wl = {
+      currentWeightLbs: wLbs,
+      goalWeightLbs: gLbs,
+      heightFt: ft,
+      heightIn: inch,
+      heightInches: heightInches,
+      bmi: bmi,
+      priorMethods: S.health.wl.priorMethods.slice(),
+      priorMethodsLabels: S.health.wl.priorMethods.map(v => {
+        const m = WL_PRIOR_METHODS.find(x => x.val === v);
+        return m ? m.en : v;
+      }),
+      metabolicFlags: S.health.wl.metabolicFlags.slice(),
+      metabolicFlagsLabels: S.health.wl.metabolicFlags.map(id => {
+        const f = WL_METABOLIC_FLAGS.find(x => x.id === id);
+        return f ? f.en : id;
+      }),
+      eatingPatterns: S.health.wl.eatingPatterns.slice(),
+      sleepQuality: S.health.wl.sleepQuality,
+      stressLevel: S.health.wl.stressLevel,
+      activityLevel: S.health.wl.activityLevel,
+      readinessToChange: S.health.wl.readinessToChange,
+      biggestBarrier: getVal('wl-barrier'),
+    };
+  }
   // Health history
   p.hx = {
     meds: getVal('meds'),
@@ -2871,7 +3705,37 @@ function resetToLanding(){
     redFlagCriticalHit: false,
     goals: [],
     sw: { prior: [], cortCount: '', cortDate: '', imagingNotes: '', limits: [] },
+    np: {
+      mnsiAnswers: {}, mnsiScore: 0, mnsiInterpretation: '',
+      diabeticStatus: '', hba1c: '', meds: [],
+      fallsLastYear: '', nocturnalSymptoms: '',
+    },
+    wl: {
+      currentWeight: '', goalWeight: '', heightFt: '', heightIn: '',
+      priorMethods: [], metabolicFlags: [], eatingPatterns: [],
+      sleepQuality: 5, stressLevel: 5, activityLevel: '',
+      readinessToChange: 5, biggestBarrier: '',
+    },
   };
+
+  // Reset MNSI UI (clear yes/no button selections and "answered" highlight)
+  document.querySelectorAll('.mnsi-yn-btn').forEach(b => b.classList.remove('yes-sel','no-sel'));
+  document.querySelectorAll('.mnsi-item').forEach(i => i.classList.remove('answered'));
+  const mnsiCard = document.getElementById('mnsi-score-card');
+  if(mnsiCard) mnsiCard.style.display = 'none';
+
+  // Reset BMI display
+  const bmiEl = document.getElementById('bmi-display');
+  if(bmiEl) bmiEl.style.display = 'none';
+
+  // Reset WL sliders to center
+  ['sleep','stress','readiness'].forEach(which => {
+    const slider = document.getElementById('wl-' + which + '-slider');
+    const valEl = document.getElementById('wl-' + which + '-val');
+    if(slider) slider.value = 5;
+    if(valEl) valEl.textContent = '5';
+  });
+
   // Hide "where exactly" input
   const neuroWhereWrap = document.getElementById('neuro-where-wrap');
   if(neuroWhereWrap) neuroWhereWrap.style.display = 'none';
@@ -2910,6 +3774,9 @@ function init(){
   buildRegionGrid();
   buildHealthFocusGrids();
   initShockwaveChips();
+  buildMNSIGrid();
+  initNeuroPathControls();
+  initWeightLossControls();
 
   // Wire chief complaint chip groups
   initSingleSelectChips('onset-chips', 'onset');

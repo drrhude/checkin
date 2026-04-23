@@ -2132,26 +2132,77 @@ function connectDrive(){
   loadCfg();
   const clientId = getVal('s-cid') || cfg.oauthClientId;
   if(!clientId){ alert('Enter OAuth Client ID in Settings first, then Save.'); return; }
-  if(!gisReady){ alert('Google services still loading. Please wait a few seconds and try again.'); return; }
-  window._driveClientId = clientId;
-  const tc = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: DRIVE_SCOPE,
-    callback: resp => {
-      if(resp.error){ alert('Drive auth failed: ' + resp.error); return; }
-      driveToken = resp.access_token;
-      gapi.client.setToken({access_token: driveToken});
-      const expiry = Date.now() + (55 * 60 * 1000);
-      localStorage.setItem('cvc_drive_token', driveToken);
-      localStorage.setItem('cvc_drive_token_expiry', String(expiry));
-      localStorage.setItem('cvc_drive_client_id', clientId);
-      clearTimeout(tokenRefreshTimer);
-      tokenRefreshTimer = setTimeout(silentRefreshDrive, 55 * 60 * 1000);
-      setDriveStatus(true);
-      alert('Drive connected successfully.');
+
+  const btn = document.getElementById('drive-connect-btn');
+
+  // If Google is ready NOW, proceed immediately
+  if(gisReady && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2){
+    doConnectDrive(clientId);
+    return;
+  }
+
+  // Otherwise: poll for Google readiness up to 10 seconds
+  if(btn){
+    btn._origText = btn._origText || btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>Loading Google…';
+  }
+
+  let attempts = 0;
+  const maxAttempts = 50; // 50 × 200ms = 10s
+  const pollInterval = setInterval(() => {
+    attempts++;
+    const googleReady = gisReady && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2;
+    if(googleReady){
+      clearInterval(pollInterval);
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = btn._origText || 'Connect Drive';
+      }
+      doConnectDrive(clientId);
+    } else if(attempts >= maxAttempts){
+      clearInterval(pollInterval);
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = btn._origText || 'Connect Drive';
+      }
+      alert(
+        "Google services didn't load after 10 seconds.\n\n" +
+        "This usually means:\n" +
+        "• Your internet connection is slow or blocked\n" +
+        "• A browser extension is blocking Google scripts\n" +
+        "• You need to allow third-party cookies for this site\n\n" +
+        "Please refresh the page and try again. If it keeps failing, try a different browser."
+      );
     }
-  });
-  tc.requestAccessToken({prompt:'consent'});
+  }, 200);
+}
+
+function doConnectDrive(clientId){
+  window._driveClientId = clientId;
+  try {
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: DRIVE_SCOPE,
+      callback: resp => {
+        if(resp.error){ alert('Drive auth failed: ' + resp.error); return; }
+        driveToken = resp.access_token;
+        gapi.client.setToken({access_token: driveToken});
+        const expiry = Date.now() + (55 * 60 * 1000);
+        localStorage.setItem('cvc_drive_token', driveToken);
+        localStorage.setItem('cvc_drive_token_expiry', String(expiry));
+        localStorage.setItem('cvc_drive_client_id', clientId);
+        clearTimeout(tokenRefreshTimer);
+        tokenRefreshTimer = setTimeout(silentRefreshDrive, 55 * 60 * 1000);
+        setDriveStatus(true);
+        alert('Drive connected successfully.');
+      }
+    });
+    tc.requestAccessToken({prompt:'consent'});
+  } catch(e){
+    console.error('connectDrive error:', e);
+    alert('Drive connection error: ' + (e.message || String(e)));
+  }
 }
 function setDriveStatus(connected){
   const ind = document.getElementById('drive-ind');

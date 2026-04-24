@@ -824,10 +824,36 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
   border-radius:10px;font-size:.7rem;font-weight:700;
 }
 .rom-row{
-  display:grid;grid-template-columns:120px 1fr 80px;gap:8px;align-items:center;
-  padding:5px 0;font-size:.82rem;
+  display:grid;grid-template-columns:130px 1fr 70px 70px;gap:8px;align-items:center;
+  padding:6px 0;font-size:.82rem;
+  border-bottom:1px dashed var(--border-lt);
 }
+.rom-row:last-child{border-bottom:none;}
 .rom-row-label{font-weight:600;color:var(--ink-md);font-size:.8rem;}
+.rom-row-controls{display:flex;gap:4px;align-items:center;}
+.rom-row-select{
+  flex:1;border:1.5px solid var(--border);border-radius:6px;
+  padding:6px 9px;background:white;font-size:.82rem;color:var(--ink);
+  font-family:'DM Sans',sans-serif;min-width:0;
+}
+.rom-row-select:focus{outline:none;border-color:var(--sage);}
+.rom-quick-btn{
+  padding:6px 9px;border-radius:6px;border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-sm);font-size:.7rem;font-weight:700;
+  cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;
+}
+.rom-quick-btn.wnl:hover{background:var(--green-lt);border-color:var(--green);color:var(--green);}
+.rom-quick-btn.nt:hover{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);}
+.rom-row-display{
+  font-size:.82rem;font-weight:700;text-align:center;padding:6px 4px;
+  background:var(--white);border:1.5px solid var(--border);border-radius:6px;
+  color:var(--ink);font-family:'DM Serif Display',serif;
+  display:flex;align-items:center;justify-content:center;min-height:34px;
+}
+.rom-row-display.wnl-set{background:var(--green-lt);border-color:var(--green);color:var(--green);}
+.rom-row-display.nt-set{background:var(--amber-lt);border-color:var(--amber);color:var(--amber);}
+/* Legacy support for any remaining .rom-row-input fields */
 .rom-row-input{
   border:1.5px solid var(--border);border-radius:6px;
   padding:6px 9px;background:white;font-size:.82rem;color:var(--ink);width:100%;
@@ -1647,6 +1673,23 @@ body[data-role="provider"] .lang-toggle{display:none;}
 }
 .signoff-attestation strong{color:var(--ink);}
 
+.signoff-attest-check{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:12px 14px;margin-bottom:14px;
+  background:var(--white);border:2px solid var(--gold);border-radius:var(--rs);
+  cursor:pointer;transition:all .15s;
+}
+.signoff-attest-check:hover{background:var(--gold-lt);}
+.signoff-attest-check input{
+  margin:0;flex-shrink:0;width:20px;height:20px;cursor:pointer;accent-color:var(--sage);
+}
+.signoff-attest-check span{
+  font-size:.85rem;font-weight:600;color:var(--ink);line-height:1.45;
+}
+.signoff-attest-check:has(input:checked){
+  border-color:var(--sage);background:var(--sage-xl);
+}
+
 .signoff-completion{
   background:linear-gradient(135deg, var(--sage), var(--sage-dk));
   color:white;border-radius:var(--r);padding:32px 28px;text-align:center;
@@ -1667,12 +1710,44 @@ body[data-role="provider"] .lang-toggle{display:none;}
 .signoff-completion-btns .btn{background:white;color:var(--sage-dk);}
 .signoff-completion-btns .btn:hover{background:var(--gold-lt);color:var(--sage-dk);}
 
+/* ═════════════════════════════════════════════════
+   SERVICE-SCOPED PLAN CARDS (Chunk 2C)
+   ═════════════════════════════════════════════════ */
+.plan-svc-summary-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+  gap:10px;margin-top:8px;
+}
+.plan-svc-metric{
+  background:var(--cream);border-radius:var(--rs);padding:10px 12px;
+  text-align:center;border:1px solid var(--border-lt);
+}
+.plan-svc-mlabel{
+  font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-sm);margin-bottom:3px;
+}
+.plan-svc-mval{
+  font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--ink);line-height:1.15;
+}
+
+/* Per-region technique grid (Chunk 3) */
+.region-tx-block{
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);
+  padding:10px 12px;margin-bottom:8px;
+}
+.region-tx-title{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:.85rem;color:var(--sage);
+  margin-bottom:6px;padding-bottom:4px;border-bottom:1px dashed var(--border-lt);
+}
+.region-tx-chips{gap:4px;}
+.region-tx-chips .chip{font-size:.74rem;padding:4px 10px;}
+
 @media (max-width:640px){
   .np-test-row{grid-template-columns:1fr;gap:6px;}
   .np-rb-row, .np-bal-row, .np-ortho-row{grid-template-columns:1fr;gap:6px;}
   .np-score-val{text-align:left;}
   .wl-metrics-grid{grid-template-columns:1fr 1fr;}
   .wl-macro-row{grid-template-columns:70px 1fr 70px;}
+  .plan-svc-summary-grid{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -2840,10 +2915,20 @@ body[data-role="provider"] .lang-toggle{display:none;}
         </div>
       </div>
 
-      <!-- Neuro Exam — shown only if patient reported neuro symptoms -->
+      <!-- Neuro Exam — auto-opens if patient reported neuro sx, manually toggleable otherwise -->
+      <div class="card" id="ex-neuro-toggle-card" style="background:var(--cream);border-left:3px solid var(--sage);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:.92rem;color:var(--ink);">Neurological Exam</div>
+            <div id="ex-neuro-toggle-reason" style="font-size:.78rem;color:var(--ink-sm);margin-top:2px;">Dermatomes · Myotomes (MMT) · Reflexes · Special tests</div>
+          </div>
+          <button class="btn btn-h btn-sm" onclick="toggleNeuroCard()" id="ex-neuro-toggle-btn">Show Neuro Panel</button>
+        </div>
+      </div>
+
       <div class="card" id="ex-neuro-card" style="display:none;">
-        <div class="card-title">Neurological Exam <span class="sub">Patient reported nerve symptoms — performing neuro screen</span></div>
-        <div class="callout">
+        <div class="card-title">Neurological Exam <span class="sub" id="ex-neuro-sub">Click test results · all fields optional</span></div>
+        <div class="callout" id="ex-neuro-reported-callout" style="display:none;">
           <div class="callout-icon">💡</div>
           <div id="ex-neuro-reported">Patient reported: —</div>
         </div>
@@ -2851,7 +2936,7 @@ body[data-role="provider"] .lang-toggle{display:none;}
         <div class="sec-lbl">Dermatomes (Light Touch + Sharp/Dull)</div>
         <div id="ex-dermatomes" class="ex-neuro-grid"></div>
 
-        <div class="sec-lbl" style="margin-top:12px;">Myotomes (Motor Strength 0–5)</div>
+        <div class="sec-lbl" style="margin-top:12px;">Myotomes (Manual Muscle Testing 0–5)</div>
         <div id="ex-myotomes" class="ex-neuro-grid"></div>
 
         <div class="sec-lbl" style="margin-top:12px;">Deep Tendon Reflexes (0–4)</div>
@@ -3109,8 +3194,10 @@ body[data-role="provider"] .lang-toggle{display:none;}
 
       <!-- ══════════════════════════════
            SECTION 5: PACKAGE + PRICING
+           (Moved to Plan step — hidden here by default,
+            provider can enable if they want inline access)
            ══════════════════════════════ -->
-      <div class="card">
+      <div class="card" id="sw-exam-pricing-card" style="display:none;">
         <div class="card-title">5️⃣ Treatment Package &amp; Pricing</div>
 
         <div class="sec-lbl">Total Sessions Recommended</div>
@@ -3417,8 +3504,9 @@ body[data-role="provider"] .lang-toggle{display:none;}
 
       <!-- ══════════════════════════════
            7 · TIER SELECTION
+           (Moved to Plan step — hidden here)
            ══════════════════════════════ -->
-      <div class="card">
+      <div class="card" id="np-exam-tier-card" style="display:none;">
         <div class="card-title" style="color:#6a4a8f;">🎯 Select Program Tier <span class="sub">Recommended tier auto-highlights based on findings</span></div>
         <div class="np-tier-grid" id="np-tier-grid"></div>
         <div class="row r1" style="margin-top:14px;">
@@ -3651,8 +3739,9 @@ body[data-role="provider"] .lang-toggle{display:none;}
 
       <!-- ══════════════════════════════
            6 · TIER RECOMMENDATION
+           (Moved to Plan step — hidden here)
            ══════════════════════════════ -->
-      <div class="card">
+      <div class="card" id="wl-exam-tier-card" style="display:none;">
         <div class="card-title" style="color:var(--teal);">🎯 Program Tier Recommendation</div>
         <div id="wl-tier-rec-banner" style="margin-bottom:10px;"></div>
         <div class="wl-tier-grid" id="wl-tier-grid"></div>
@@ -3729,9 +3818,98 @@ body[data-role="provider"] .lang-toggle{display:none;}
       <div class="phase-hdr">
         <div class="phase-lbl">Assessment &amp; Plan</div>
         <div class="phase-title">Diagnosis &amp; Treatment Plan</div>
-        <div class="phase-desc">The engine analyzed your exam findings and ranked ICD-10 codes. Select diagnoses to apply.</div>
+        <div class="phase-desc">Review findings per service, finalize pricing, and confirm the plan of care.</div>
       </div>
 
+      <!-- ══════════════════════════════
+           SHOCKWAVE PLAN CARD (only shown if SW in services)
+           ══════════════════════════════ -->
+      <div class="card" id="plan-sw-card" style="display:none;border-left:4px solid var(--gold);">
+        <div class="card-title" style="color:var(--gold-dk);">⚡ Shockwave Plan <span class="sub">Protocol, package, and pricing</span></div>
+        <div id="plan-sw-summary"></div>
+        <div class="sec-lbl" style="margin-top:14px;">Total Sessions Recommended</div>
+        <div class="chips" id="plan-sw-sessions-chips">
+          <div class="chip" data-val="1">1 Session (assessment)</div>
+          <div class="chip" data-val="5">5 Sessions (standard)</div>
+          <div class="chip" data-val="10">10 Sessions (chronic/severe)</div>
+          <div class="chip" data-val="custom">Custom</div>
+        </div>
+        <div class="row" id="plan-sw-custom-row" style="margin-top:10px;display:none;">
+          <div class="field">
+            <label>Custom Session Count</label>
+            <input type="number" id="plan-sw-custom-sessions" min="1" max="20" value="3" oninput="updatePlanSWPricing()">
+          </div>
+        </div>
+        <div class="sw-pricing-tiers" id="plan-sw-pricing-display"></div>
+        <div class="row" style="margin-top:14px;">
+          <div class="field">
+            <label>Treatment Frequency</label>
+            <select id="plan-sw-frequency" onchange="syncSWToState()">
+              <option value="1x/wk">1× per week (standard)</option>
+              <option value="2x/wk">2× per week (aggressive)</option>
+              <option value="3x/wk">3× per week (acute)</option>
+              <option value="every-other">Every 2 weeks (maintenance)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Expected Duration</label>
+            <input id="plan-sw-duration" readonly>
+          </div>
+        </div>
+        <div class="row r1" style="margin-top:10px;">
+          <div class="field">
+            <label>Package Notes / Patient Discussion</label>
+            <textarea id="plan-sw-package-notes" placeholder="e.g., Patient selected 5-session package. Discussed expected timeline." oninput="syncSWToState()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           NEUROPATH PLAN CARD (only shown if NP in services)
+           ══════════════════════════════ -->
+      <div class="card" id="plan-np-card" style="display:none;border-left:4px solid #6a4a8f;">
+        <div class="card-title" style="color:#6a4a8f;">🧠 NeuroPath Plan <span class="sub">Findings summary + tier selection</span></div>
+        <div id="plan-np-summary"></div>
+        <div class="sec-lbl" style="margin-top:14px;">Program Tier</div>
+        <div class="np-tier-grid" id="plan-np-tier-grid"></div>
+        <div class="row r1" style="margin-top:14px;">
+          <div class="field">
+            <label>Tier Selection Rationale / Discussion Notes</label>
+            <textarea id="plan-np-tier-notes" placeholder="e.g., Patient opted for Tier 2. Discussed expected timeline. Will re-eval at Week 4." oninput="syncNPPlanToState()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           WEIGHT LOSS PLAN CARD (only shown if WL in services)
+           ══════════════════════════════ -->
+      <div class="card" id="plan-wl-card" style="display:none;border-left:4px solid var(--teal);">
+        <div class="card-title" style="color:var(--teal);">⚖️ Weight Loss Plan <span class="sub">Metabolic summary + program tier</span></div>
+        <div id="plan-wl-summary"></div>
+        <div class="sec-lbl" style="margin-top:14px;">Program Tier</div>
+        <div class="wl-tier-grid" id="plan-wl-tier-grid"></div>
+        <div class="row r1" style="margin-top:14px;">
+          <div class="field">
+            <label>Tier Selection / Check-in Schedule</label>
+            <textarea id="plan-wl-tier-notes" placeholder="e.g., 12-week Performance tier. Weekly 15-min check-ins. Re-measure Week 4, 8, 12." oninput="syncWLPlanToState()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           AUTO-PLAN SUGGESTION BANNER (shows when dx selected)
+           ══════════════════════════════ -->
+      <div class="card" id="plan-autofill-banner" style="display:none;background:linear-gradient(135deg, var(--sage-xl), var(--cream));border-left:4px solid var(--gold);">
+        <div class="card-title" style="color:var(--gold-dk);">🤖 Auto-Plan Suggestion <span class="sub">Based on your primary diagnosis</span></div>
+        <div id="plan-autofill-content"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-p btn-sm" onclick="applyAutoPlan()">✓ Apply Suggestion</button>
+          <button class="btn btn-h btn-sm" onclick="dismissAutoPlan()">Dismiss</button>
+        </div>
+      </div>
+
+      <!-- Chiro dx + tx-plan sections only show for CHIRO patients -->
+      <div id="plan-chiro-dx-wrapper">
       <!-- Clinical reasoning summary card -->
       <div class="card">
         <div class="card-title">📋 Clinical Reasoning Summary <span class="sub">What the engine sees</span></div>
@@ -3768,7 +3946,13 @@ body[data-role="provider"] .lang-toggle{display:none;}
           <div class="icd-empty-selected">No diagnoses selected yet. Tap any suggested code above or search the library.</div>
         </div>
       </div>
+      </div><!-- /plan-chiro-dx-wrapper -->
 
+      <!-- ══════════════════════════════
+           CHIRO-ONLY SECTIONS WRAPPER
+           (Hidden when patient has no CHIRO service)
+           ══════════════════════════════ -->
+      <div id="plan-chiro-wrapper">
       <!-- ══════════════════════════════
            TODAY'S TREATMENT CARD
            ══════════════════════════════ -->
@@ -3787,25 +3971,37 @@ body[data-role="provider"] .lang-toggle{display:none;}
           <div class="palp-intro">Pre-filled from patient's reported regions. Tap to add/remove.</div>
           <div class="chips" id="tx-regions-chips"></div>
 
-          <div class="sec-lbl" style="margin-top:14px;">Techniques Used <span style="color:var(--ink-sm);font-weight:400;font-size:.72rem;font-style:italic;">Multi-select</span></div>
-          <div class="chips" id="tx-techniques-chips">
-            <div class="chip" data-val="diversified">Diversified</div>
-            <div class="chip" data-val="gonstead">Gonstead</div>
-            <div class="chip" data-val="thompson">Thompson / Drop-Table</div>
-            <div class="chip" data-val="activator">Activator</div>
-            <div class="chip" data-val="flex-dist">Flexion-Distraction</div>
-            <div class="chip" data-val="sot">SOT / Sacro-Occipital</div>
-            <div class="chip" data-val="mfr">Myofascial Release</div>
-            <div class="chip" data-val="iastm">IASTM / Graston</div>
-            <div class="chip" data-val="cupping">Cupping</div>
-            <div class="chip" data-val="estim">E-stim</div>
-            <div class="chip" data-val="ultrasound">Ultrasound</div>
-            <div class="chip" data-val="manual-stretch">Manual Stretching</div>
-            <div class="chip" data-val="ther-ex">Therapeutic Exercise</div>
-            <div class="chip" data-val="neuro-reed">Neuromuscular Re-ed</div>
-            <div class="chip" data-val="pir">PIR / Muscle Energy</div>
-            <div class="chip" data-val="pnf">PNF Stretching</div>
+          <div class="sec-lbl" style="margin-top:14px;">Techniques Used Per Region</div>
+          <div class="palp-intro" style="margin-bottom:8px;">Tap the techniques applied to each region you treated today. Use the picker if you used different techniques per region.</div>
+
+          <!-- Global technique chips (optional quick-fill: applies to ALL treated regions) -->
+          <div style="background:var(--cream);border:1px dashed var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <span style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-sm);">Apply to ALL regions:</span>
+              <button class="btn btn-h btn-sm" onclick="toggleTxTechniquesGlobal()" id="tx-tech-global-toggle">+ Pick global techniques</button>
+            </div>
+            <div class="chips" id="tx-techniques-chips" style="display:none;">
+              <div class="chip" data-val="diversified">Diversified</div>
+              <div class="chip" data-val="gonstead">Gonstead</div>
+              <div class="chip" data-val="thompson">Thompson / Drop-Table</div>
+              <div class="chip" data-val="activator">Activator</div>
+              <div class="chip" data-val="flex-dist">Flexion-Distraction</div>
+              <div class="chip" data-val="sot">SOT / Sacro-Occipital</div>
+              <div class="chip" data-val="mfr">Myofascial Release</div>
+              <div class="chip" data-val="iastm">IASTM / Graston</div>
+              <div class="chip" data-val="cupping">Cupping</div>
+              <div class="chip" data-val="estim">E-stim</div>
+              <div class="chip" data-val="ultrasound">Ultrasound</div>
+              <div class="chip" data-val="manual-stretch">Manual Stretching</div>
+              <div class="chip" data-val="ther-ex">Therapeutic Exercise</div>
+              <div class="chip" data-val="neuro-reed">Neuromuscular Re-ed</div>
+              <div class="chip" data-val="pir">PIR / Muscle Energy</div>
+              <div class="chip" data-val="pnf">PNF Stretching</div>
+            </div>
           </div>
+
+          <!-- Per-region technique grid — each region gets its own multi-select picker -->
+          <div id="tx-region-techniques"></div>
 
           <div class="sec-lbl" style="margin-top:14px;">Specific Segments Adjusted <span style="color:var(--ink-sm);font-weight:400;font-size:.72rem;font-style:italic;">From palpation findings</span></div>
           <div id="tx-segments-suggested" class="chips"></div>
@@ -4121,6 +4317,7 @@ body[data-role="provider"] .lang-toggle{display:none;}
           </div>
         </div>
       </div>
+      </div><!-- /plan-chiro-wrapper -->
 
       <div class="brow">
         <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
@@ -4145,6 +4342,10 @@ body[data-role="provider"] .lang-toggle{display:none;}
         <div class="signoff-attestation">
           By signing below, I attest that I personally performed this examination, that the findings documented accurately reflect my clinical assessment, and that I have discussed the findings and plan of care with the patient. The patient has been given the opportunity to ask questions, and the patient has verbalized understanding of the recommendations. <strong>I take professional responsibility for the clinical accuracy of this chart.</strong>
         </div>
+        <label class="signoff-attest-check">
+          <input type="checkbox" id="signoff-attest-box" onchange="updateSignoffButtonState()">
+          <span>I have reviewed all findings above and attest that the documentation is accurate and complete.</span>
+        </label>
         <div class="row">
           <div class="field">
             <label>Provider Name</label>
@@ -4179,6 +4380,7 @@ body[data-role="provider"] .lang-toggle{display:none;}
 
       <div class="brow" id="signoff-brow">
         <button class="btn btn-h" onclick="examPrevStep()">← Back</button>
+        <button class="btn btn-h" onclick="downloadPatientROF()" style="margin-left:8px;">📋 Preview Patient ROF</button>
         <div class="spacer"></div>
         <button class="btn btn-p btn-lg" id="signoff-submit-btn" onclick="submitExamSignoff()">✓ Sign Off &amp; Save Chart</button>
       </div>
@@ -7968,7 +8170,9 @@ const MUSCLE_GROUPS = [
 //     - weight:  points added if match is true
 // ═══════════════════════════════════════════════════════
 const ICD_LIBRARY = [
-  // ═════ LUMBAR / LOW BACK ═════
+  // ═════════════════════════════════════════════
+  // LUMBAR / LOW BACK — PRIORITY CODES (scored)
+  // ═════════════════════════════════════════════
   { code:'M54.50', name:'Low back pain, unspecified', category:'lumbar', laterality:null,
     triggers:[
       {source:'region', match:'low-back', weight:30},
@@ -7980,6 +8184,8 @@ const ICD_LIBRARY = [
       {source:'onset',  match:['3-plus-mo','chronic'], weight:15},
       {source:'palpspine-lumbar', match:true, weight:20},
     ]},
+  { code:'M54.59', name:'Other low back pain', category:'lumbar', laterality:null,
+    triggers:[{source:'region', match:'low-back', weight:15}]},
   { code:'M54.16', name:'Radiculopathy, lumbar region', category:'lumbar', laterality:'B',
     triggers:[
       {source:'region', match:'low-back', weight:20},
@@ -7994,6 +8200,30 @@ const ICD_LIBRARY = [
       {source:'neuro',  match:['neuro-shoot','neuro-num'], weight:15},
       {source:'ortho',  match:['slr','slump'], weight:20},
       {source:'neuro-finding', match:'dermatome-s1', weight:20},
+    ]},
+  { code:'M54.30', name:'Sciatica, unspecified side', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:10},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:15},
+    ]},
+  { code:'M54.31', name:'Sciatica, right side', category:'lumbar', laterality:'R',
+    triggers:[
+      {source:'region', match:'low-back', weight:10},
+      {source:'region-side', match:'R', weight:10},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:15},
+      {source:'ortho-side', match:{test:'slr', side:'R'}, weight:20},
+    ]},
+  { code:'M54.32', name:'Sciatica, left side', category:'lumbar', laterality:'L',
+    triggers:[
+      {source:'region', match:'low-back', weight:10},
+      {source:'region-side', match:'L', weight:10},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:15},
+      {source:'ortho-side', match:{test:'slr', side:'L'}, weight:20},
+    ]},
+  { code:'M54.40', name:'Lumbago with sciatica, unspecified side', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:15},
     ]},
   { code:'M54.41', name:'Lumbago with sciatica, right side', category:'lumbar', laterality:'R',
     triggers:[
@@ -8015,6 +8245,19 @@ const ICD_LIBRARY = [
       {source:'onset',  match:['chronic','3-plus-mo'], weight:20},
       {source:'age-over-45', match:true, weight:15},
     ]},
+  { code:'M47.817', name:'Spondylosis without myelopathy/radiculopathy, lumbosacral', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:15},
+      {source:'age-over-45', match:true, weight:10},
+    ]},
+  { code:'M47.26', name:'Other spondylosis with radiculopathy, lumbar region', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'neuro', match:['neuro-num','neuro-shoot','neuro-tingle'], weight:15},
+      {source:'age-over-45', match:true, weight:10},
+    ]},
+  { code:'M47.27', name:'Other spondylosis with radiculopathy, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
   { code:'M47.816-facet', name:'Lumbar facet syndrome (M47.816)', category:'lumbar', laterality:null,
     triggers:[
       {source:'region', match:'low-back', weight:15},
@@ -8022,23 +8265,70 @@ const ICD_LIBRARY = [
       {source:'agg',    match:['standing','bending'], weight:10},
       {source:'rel',    match:['sitting'], weight:5},
     ]},
-  { code:'M51.36', name:'Other intervertebral disc degeneration, lumbar region', category:'lumbar', laterality:null,
+  { code:'M51.16', name:'IVD disorders with radiculopathy, lumbar region', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:15},
+      {source:'neuro', match:['neuro-shoot','neuro-num','neuro-weak'], weight:20},
+      {source:'ortho', match:['slr','slump','crossed-slr'], weight:20},
+    ]},
+  { code:'M51.17', name:'IVD disorders with radiculopathy, lumbosacral region', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'neuro', match:['neuro-shoot','neuro-num'], weight:18},
+      {source:'neuro-finding', match:'dermatome-s1', weight:15},
+    ]},
+  { code:'M51.26', name:'Other IVD displacement, lumbar region', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'onset', match:['this-week','2-4-wk','1-3-mo'], weight:10},
+    ]},
+  { code:'M51.27', name:'Other IVD displacement, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M51.36', name:'Other IVD degeneration, lumbar region', category:'lumbar', laterality:null,
     triggers:[
       {source:'region', match:'low-back', weight:15},
       {source:'onset',  match:['chronic','3-plus-mo'], weight:15},
       {source:'ortho',  match:['slr','slump'], weight:15},
     ]},
-  { code:'M53.3', name:'Sacrococcygeal disorders (SI dysfunction)', category:'lumbar', laterality:null,
+  { code:'M51.37', name:'Other IVD degeneration, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M48.061', name:'Spinal stenosis, lumbar region w/o neurogenic claudication', category:'lumbar', laterality:null,
     triggers:[
-      {source:'region', match:['low-back','hip'], weight:15},
-      {source:'ortho',  match:['faber','gaenslen','thigh-thrust','si-compress','si-distract'], weight:25, minMatches:2},
+      {source:'region', match:'low-back', weight:10},
+      {source:'age-over-45', match:true, weight:15},
+      {source:'agg', match:['standing','walking'], weight:10},
+    ]},
+  { code:'M48.062', name:'Spinal stenosis, lumbar region with neurogenic claudication', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:10},
+      {source:'age-over-45', match:true, weight:15},
+      {source:'agg', match:['walking'], weight:15},
+      {source:'rel', match:['sitting','bending-forward'], weight:10},
+    ]},
+  { code:'M48.07', name:'Spinal stenosis, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M43.16', name:'Spondylolisthesis, lumbar region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M43.17', name:'Spondylolisthesis, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M43.06', name:'Spondylolysis, lumbar region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M43.07', name:'Spondylolysis, lumbosacral region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M43.8X6', name:'Other specified deforming dorsopathies, lumbar region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'M53.2X6', name:'Spinal instabilities, lumbar region', category:'lumbar', laterality:null, triggers:[]},
+  { code:'S33.5XXA', name:'Sprain of ligaments of lumbar spine, initial encounter', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'mechanism', match:['mva','fall','sports','lifting','sudden'], weight:25},
+      {source:'onset', match:['today','this-week'], weight:10},
+    ]},
+  { code:'S39.012A', name:'Strain of muscle/fascia/tendon of lower back, initial encounter', category:'lumbar', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:12},
+      {source:'mechanism', match:['lifting','sudden','sports'], weight:20},
+      {source:'palpmuscle-hyper', match:true, weight:15},
     ]},
 
-  // ═════ CERVICAL / NECK ═════
+  // ═════════════════════════════════════════════
+  // CERVICAL / NECK
+  // ═════════════════════════════════════════════
   { code:'M54.2', name:'Cervicalgia', category:'cervical', laterality:null,
-    triggers:[
-      {source:'region', match:'neck', weight:30},
-    ]},
+    triggers:[{source:'region', match:'neck', weight:30}]},
+  { code:'M54.11', name:'Radiculopathy, occipito-atlanto-axial region', category:'cervical', laterality:null, triggers:[]},
   { code:'M54.12', name:'Radiculopathy, cervical region', category:'cervical', laterality:'B',
     triggers:[
       {source:'region', match:'neck', weight:20},
@@ -8046,42 +8336,168 @@ const ICD_LIBRARY = [
       {source:'ortho',  match:['spurlings','cerv-distraction','ult'], weight:25},
       {source:'neuro-finding', match:'dermatome-decreased', weight:15},
     ]},
-  { code:'M47.812', name:'Spondylosis without myelopathy/radiculopathy, cervical region', category:'cervical', laterality:null,
+  { code:'M54.13', name:'Radiculopathy, cervicothoracic region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.10', name:'Cervical disc disorder with radiculopathy, unspecified cervical region', category:'cervical', laterality:null,
     triggers:[
       {source:'region', match:'neck', weight:15},
-      {source:'onset',  match:['chronic','3-plus-mo'], weight:20},
-      {source:'age-over-45', match:true, weight:10},
+      {source:'neuro', match:['neuro-num','neuro-shoot'], weight:18},
+      {source:'ortho', match:['spurlings'], weight:15},
     ]},
-  { code:'S13.4XXA', name:'Cervical sprain, initial encounter', category:'cervical', laterality:null,
-    triggers:[
-      {source:'region', match:'neck', weight:15},
-      {source:'mechanism', match:['mva','sports','fall','sudden'], weight:30},
-      {source:'onset', match:['today','this-week','2-4-wk'], weight:10},
-    ]},
+  { code:'M50.11', name:'Cervical disc disorder with radiculopathy, high cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.12', name:'Cervical disc disorder with radiculopathy, mid-cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.13', name:'Cervical disc disorder with radiculopathy, cervicothoracic region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.20', name:'Other cervical disc displacement, unspecified cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.21', name:'Other cervical disc displacement, high cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.22', name:'Other cervical disc displacement, mid-cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.23', name:'Other cervical disc displacement, cervicothoracic region', category:'cervical', laterality:null, triggers:[]},
   { code:'M50.30', name:'Other cervical disc degeneration, unspecified', category:'cervical', laterality:null,
     triggers:[
       {source:'region', match:'neck', weight:15},
       {source:'onset',  match:['chronic','3-plus-mo'], weight:15},
       {source:'ortho',  match:['spurlings','cerv-distraction'], weight:15},
     ]},
+  { code:'M50.31', name:'Other cervical disc degeneration, high cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.32', name:'Other cervical disc degeneration, mid-cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M50.33', name:'Other cervical disc degeneration, cervicothoracic region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M48.02', name:'Spinal stenosis, cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M47.812', name:'Spondylosis w/o myelopathy or radiculopathy, cervical', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:15},
+      {source:'onset',  match:['chronic','3-plus-mo'], weight:20},
+      {source:'age-over-45', match:true, weight:10},
+    ]},
+  { code:'M47.22', name:'Other spondylosis with radiculopathy, cervical region', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:12},
+      {source:'neuro', match:['neuro-num','neuro-tingle','neuro-shoot'], weight:15},
+      {source:'age-over-45', match:true, weight:10},
+    ]},
+  { code:'M43.12', name:'Spondylolisthesis, cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'M43.6', name:'Torticollis', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:10},
+      {source:'onset', match:['today','this-week'], weight:15},
+    ]},
   { code:'M53.0', name:'Cervicocranial syndrome (cervicogenic headache)', category:'cervical', laterality:null,
     triggers:[
       {source:'region', match:['neck','head'], weight:20, requiresBoth:['neck','head']},
       {source:'onset',  match:['2-4-wk','1-3-mo','3-plus-mo','chronic'], weight:10},
     ]},
-
-  // ═════ THORACIC ═════
-  { code:'M54.6', name:'Pain in thoracic spine', category:'thoracic', laterality:null,
+  { code:'M53.1', name:'Cervicobrachial syndrome', category:'cervical', laterality:null,
     triggers:[
-      {source:'region', match:['upper-back','mid-back'], weight:30},
+      {source:'region', match:'neck', weight:10},
+      {source:'neuro', match:['neuro-shoot','neuro-num','neuro-tingle'], weight:15},
     ]},
+  { code:'M53.2X2', name:'Spinal instabilities, cervical region', category:'cervical', laterality:null, triggers:[]},
+  { code:'S13.4XXA', name:'Cervical sprain, initial encounter', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:15},
+      {source:'mechanism', match:['mva','sports','fall','sudden'], weight:30},
+      {source:'onset', match:['today','this-week','2-4-wk'], weight:10},
+    ]},
+  { code:'S16.1XXA', name:'Strain of muscle/fascia/tendon at neck level, initial encounter', category:'cervical', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:12},
+      {source:'mechanism', match:['mva','sports','fall','sudden','lifting'], weight:20},
+      {source:'palpmuscle-hyper', match:true, weight:12},
+    ]},
+
+  // ═════════════════════════════════════════════
+  // HEAD / TMJ / HEADACHE
+  // ═════════════════════════════════════════════
+  { code:'R51.9', name:'Headache, unspecified', category:'head', laterality:null,
+    triggers:[{source:'region', match:'head', weight:25}]},
+  { code:'G44.209', name:'Tension-type headache, unspecified, not intractable', category:'head', laterality:null,
+    triggers:[
+      {source:'region', match:'head', weight:15},
+      {source:'region', match:'neck', weight:10},
+    ]},
+  { code:'G44.219', name:'Episodic tension-type headache, not intractable', category:'head', laterality:null, triggers:[]},
+  { code:'G44.229', name:'Chronic tension-type headache, not intractable', category:'head', laterality:null,
+    triggers:[
+      {source:'region', match:'head', weight:12},
+      {source:'onset', match:['chronic','3-plus-mo'], weight:15},
+    ]},
+  { code:'G44.86', name:'Cervicogenic headache', category:'head', laterality:null,
+    triggers:[
+      {source:'region', match:['head','neck'], weight:20, requiresBoth:['head','neck']},
+      {source:'palpspine-lumbar', match:false, weight:0},
+    ]},
+  { code:'G43.909', name:'Migraine, unspecified, not intractable', category:'head', laterality:null,
+    triggers:[{source:'region', match:'head', weight:12}]},
+  { code:'G43.009', name:'Migraine w/o aura, not intractable', category:'head', laterality:null, triggers:[]},
+  { code:'G43.109', name:'Migraine with aura, not intractable', category:'head', laterality:null, triggers:[]},
+  { code:'M26.601', name:'Right temporomandibular joint disorder, unspecified', category:'head', laterality:'R', triggers:[]},
+  { code:'M26.602', name:'Left temporomandibular joint disorder, unspecified', category:'head', laterality:'L', triggers:[]},
+  { code:'M26.603', name:'Bilateral temporomandibular joint disorder, unspecified', category:'head', laterality:'B', triggers:[]},
+  { code:'M26.609', name:'Temporomandibular joint disorder, unspecified', category:'head', laterality:null, triggers:[]},
+  { code:'M26.621', name:'Arthralgia of right temporomandibular joint', category:'head', laterality:'R', triggers:[]},
+  { code:'M26.622', name:'Arthralgia of left temporomandibular joint', category:'head', laterality:'L', triggers:[]},
+  { code:'M26.623', name:'Arthralgia of bilateral temporomandibular joints', category:'head', laterality:'B', triggers:[]},
+  { code:'M26.629', name:'Arthralgia of temporomandibular joint, unspecified side', category:'head', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // THORACIC / RIBS
+  // ═════════════════════════════════════════════
+  { code:'M54.6', name:'Pain in thoracic spine', category:'thoracic', laterality:null,
+    triggers:[{source:'region', match:['upper-back','mid-back'], weight:30}]},
   { code:'M54.14', name:'Radiculopathy, thoracic region', category:'thoracic', laterality:'B',
     triggers:[
       {source:'region', match:['upper-back','mid-back'], weight:15},
       {source:'neuro',  match:['neuro-shoot','neuro-burn'], weight:20},
     ]},
+  { code:'M54.15', name:'Radiculopathy, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.14', name:'IVD disorders with radiculopathy, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.15', name:'IVD disorders with radiculopathy, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.24', name:'Other IVD displacement, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.25', name:'Other IVD displacement, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.34', name:'Other IVD degeneration, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M51.35', name:'Other IVD degeneration, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M48.04', name:'Spinal stenosis, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M48.05', name:'Spinal stenosis, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M47.814', name:'Spondylosis w/o myelopathy or radiculopathy, thoracic', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M47.24', name:'Other spondylosis with radiculopathy, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M40.04', name:'Postural kyphosis, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M40.204', name:'Unspecified kyphosis, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M41.24', name:'Other idiopathic scoliosis, thoracic region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M41.25', name:'Other idiopathic scoliosis, thoracolumbar region', category:'thoracic', laterality:null, triggers:[]},
+  { code:'M94.0', name:'Chondrocostal junction syndrome / Tietze syndrome', category:'thoracic', laterality:null,
+    triggers:[
+      {source:'region', match:['upper-back','mid-back'], weight:10},
+    ]},
+  { code:'R07.81', name:'Pleurodynia / rib pain', category:'thoracic', laterality:null, triggers:[]},
+  { code:'S23.3XXA', name:'Sprain of ligaments of thoracic spine, initial encounter', category:'thoracic', laterality:null,
+    triggers:[
+      {source:'region', match:['upper-back','mid-back'], weight:12},
+      {source:'mechanism', match:['mva','fall','sports','sudden'], weight:20},
+    ]},
+  { code:'S29.012A', name:'Strain of muscle/tendon of back wall of thorax, initial encounter', category:'thoracic', laterality:null, triggers:[]},
 
-  // ═════ SHOULDER ═════
+  // ═════════════════════════════════════════════
+  // SACRUM / SI / PELVIS
+  // ═════════════════════════════════════════════
+  { code:'M53.3', name:'Sacrococcygeal disorders (SI dysfunction)', category:'pelvis', laterality:null,
+    triggers:[
+      {source:'region', match:['low-back','hip'], weight:15},
+      {source:'ortho',  match:['faber','gaenslen','thigh-thrust','si-compress','si-distract'], weight:25, minMatches:2},
+    ]},
+  { code:'M54.18', name:'Radiculopathy, sacral and sacrococcygeal region', category:'pelvis', laterality:null, triggers:[]},
+  { code:'M46.1', name:'Sacroiliitis, not elsewhere classified', category:'pelvis', laterality:null,
+    triggers:[
+      {source:'region', match:['low-back','hip'], weight:10},
+      {source:'ortho', match:['faber','gaenslen'], weight:18},
+    ]},
+  { code:'S33.6XXA', name:'Sprain of sacroiliac joint, initial encounter', category:'pelvis', laterality:null,
+    triggers:[
+      {source:'region', match:['low-back','hip'], weight:10},
+      {source:'mechanism', match:['mva','fall','sports','lifting'], weight:20},
+    ]},
+  { code:'S39.013A', name:'Strain of muscle/fascia/tendon of pelvis, initial encounter', category:'pelvis', laterality:null, triggers:[]},
+  { code:'R10.2', name:'Pelvic and perineal pain', category:'pelvis', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // SHOULDER
+  // ═════════════════════════════════════════════
   { code:'M25.511', name:'Pain in right shoulder', category:'shoulder', laterality:'R',
     triggers:[
       {source:'region', match:'shoulder', weight:20},
@@ -8092,24 +8508,125 @@ const ICD_LIBRARY = [
       {source:'region', match:'shoulder', weight:20},
       {source:'region-side', match:'L', weight:15},
     ]},
+  { code:'M25.519', name:'Pain in unspecified shoulder', category:'shoulder', laterality:null,
+    triggers:[{source:'region', match:'shoulder', weight:12}]},
+  { code:'M25.611', name:'Stiffness of right shoulder, NEC', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M25.612', name:'Stiffness of left shoulder, NEC', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'M25.619', name:'Stiffness of unspecified shoulder, NEC', category:'shoulder', laterality:null, triggers:[]},
+  { code:'M25.311', name:'Other instability, right shoulder', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M25.312', name:'Other instability, left shoulder', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'M75.01', name:'Adhesive capsulitis of right shoulder', category:'shoulder', laterality:'R',
+    triggers:[
+      {source:'region', match:'shoulder', weight:12},
+      {source:'region-side', match:'R', weight:10},
+      {source:'onset', match:['3-plus-mo','chronic'], weight:15},
+    ]},
+  { code:'M75.02', name:'Adhesive capsulitis of left shoulder', category:'shoulder', laterality:'L',
+    triggers:[
+      {source:'region', match:'shoulder', weight:12},
+      {source:'region-side', match:'L', weight:10},
+      {source:'onset', match:['3-plus-mo','chronic'], weight:15},
+    ]},
+  { code:'M75.21', name:'Bicipital tendinitis, right shoulder', category:'shoulder', laterality:'R',
+    triggers:[
+      {source:'region', match:'shoulder', weight:10},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho', match:['speeds','yergasons'], weight:18},
+    ]},
+  { code:'M75.22', name:'Bicipital tendinitis, left shoulder', category:'shoulder', laterality:'L',
+    triggers:[
+      {source:'region', match:'shoulder', weight:10},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho', match:['speeds','yergasons'], weight:18},
+    ]},
   { code:'M75.30', name:'Calcific tendinitis of shoulder, unspecified', category:'shoulder', laterality:null,
     triggers:[
       {source:'region', match:'shoulder', weight:15},
       {source:'ortho',  match:['neer','hawkins','empty-can'], weight:20, minMatches:2},
       {source:'onset',  match:['3-plus-mo','chronic'], weight:10},
     ]},
-  { code:'M75.100', name:'Unspecified rotator cuff tear, unspecified shoulder', category:'shoulder', laterality:null,
+  { code:'M75.41', name:'Impingement syndrome of right shoulder', category:'shoulder', laterality:'R',
     triggers:[
       {source:'region', match:'shoulder', weight:15},
-      {source:'ortho',  match:['empty-can','drop-arm'], weight:25},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho', match:['neer','hawkins'], weight:25},
+    ]},
+  { code:'M75.42', name:'Impingement syndrome of left shoulder', category:'shoulder', laterality:'L',
+    triggers:[
+      {source:'region', match:'shoulder', weight:15},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho', match:['neer','hawkins'], weight:25},
     ]},
   { code:'M75.40', name:'Impingement syndrome of shoulder, unspecified', category:'shoulder', laterality:null,
     triggers:[
       {source:'region', match:'shoulder', weight:15},
       {source:'ortho',  match:['neer','hawkins'], weight:25},
     ]},
+  { code:'M75.51', name:'Bursitis of right shoulder', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M75.52', name:'Bursitis of left shoulder', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'M75.81', name:'Other shoulder lesions, right shoulder', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M75.82', name:'Other shoulder lesions, left shoulder', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'M75.100', name:'Unspecified rotator cuff tear, unspecified shoulder', category:'shoulder', laterality:null,
+    triggers:[
+      {source:'region', match:'shoulder', weight:15},
+      {source:'ortho',  match:['empty-can','drop-arm'], weight:25},
+    ]},
+  { code:'M75.101', name:'Unspecified rotator cuff tear, right shoulder', category:'shoulder', laterality:'R',
+    triggers:[
+      {source:'region', match:'shoulder', weight:12},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho', match:['empty-can','drop-arm'], weight:22},
+    ]},
+  { code:'M75.102', name:'Unspecified rotator cuff tear, left shoulder', category:'shoulder', laterality:'L',
+    triggers:[
+      {source:'region', match:'shoulder', weight:12},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho', match:['empty-can','drop-arm'], weight:22},
+    ]},
+  { code:'M75.111', name:'Incomplete rotator cuff tear, right shoulder', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M75.112', name:'Incomplete rotator cuff tear, left shoulder', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'M75.121', name:'Complete rotator cuff tear, right shoulder', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'M75.122', name:'Complete rotator cuff tear, left shoulder', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'S43.421A', name:'Sprain of right rotator cuff capsule, initial encounter', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'S43.422A', name:'Sprain of left rotator cuff capsule, initial encounter', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'S46.011A', name:'Strain of muscle/tendon of right rotator cuff, initial encounter', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'S46.012A', name:'Strain of muscle/tendon of left rotator cuff, initial encounter', category:'shoulder', laterality:'L', triggers:[]},
+  { code:'S46.111A', name:'Strain of long head of biceps, right arm, initial encounter', category:'shoulder', laterality:'R', triggers:[]},
+  { code:'S46.112A', name:'Strain of long head of biceps, left arm, initial encounter', category:'shoulder', laterality:'L', triggers:[]},
 
-  // ═════ ELBOW / WRIST ═════
+  // ═════════════════════════════════════════════
+  // ARM / ELBOW / FOREARM
+  // ═════════════════════════════════════════════
+  { code:'M79.601', name:'Pain in right arm', category:'arm', laterality:'R', triggers:[]},
+  { code:'M79.602', name:'Pain in left arm', category:'arm', laterality:'L', triggers:[]},
+  { code:'M79.603', name:'Pain in arm, unspecified', category:'arm', laterality:null, triggers:[]},
+  { code:'M79.631', name:'Pain in right forearm', category:'arm', laterality:'R', triggers:[]},
+  { code:'M79.632', name:'Pain in left forearm', category:'arm', laterality:'L', triggers:[]},
+  { code:'M25.521', name:'Pain in right elbow', category:'elbow', laterality:'R',
+    triggers:[
+      {source:'region', match:'elbow', weight:20},
+      {source:'region-side', match:'R', weight:12},
+    ]},
+  { code:'M25.522', name:'Pain in left elbow', category:'elbow', laterality:'L',
+    triggers:[
+      {source:'region', match:'elbow', weight:20},
+      {source:'region-side', match:'L', weight:12},
+    ]},
+  { code:'M25.529', name:'Pain in unspecified elbow', category:'elbow', laterality:null, triggers:[]},
+  { code:'M25.621', name:'Stiffness of right elbow, NEC', category:'elbow', laterality:'R', triggers:[]},
+  { code:'M25.622', name:'Stiffness of left elbow, NEC', category:'elbow', laterality:'L', triggers:[]},
+  { code:'M77.01', name:'Medial epicondylitis, right elbow (golfer\'s elbow)', category:'elbow', laterality:'R',
+    triggers:[
+      {source:'region', match:'elbow', weight:12},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho', match:['reverse-cozen','golfers'], weight:22},
+    ]},
+  { code:'M77.02', name:'Medial epicondylitis, left elbow (golfer\'s elbow)', category:'elbow', laterality:'L',
+    triggers:[
+      {source:'region', match:'elbow', weight:12},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho', match:['reverse-cozen','golfers'], weight:22},
+    ]},
   { code:'M77.11', name:'Lateral epicondylitis, right elbow (tennis elbow)', category:'elbow', laterality:'R',
     triggers:[
       {source:'region', match:'elbow', weight:15},
@@ -8122,14 +8639,78 @@ const ICD_LIBRARY = [
       {source:'region-side', match:'L', weight:10},
       {source:'ortho',  match:['cozen','mills'], weight:25},
     ]},
+  { code:'M70.21', name:'Olecranon bursitis, right elbow', category:'elbow', laterality:'R', triggers:[]},
+  { code:'M70.22', name:'Olecranon bursitis, left elbow', category:'elbow', laterality:'L', triggers:[]},
+  { code:'G56.21', name:'Lesion of ulnar nerve, right upper limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G56.22', name:'Lesion of ulnar nerve, left upper limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'G56.31', name:'Lesion of radial nerve, right upper limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G56.32', name:'Lesion of radial nerve, left upper limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'S53.401A', name:'Sprain of unspecified ligament of right elbow, initial encounter', category:'elbow', laterality:'R', triggers:[]},
+  { code:'S53.402A', name:'Sprain of unspecified ligament of left elbow, initial encounter', category:'elbow', laterality:'L', triggers:[]},
+  { code:'S56.911A', name:'Strain of muscles/tendons at forearm, right arm, initial encounter', category:'elbow', laterality:'R', triggers:[]},
+  { code:'S56.912A', name:'Strain of muscles/tendons at forearm, left arm, initial encounter', category:'elbow', laterality:'L', triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // WRIST / HAND / FINGERS
+  // ═════════════════════════════════════════════
+  { code:'M25.531', name:'Pain in right wrist', category:'wrist', laterality:'R',
+    triggers:[
+      {source:'region', match:'wrist', weight:20},
+      {source:'region-side', match:'R', weight:12},
+    ]},
+  { code:'M25.532', name:'Pain in left wrist', category:'wrist', laterality:'L',
+    triggers:[
+      {source:'region', match:'wrist', weight:20},
+      {source:'region-side', match:'L', weight:12},
+    ]},
+  { code:'M25.539', name:'Pain in unspecified wrist', category:'wrist', laterality:null, triggers:[]},
+  { code:'M25.641', name:'Stiffness of right hand, NEC', category:'wrist', laterality:'R', triggers:[]},
+  { code:'M25.642', name:'Stiffness of left hand, NEC', category:'wrist', laterality:'L', triggers:[]},
+  { code:'M79.641', name:'Pain in right hand', category:'wrist', laterality:'R', triggers:[]},
+  { code:'M79.642', name:'Pain in left hand', category:'wrist', laterality:'L', triggers:[]},
+  { code:'M79.643', name:'Pain in unspecified hand', category:'wrist', laterality:null, triggers:[]},
+  { code:'M79.644', name:'Pain in right finger(s)', category:'wrist', laterality:'R', triggers:[]},
+  { code:'M79.645', name:'Pain in left finger(s)', category:'wrist', laterality:'L', triggers:[]},
+  { code:'M65.4', name:'Radial styloid tenosynovitis / De Quervain\'s', category:'wrist', laterality:null,
+    triggers:[
+      {source:'region', match:'wrist', weight:12},
+      {source:'ortho', match:['finkelstein'], weight:22},
+    ]},
+  { code:'M65.311', name:'Trigger thumb, right thumb', category:'wrist', laterality:'R', triggers:[]},
+  { code:'M65.312', name:'Trigger thumb, left thumb', category:'wrist', laterality:'L', triggers:[]},
+  { code:'M65.331', name:'Trigger finger, right middle finger', category:'wrist', laterality:'R', triggers:[]},
+  { code:'M65.332', name:'Trigger finger, left middle finger', category:'wrist', laterality:'L', triggers:[]},
   { code:'G56.00', name:'Carpal tunnel syndrome, unspecified upper limb', category:'wrist', laterality:null,
     triggers:[
       {source:'region', match:'wrist', weight:15},
       {source:'neuro',  match:['neuro-num','neuro-tingle'], weight:15},
       {source:'ortho',  match:['phalen','tinel-wrist'], weight:30},
     ]},
+  { code:'G56.01', name:'Carpal tunnel syndrome, right upper limb', category:'wrist', laterality:'R',
+    triggers:[
+      {source:'region', match:'wrist', weight:12},
+      {source:'region-side', match:'R', weight:10},
+      {source:'neuro', match:['neuro-num','neuro-tingle'], weight:12},
+      {source:'ortho', match:['phalen','tinel-wrist'], weight:25},
+    ]},
+  { code:'G56.02', name:'Carpal tunnel syndrome, left upper limb', category:'wrist', laterality:'L',
+    triggers:[
+      {source:'region', match:'wrist', weight:12},
+      {source:'region-side', match:'L', weight:10},
+      {source:'neuro', match:['neuro-num','neuro-tingle'], weight:12},
+      {source:'ortho', match:['phalen','tinel-wrist'], weight:25},
+    ]},
+  { code:'G56.03', name:'Carpal tunnel syndrome, bilateral upper limbs', category:'wrist', laterality:'B', triggers:[]},
+  { code:'G56.11', name:'Other lesions of median nerve, right upper limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G56.12', name:'Other lesions of median nerve, left upper limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'S63.501A', name:'Unspecified sprain of right wrist, initial encounter', category:'wrist', laterality:'R', triggers:[]},
+  { code:'S63.502A', name:'Unspecified sprain of left wrist, initial encounter', category:'wrist', laterality:'L', triggers:[]},
+  { code:'S66.911A', name:'Strain of muscle/tendon at wrist/hand, right hand, initial encounter', category:'wrist', laterality:'R', triggers:[]},
+  { code:'S66.912A', name:'Strain of muscle/tendon at wrist/hand, left hand, initial encounter', category:'wrist', laterality:'L', triggers:[]},
 
-  // ═════ HIP / KNEE / ANKLE ═════
+  // ═════════════════════════════════════════════
+  // HIP / THIGH / GLUTE
+  // ═════════════════════════════════════════════
   { code:'M25.551', name:'Pain in right hip', category:'hip', laterality:'R',
     triggers:[
       {source:'region', match:'hip', weight:25},
@@ -8140,25 +8721,336 @@ const ICD_LIBRARY = [
       {source:'region', match:'hip', weight:25},
       {source:'region-side', match:'L', weight:10},
     ]},
+  { code:'M25.559', name:'Pain in unspecified hip', category:'hip', laterality:null, triggers:[]},
+  { code:'M25.651', name:'Stiffness of right hip, NEC', category:'hip', laterality:'R', triggers:[]},
+  { code:'M25.652', name:'Stiffness of left hip, NEC', category:'hip', laterality:'L', triggers:[]},
+  { code:'M25.659', name:'Stiffness of unspecified hip, NEC', category:'hip', laterality:null, triggers:[]},
+  { code:'M16.11', name:'Unilateral primary osteoarthritis, right hip', category:'hip', laterality:'R',
+    triggers:[
+      {source:'region', match:'hip', weight:12},
+      {source:'region-side', match:'R', weight:8},
+      {source:'age-over-45', match:true, weight:15},
+      {source:'onset', match:['chronic','3-plus-mo'], weight:10},
+    ]},
+  { code:'M16.12', name:'Unilateral primary osteoarthritis, left hip', category:'hip', laterality:'L',
+    triggers:[
+      {source:'region', match:'hip', weight:12},
+      {source:'region-side', match:'L', weight:8},
+      {source:'age-over-45', match:true, weight:15},
+      {source:'onset', match:['chronic','3-plus-mo'], weight:10},
+    ]},
+  { code:'M16.0', name:'Bilateral primary osteoarthritis of hip', category:'hip', laterality:'B', triggers:[]},
+  { code:'M70.61', name:'Trochanteric bursitis, right hip', category:'hip', laterality:'R',
+    triggers:[
+      {source:'region', match:'hip', weight:10},
+      {source:'region-side', match:'R', weight:10},
+    ]},
+  { code:'M70.62', name:'Trochanteric bursitis, left hip', category:'hip', laterality:'L',
+    triggers:[
+      {source:'region', match:'hip', weight:10},
+      {source:'region-side', match:'L', weight:10},
+    ]},
+  { code:'M76.01', name:'Gluteal tendinitis, right hip', category:'hip', laterality:'R', triggers:[]},
+  { code:'M76.02', name:'Gluteal tendinitis, left hip', category:'hip', laterality:'L', triggers:[]},
+  { code:'M76.11', name:'Psoas tendinitis, right hip', category:'hip', laterality:'R', triggers:[]},
+  { code:'M76.12', name:'Psoas tendinitis, left hip', category:'hip', laterality:'L', triggers:[]},
+  { code:'M76.31', name:'Iliotibial band syndrome, right leg', category:'hip', laterality:'R',
+    triggers:[
+      {source:'region', match:['hip','knee'], weight:10},
+      {source:'region-side', match:'R', weight:8},
+      {source:'ortho', match:['noble','ober'], weight:20},
+    ]},
+  { code:'M76.32', name:'Iliotibial band syndrome, left leg', category:'hip', laterality:'L',
+    triggers:[
+      {source:'region', match:['hip','knee'], weight:10},
+      {source:'region-side', match:'L', weight:8},
+      {source:'ortho', match:['noble','ober'], weight:20},
+    ]},
+  { code:'M79.651', name:'Pain in right thigh', category:'hip', laterality:'R', triggers:[]},
+  { code:'M79.652', name:'Pain in left thigh', category:'hip', laterality:'L', triggers:[]},
+  { code:'S73.191A', name:'Other sprain of right hip, initial encounter', category:'hip', laterality:'R', triggers:[]},
+  { code:'S73.192A', name:'Other sprain of left hip, initial encounter', category:'hip', laterality:'L', triggers:[]},
+  { code:'S76.011A', name:'Strain of muscle/tendon of right hip, initial encounter', category:'hip', laterality:'R', triggers:[]},
+  { code:'S76.012A', name:'Strain of muscle/tendon of left hip, initial encounter', category:'hip', laterality:'L', triggers:[]},
+  { code:'S76.311A', name:'Strain of right hamstring, initial encounter', category:'hip', laterality:'R', triggers:[]},
+  { code:'S76.312A', name:'Strain of left hamstring, initial encounter', category:'hip', laterality:'L', triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // KNEE
+  // ═════════════════════════════════════════════
+  { code:'M25.561', name:'Pain in right knee', category:'knee', laterality:'R',
+    triggers:[
+      {source:'region', match:'knee', weight:20},
+      {source:'region-side', match:'R', weight:12},
+    ]},
+  { code:'M25.562', name:'Pain in left knee', category:'knee', laterality:'L',
+    triggers:[
+      {source:'region', match:'knee', weight:20},
+      {source:'region-side', match:'L', weight:12},
+    ]},
+  { code:'M25.569', name:'Pain in unspecified knee', category:'knee', laterality:null, triggers:[]},
+  { code:'M25.661', name:'Stiffness of right knee, NEC', category:'knee', laterality:'R', triggers:[]},
+  { code:'M25.662', name:'Stiffness of left knee, NEC', category:'knee', laterality:'L', triggers:[]},
+  { code:'M25.361', name:'Other instability, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M25.362', name:'Other instability, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'M17.11', name:'Unilateral primary osteoarthritis, right knee', category:'knee', laterality:'R',
+    triggers:[
+      {source:'region', match:'knee', weight:12},
+      {source:'region-side', match:'R', weight:8},
+      {source:'age-over-45', match:true, weight:15},
+    ]},
+  { code:'M17.12', name:'Unilateral primary osteoarthritis, left knee', category:'knee', laterality:'L',
+    triggers:[
+      {source:'region', match:'knee', weight:12},
+      {source:'region-side', match:'L', weight:8},
+      {source:'age-over-45', match:true, weight:15},
+    ]},
+  { code:'M17.0', name:'Bilateral primary osteoarthritis of knee', category:'knee', laterality:'B', triggers:[]},
+  { code:'M22.2X1', name:'Patellofemoral disorders, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M22.2X2', name:'Patellofemoral disorders, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'M22.41', name:'Chondromalacia patellae, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M22.42', name:'Chondromalacia patellae, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'M23.203', name:'Medial meniscus derangement, right knee', category:'knee', laterality:'R',
+    triggers:[
+      {source:'region', match:'knee', weight:10},
+      {source:'region-side', match:'R', weight:8},
+      {source:'ortho', match:['mcmurray'], weight:25},
+    ]},
+  { code:'M23.204', name:'Medial meniscus derangement, left knee', category:'knee', laterality:'L',
+    triggers:[
+      {source:'region', match:'knee', weight:10},
+      {source:'region-side', match:'L', weight:8},
+      {source:'ortho', match:['mcmurray'], weight:25},
+    ]},
   { code:'M23.205', name:'Derangement of meniscus, unspecified', category:'knee', laterality:null,
     triggers:[
       {source:'region', match:'knee', weight:15},
       {source:'ortho',  match:['mcmurray'], weight:30},
       {source:'mechanism', match:['sports','sudden','lifting'], weight:10},
     ]},
+  { code:'M23.206', name:'Lateral meniscus derangement, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M23.207', name:'Lateral meniscus derangement, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'M76.51', name:'Patellar tendinitis, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M76.52', name:'Patellar tendinitis, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'M70.41', name:'Prepatellar bursitis, right knee', category:'knee', laterality:'R', triggers:[]},
+  { code:'M70.42', name:'Prepatellar bursitis, left knee', category:'knee', laterality:'L', triggers:[]},
+  { code:'S83.411A', name:'Sprain of MCL of right knee, initial encounter', category:'knee', laterality:'R', triggers:[]},
+  { code:'S83.412A', name:'Sprain of MCL of left knee, initial encounter', category:'knee', laterality:'L', triggers:[]},
+  { code:'S83.511A', name:'Sprain of ACL of right knee, initial encounter', category:'knee', laterality:'R', triggers:[]},
+  { code:'S83.512A', name:'Sprain of ACL of left knee, initial encounter', category:'knee', laterality:'L', triggers:[]},
+  { code:'S83.241A', name:'Other tear of medial meniscus, right knee, initial encounter', category:'knee', laterality:'R', triggers:[]},
+  { code:'S83.242A', name:'Other tear of medial meniscus, left knee, initial encounter', category:'knee', laterality:'L', triggers:[]},
+  { code:'S86.911A', name:'Strain of muscle/tendon at lower leg, right leg, initial encounter', category:'knee', laterality:'R', triggers:[]},
+  { code:'S86.912A', name:'Strain of muscle/tendon at lower leg, left leg, initial encounter', category:'knee', laterality:'L', triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // LOWER LEG / CALF / SHIN
+  // ═════════════════════════════════════════════
+  { code:'M79.661', name:'Pain in right lower leg', category:'leg', laterality:'R', triggers:[]},
+  { code:'M79.662', name:'Pain in left lower leg', category:'leg', laterality:'L', triggers:[]},
+  { code:'M79.669', name:'Pain in unspecified lower leg', category:'leg', laterality:null, triggers:[]},
+  { code:'M79.604', name:'Pain in right leg', category:'leg', laterality:'R', triggers:[]},
+  { code:'M79.605', name:'Pain in left leg', category:'leg', laterality:'L', triggers:[]},
+  { code:'M79.606', name:'Pain in leg, unspecified', category:'leg', laterality:null, triggers:[]},
+  { code:'M76.61', name:'Achilles tendinitis, right leg', category:'ankle', laterality:'R',
+    triggers:[
+      {source:'region', match:['ankle','leg'], weight:12},
+      {source:'region-side', match:'R', weight:10},
+    ]},
+  { code:'M76.62', name:'Achilles tendinitis, left leg', category:'ankle', laterality:'L',
+    triggers:[
+      {source:'region', match:['ankle','leg'], weight:12},
+      {source:'region-side', match:'L', weight:10},
+    ]},
+  { code:'M76.811', name:'Anterior tibial syndrome, right leg', category:'leg', laterality:'R', triggers:[]},
+  { code:'M76.812', name:'Anterior tibial syndrome, left leg', category:'leg', laterality:'L', triggers:[]},
+  { code:'M76.821', name:'Posterior tibial tendinitis, right leg', category:'leg', laterality:'R', triggers:[]},
+  { code:'M76.822', name:'Posterior tibial tendinitis, left leg', category:'leg', laterality:'L', triggers:[]},
+  { code:'S86.011A', name:'Strain of right Achilles tendon, initial encounter', category:'ankle', laterality:'R', triggers:[]},
+  { code:'S86.012A', name:'Strain of left Achilles tendon, initial encounter', category:'ankle', laterality:'L', triggers:[]},
+  { code:'S86.111A', name:'Strain of right gastrocnemius muscle, initial encounter', category:'leg', laterality:'R', triggers:[]},
+  { code:'S86.112A', name:'Strain of left gastrocnemius muscle, initial encounter', category:'leg', laterality:'L', triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // ANKLE / FOOT / TOES
+  // ═════════════════════════════════════════════
+  { code:'M25.571', name:'Pain in right ankle and joints of right foot', category:'ankle', laterality:'R',
+    triggers:[
+      {source:'region', match:'ankle', weight:20},
+      {source:'region-side', match:'R', weight:12},
+    ]},
+  { code:'M25.572', name:'Pain in left ankle and joints of left foot', category:'ankle', laterality:'L',
+    triggers:[
+      {source:'region', match:'ankle', weight:20},
+      {source:'region-side', match:'L', weight:12},
+    ]},
+  { code:'M25.579', name:'Pain in unspecified ankle and foot', category:'ankle', laterality:null, triggers:[]},
+  { code:'M25.671', name:'Stiffness of right ankle, NEC', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M25.672', name:'Stiffness of left ankle, NEC', category:'ankle', laterality:'L', triggers:[]},
+  { code:'M79.671', name:'Pain in right foot', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M79.672', name:'Pain in left foot', category:'ankle', laterality:'L', triggers:[]},
+  { code:'M79.673', name:'Pain in unspecified foot', category:'ankle', laterality:null, triggers:[]},
+  { code:'M79.674', name:'Pain in right toe(s)', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M79.675', name:'Pain in left toe(s)', category:'ankle', laterality:'L', triggers:[]},
+  { code:'M72.2', name:'Plantar fascial fibromatosis / plantar fasciitis', category:'ankle', laterality:null,
+    triggers:[
+      {source:'region', match:'ankle', weight:12},
+      {source:'ortho', match:['windlass'], weight:25},
+      {source:'agg', match:['walking','mornings'], weight:12},
+    ]},
   { code:'M77.31', name:'Calcaneal spur, right foot (plantar fasciitis)', category:'ankle', laterality:'R',
     triggers:[
       {source:'region', match:'ankle', weight:15},
-      {source:'ortho',  match:['windlass'], weight:30},
+      {source:'region-side', match:'R', weight:10},
+      {source:'ortho',  match:['windlass'], weight:25},
       {source:'agg',    match:['walking','mornings'], weight:10},
     ]},
+  { code:'M77.32', name:'Calcaneal spur, left foot (plantar fasciitis)', category:'ankle', laterality:'L',
+    triggers:[
+      {source:'region', match:'ankle', weight:15},
+      {source:'region-side', match:'L', weight:10},
+      {source:'ortho',  match:['windlass'], weight:25},
+      {source:'agg',    match:['walking','mornings'], weight:10},
+    ]},
+  { code:'M77.41', name:'Metatarsalgia, right foot', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M77.42', name:'Metatarsalgia, left foot', category:'ankle', laterality:'L', triggers:[]},
+  { code:'M20.11', name:'Hallux valgus, right foot', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M20.12', name:'Hallux valgus, left foot', category:'ankle', laterality:'L', triggers:[]},
+  { code:'M20.21', name:'Hallux rigidus, right foot', category:'ankle', laterality:'R', triggers:[]},
+  { code:'M20.22', name:'Hallux rigidus, left foot', category:'ankle', laterality:'L', triggers:[]},
+  { code:'G57.61', name:'Lesion of plantar nerve, right lower limb / Morton\'s neuroma', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G57.62', name:'Lesion of plantar nerve, left lower limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'S93.401A', name:'Sprain of unspecified ligament of right ankle, initial encounter', category:'ankle', laterality:'R',
+    triggers:[
+      {source:'region', match:'ankle', weight:10},
+      {source:'region-side', match:'R', weight:8},
+      {source:'mechanism', match:['sports','sudden','fall'], weight:20},
+    ]},
+  { code:'S93.402A', name:'Sprain of unspecified ligament of left ankle, initial encounter', category:'ankle', laterality:'L',
+    triggers:[
+      {source:'region', match:'ankle', weight:10},
+      {source:'region-side', match:'L', weight:8},
+      {source:'mechanism', match:['sports','sudden','fall'], weight:20},
+    ]},
+  { code:'S93.601A', name:'Sprain of unspecified ligament of right foot, initial encounter', category:'ankle', laterality:'R', triggers:[]},
+  { code:'S93.602A', name:'Sprain of unspecified ligament of left foot, initial encounter', category:'ankle', laterality:'L', triggers:[]},
+  { code:'S96.911A', name:'Strain of muscle/tendon at ankle/foot, right foot, initial encounter', category:'ankle', laterality:'R', triggers:[]},
+  { code:'S96.912A', name:'Strain of muscle/tendon at ankle/foot, left foot, initial encounter', category:'ankle', laterality:'L', triggers:[]},
 
-  // ═════ GENERAL ═════
+  // ═════════════════════════════════════════════
+  // SEGMENTAL/SOMATIC DYSFUNCTION (chiro-specific)
+  // ═════════════════════════════════════════════
+  { code:'M99.00', name:'Segmental and somatic dysfunction of head region', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.01', name:'Segmental and somatic dysfunction of cervical region', category:'dysfunction', laterality:null,
+    triggers:[
+      {source:'region', match:'neck', weight:10},
+    ]},
+  { code:'M99.02', name:'Segmental and somatic dysfunction of thoracic region', category:'dysfunction', laterality:null,
+    triggers:[
+      {source:'region', match:['upper-back','mid-back'], weight:10},
+    ]},
+  { code:'M99.03', name:'Segmental and somatic dysfunction of lumbar region', category:'dysfunction', laterality:null,
+    triggers:[
+      {source:'region', match:'low-back', weight:10},
+      {source:'palpspine-lumbar', match:true, weight:10},
+    ]},
+  { code:'M99.04', name:'Segmental and somatic dysfunction of sacral region', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.05', name:'Segmental and somatic dysfunction of pelvic region', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.06', name:'Segmental and somatic dysfunction of lower extremity', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.07', name:'Segmental and somatic dysfunction of upper extremity', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.08', name:'Segmental and somatic dysfunction of rib cage', category:'dysfunction', laterality:null, triggers:[]},
+  { code:'M99.09', name:'Segmental and somatic dysfunction of abdomen/other region', category:'dysfunction', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // NERVE / NEUROPATHY
+  // ═════════════════════════════════════════════
+  { code:'M54.10', name:'Radiculopathy, site unspecified', category:'nerve', laterality:null, triggers:[]},
+  { code:'G57.01', name:'Lesion of sciatic nerve, right lower limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G57.02', name:'Lesion of sciatic nerve, left lower limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'G57.11', name:'Meralgia paresthetica, right lower limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G57.12', name:'Meralgia paresthetica, left lower limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'G57.31', name:'Lesion of lateral popliteal nerve, right lower limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G57.32', name:'Lesion of lateral popliteal nerve, left lower limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'G57.51', name:'Tarsal tunnel syndrome, right lower limb', category:'nerve', laterality:'R', triggers:[]},
+  { code:'G57.52', name:'Tarsal tunnel syndrome, left lower limb', category:'nerve', laterality:'L', triggers:[]},
+  { code:'G60.9', name:'Hereditary and idiopathic neuropathy, unspecified', category:'nerve', laterality:null, triggers:[]},
+  { code:'G62.9', name:'Polyneuropathy, unspecified', category:'nerve', laterality:null, triggers:[]},
+  { code:'E11.40', name:'Type 2 DM with diabetic neuropathy, unspecified', category:'nerve', laterality:null, triggers:[]},
+  { code:'E11.42', name:'Type 2 DM with diabetic polyneuropathy', category:'nerve', laterality:null, triggers:[]},
+  { code:'R20.0', name:'Anesthesia of skin / numbness', category:'nerve', laterality:null, triggers:[]},
+  { code:'R20.2', name:'Paresthesia of skin / tingling', category:'nerve', laterality:null, triggers:[]},
+  { code:'R20.8', name:'Other disturbances of skin sensation', category:'nerve', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // SWELLING / EDEMA / RED-FLAG SUPPORTING
+  // ═════════════════════════════════════════════
+  { code:'R22.31', name:'Localized swelling, mass and lump, right upper limb', category:'general', laterality:'R', triggers:[]},
+  { code:'R22.32', name:'Localized swelling, mass and lump, left upper limb', category:'general', laterality:'L', triggers:[]},
+  { code:'R22.33', name:'Localized swelling, bilateral upper limbs', category:'general', laterality:'B', triggers:[]},
+  { code:'R22.41', name:'Localized swelling, mass and lump, right lower limb', category:'general', laterality:'R', triggers:[]},
+  { code:'R22.42', name:'Localized swelling, mass and lump, left lower limb', category:'general', laterality:'L', triggers:[]},
+  { code:'R22.43', name:'Localized swelling, bilateral lower limbs', category:'general', laterality:'B', triggers:[]},
+  { code:'R60.0', name:'Localized edema', category:'general', laterality:null, triggers:[]},
+  { code:'R60.9', name:'Edema, unspecified', category:'general', laterality:null, triggers:[]},
+  { code:'R53.1', name:'Weakness', category:'general', laterality:null, triggers:[]},
+  { code:'R42', name:'Dizziness and giddiness', category:'general', laterality:null, triggers:[]},
+  { code:'R26.81', name:'Unsteadiness on feet', category:'general', laterality:null, triggers:[]},
+  { code:'R26.89', name:'Other abnormalities of gait and mobility', category:'general', laterality:null, triggers:[]},
+  { code:'R29.3', name:'Abnormal posture', category:'general', laterality:null, triggers:[]},
+  { code:'R29.6', name:'Repeated falls', category:'general', laterality:null, triggers:[]},
+  { code:'R29.898', name:'Other symptoms involving the musculoskeletal system', category:'general', laterality:null, triggers:[]},
+  { code:'R29.2', name:'Abnormal reflex', category:'general', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // ARTHRITIS / DJD
+  // ═════════════════════════════════════════════
+  { code:'M15.9', name:'Polyosteoarthritis, unspecified', category:'arthritis', laterality:null, triggers:[]},
+  { code:'M19.011', name:'Primary osteoarthritis, right shoulder', category:'arthritis', laterality:'R', triggers:[]},
+  { code:'M19.012', name:'Primary osteoarthritis, left shoulder', category:'arthritis', laterality:'L', triggers:[]},
+  { code:'M19.021', name:'Primary osteoarthritis, right elbow', category:'arthritis', laterality:'R', triggers:[]},
+  { code:'M19.022', name:'Primary osteoarthritis, left elbow', category:'arthritis', laterality:'L', triggers:[]},
+  { code:'M19.031', name:'Primary osteoarthritis, right wrist', category:'arthritis', laterality:'R', triggers:[]},
+  { code:'M19.032', name:'Primary osteoarthritis, left wrist', category:'arthritis', laterality:'L', triggers:[]},
+  { code:'M19.071', name:'Primary osteoarthritis, right ankle and foot', category:'arthritis', laterality:'R', triggers:[]},
+  { code:'M19.072', name:'Primary osteoarthritis, left ankle and foot', category:'arthritis', laterality:'L', triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // MUSCLE / MISC
+  // ═════════════════════════════════════════════
+  { code:'M79.10', name:'Myalgia, unspecified site', category:'generalized', laterality:null, triggers:[]},
   { code:'M79.18', name:'Myalgia, other site (muscle pain)', category:'generalized', laterality:null,
     triggers:[
       {source:'palpmuscle-hyper', match:true, weight:25, minMatches:2},
       {source:'onset', match:['today','this-week','2-4-wk'], weight:10},
     ]},
+  { code:'M62.81', name:'Muscle weakness, generalized', category:'generalized', laterality:null, triggers:[]},
+  { code:'M62.830', name:'Muscle spasm of back', category:'generalized', laterality:null,
+    triggers:[
+      {source:'region', match:['low-back','upper-back','mid-back','neck'], weight:10},
+      {source:'palpmuscle-hyper', match:true, weight:20, minMatches:1},
+    ]},
+  { code:'M62.838', name:'Other muscle spasm', category:'generalized', laterality:null, triggers:[]},
+  { code:'M62.89', name:'Other specified disorders of muscle', category:'generalized', laterality:null, triggers:[]},
+  { code:'R52', name:'Pain, unspecified', category:'generalized', laterality:null, triggers:[]},
+  { code:'G89.21', name:'Chronic pain due to trauma', category:'generalized', laterality:null, triggers:[]},
+  { code:'G89.29', name:'Other chronic pain', category:'generalized', laterality:null,
+    triggers:[
+      {source:'onset', match:['chronic','3-plus-mo'], weight:10},
+    ]},
+  { code:'Z98.1', name:'Arthrodesis status / history of spinal fusion', category:'general', laterality:null, triggers:[]},
+  { code:'Z87.39', name:'Personal history of MSK/connective tissue disease', category:'general', laterality:null, triggers:[]},
+
+  // ═════════════════════════════════════════════
+  // TRAUMA / INJURY VISIT SUPPORT
+  // ═════════════════════════════════════════════
+  { code:'V89.2XXA', name:'Person injured in unspecified motor-vehicle accident, traffic, initial encounter', category:'trauma', laterality:null, triggers:[]},
+  { code:'Y92.410', name:'Unspecified street and highway as place of occurrence', category:'trauma', laterality:null, triggers:[]},
+  { code:'W19.XXXA', name:'Unspecified fall, initial encounter', category:'trauma', laterality:null, triggers:[]},
+  { code:'W01.0XXA', name:'Fall on same level from slipping, tripping, stumbling, initial encounter', category:'trauma', laterality:null, triggers:[]},
+  { code:'X50.0XXA', name:'Overexertion from strenuous movement or load, initial encounter', category:'trauma', laterality:null, triggers:[]},
+  { code:'X50.1XXA', name:'Overexertion from prolonged static or awkward postures, initial encounter', category:'trauma', laterality:null, triggers:[]},
+  { code:'Y93.B9', name:'Activity, other involving muscle strengthening exercises', category:'trauma', laterality:null, triggers:[]},
+  { code:'Y93.A1', name:'Activity, walking, marching and hiking', category:'trauma', laterality:null, triggers:[]},
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -8526,6 +9418,10 @@ function toggleICDSelect(code){
   if(searchInput && searchInput.value) searchICDLibrary(searchInput.value);
   // Re-render plan goals (since they're tied to selected ICDs)
   if(typeof renderPlanGoals === 'function') renderPlanGoals();
+  // Reset auto-plan dismissal when selection changes, so banner re-appears with new template
+  S.exam._autoPlanDismissed = false;
+  S.exam._autoPlanApplied = false;
+  if(typeof updateAutoPlanBanner === 'function') updateAutoPlanBanner();
 }
 
 function renderICDSelected(){
@@ -8562,6 +9458,10 @@ function setICDPrimary(code){
   if(!S.exam.chiro.selectedICD) return;
   S.exam.chiro.selectedICD.forEach(d => { d.primary = (d.code === code); });
   renderICDSelected();
+  // Primary changed — reset dismissal, re-show auto-plan with new template
+  S.exam._autoPlanDismissed = false;
+  S.exam._autoPlanApplied = false;
+  if(typeof updateAutoPlanBanner === 'function') updateAutoPlanBanner();
 }
 
 function updateICDLaterality(code, newLat){
@@ -8585,6 +9485,10 @@ function removeICD(code){
   if(searchInput && searchInput.value) searchICDLibrary(searchInput.value);
   // Re-render plan goals since ICDs changed
   if(typeof renderPlanGoals === 'function') renderPlanGoals();
+  // Primary may have changed — refresh auto-plan banner
+  S.exam._autoPlanDismissed = false;
+  S.exam._autoPlanApplied = false;
+  if(typeof updateAutoPlanBanner === 'function') updateAutoPlanBanner();
 }
 
 function searchICDLibrary(query){
@@ -8597,19 +9501,24 @@ function searchICDLibrary(query){
   }
   const matches = ICD_LIBRARY.filter(c =>
     c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q)
-  ).slice(0, 20);
+  ).slice(0, 30);
 
   if(matches.length === 0){
     resultsEl.innerHTML = `<div style="padding:12px;color:var(--ink-sm);font-size:.82rem;font-style:italic;">No matches for "${escapeHtml(q)}".</div>`;
     return;
   }
 
-  resultsEl.innerHTML = matches.map(c => {
+  const countHeader = `<div style="padding:4px 0 8px;font-size:.72rem;color:var(--ink-sm);font-style:italic;">Showing ${matches.length} of ${ICD_LIBRARY.filter(c => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q)).length} total · Type more to narrow</div>`;
+
+  resultsEl.innerHTML = countHeader + matches.map(c => {
     const isSel = (S.exam.chiro.selectedICD || []).some(d => d.code === c.code);
+    const latBadge = c.laterality === 'R' ? '<span class="icd-lat-badge laterality-r" style="margin-left:6px;">R</span>'
+                   : c.laterality === 'L' ? '<span class="icd-lat-badge laterality-l" style="margin-left:6px;">L</span>'
+                   : c.laterality === 'B' ? '<span class="icd-lat-badge laterality-b" style="margin-left:6px;">B</span>' : '';
     return `
       <div class="icd-search-item${isSel ? ' selected' : ''}" onclick="toggleICDSelect('${c.code}')">
-        <div class="icd-search-code">${escapeHtml(c.code)}</div>
-        <div class="icd-search-name">${escapeHtml(c.name)}</div>
+        <div class="icd-search-code">${escapeHtml(c.code)}${latBadge}</div>
+        <div class="icd-search-name">${escapeHtml(c.name)} <span style="color:var(--ink-sm);font-size:.72rem;">· ${escapeHtml(c.category)}</span></div>
         <div class="icd-search-add">${isSel ? '✓ Added' : '+ Add'}</div>
       </div>`;
   }).join('');
@@ -8930,22 +9839,42 @@ function enterExamView(patient){
   renderSpineFindingsList();
   renderMuscleFindingsList();
 
-  // Show/hide neuro exam card based on whether patient reported symptoms
+  // Auto-open neuro card based on reported symptoms; provider can always toggle it
   const reportedNeuro = patient.payload && patient.payload.health &&
                         patient.payload.health.neuroSymptoms &&
                         patient.payload.health.neuroSymptoms.some(s => s !== 'neuro-none');
   const neuroCard = document.getElementById('ex-neuro-card');
+  const neuroToggleBtn = document.getElementById('ex-neuro-toggle-btn');
+  const neuroReason = document.getElementById('ex-neuro-toggle-reason');
   if(neuroCard) neuroCard.style.display = reportedNeuro ? '' : 'none';
+  if(neuroToggleBtn) neuroToggleBtn.textContent = reportedNeuro ? 'Hide Neuro Panel' : 'Show Neuro Panel';
   if(reportedNeuro){
     const lbls = (patient.payload.health.neuroSymptomsLabels || []).join(', ');
     const where = patient.payload.health.neuroWhere || '';
-    const el = document.getElementById('ex-neuro-reported');
-    if(el) el.textContent = 'Patient reported: ' + lbls + (where ? ' — Distribution: ' + where : '');
+    const reportedEl = document.getElementById('ex-neuro-reported');
+    const reportedCallout = document.getElementById('ex-neuro-reported-callout');
+    if(reportedEl) reportedEl.textContent = 'Patient reported: ' + lbls + (where ? ' — Distribution: ' + where : '');
+    if(reportedCallout) reportedCallout.style.display = '';
+    if(neuroReason) neuroReason.textContent = '⚠ Patient reported neuro symptoms — opened automatically';
+  } else {
+    const reportedCallout = document.getElementById('ex-neuro-reported-callout');
+    if(reportedCallout) reportedCallout.style.display = 'none';
+    if(neuroReason) neuroReason.textContent = 'Dermatomes · Myotomes (MMT) · Reflexes · Special tests';
   }
 
   // Go to step 0
   examGoStep(0);
   window.scrollTo({top:0, behavior:'instant'});
+}
+
+function toggleNeuroCard(){
+  const neuroCard = document.getElementById('ex-neuro-card');
+  const btn = document.getElementById('ex-neuro-toggle-btn');
+  if(!neuroCard) return;
+  const isHidden = neuroCard.style.display === 'none' || !neuroCard.style.display;
+  neuroCard.style.display = isHidden ? '' : 'none';
+  if(btn) btn.textContent = isHidden ? 'Hide Neuro Panel' : 'Show Neuro Panel';
+  if(isHidden) neuroCard.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function exitExamToWaitingRoom(){
@@ -9013,7 +9942,7 @@ function _buildPristineExamState(){
       palpNotes: '',
       selectedICD: [],
       today: {
-        provided: true, regions: [], techniques: [], segmentsAdjusted: [],
+        provided: true, regions: [], techniques: [], regionTechniques: {}, segmentsAdjusted: [],
         segmentsNotes: '', todayNotes: '',
         deferReason: '', imaging: [], imagingRegion: '', imagingFacility: '',
         specialistTarget: '', specialistUrgency: '',
@@ -9092,6 +10021,13 @@ function _clearExamFormUI(){
     el.className = 'np-tho';
   });
   document.querySelectorAll('#exam-app .np-tier-card, #exam-app .wl-tier-card').forEach(el => el.classList.remove('sel'));
+  // Reset ROM displays (they hold the finalized value "40°" / "WNL" / "NT")
+  document.querySelectorAll('#exam-app .rom-row-display').forEach(el => {
+    el.textContent = '—';
+    el.className = 'rom-row-display';
+  });
+  // Reset all ROM dropdowns
+  document.querySelectorAll('#exam-app .rom-row-select').forEach(el => { el.value = ''; });
   // WL supplement rows
   document.querySelectorAll('#exam-app .wl-supp-row').forEach(el => el.classList.remove('sel'));
   // Clear ICD UI containers + palpation lists + NP summary cards + WL metric displays
@@ -9137,6 +10073,12 @@ function _clearExamFormUI(){
   // Show the signoff brow again in case it was hidden by a previous completion
   const brow = document.getElementById('signoff-brow');
   if(brow) brow.style.display = '';
+  // CRITICAL: Re-enable the signoff button in case a prior submit left it disabled
+  const soBtn = document.getElementById('signoff-submit-btn');
+  if(soBtn) soBtn.disabled = false;
+  // Uncheck the attestation box
+  const soAttest = document.getElementById('signoff-attest-box');
+  if(soAttest) soAttest.checked = false;
 }
 
 function _resetExamStateForNewPatient(){
@@ -9528,7 +10470,7 @@ function buildROMTester(patient){
   }
   if(emptyEl) emptyEl.style.display = 'none';
 
-  // De-duplicate: multiple region IDs that map to the same ROM spec (upper-back + mid-back both thoracic) — use one block
+  // De-duplicate: multiple region IDs that map to the same ROM spec — use one block
   const seen = new Set();
   const blocks = [];
   regionIds.forEach(rid => {
@@ -9553,20 +10495,54 @@ function buildROMTester(patient){
          ${b.spec.name}${b.side}
          <span class="rom-region-pain">Reported: ${b.pain}/10</span>
        </div>
-       ${b.spec.planes.map(p => `
+       ${b.spec.planes.map(p => {
+         const normalDeg = parseInt(p.normal) || 0;
+         // Generate dropdown options in 5° steps, from 0 up to 125% of normal (rounded to nearest 5)
+         const maxDeg = Math.max(60, Math.ceil((normalDeg * 1.25) / 5) * 5);
+         let options = '<option value="">Select degrees…</option>';
+         for(let d = 0; d <= maxDeg; d += 5){
+           const flag = d === normalDeg ? ' (normal)' : '';
+           options += `<option value="${d}°">${d}°${flag}</option>`;
+         }
+         return `
          <div class="rom-row">
            <div class="rom-row-label">${p.label} <span style="font-size:.68rem;color:var(--ink-sm);">(normal ${p.normal})</span></div>
-           <input class="rom-row-input" id="rom-${p.key}" placeholder="actual ROM (e.g., '40°' or 'WNL')" oninput="updateROMField('${p.key}', this.value)">
+           <div class="rom-row-controls">
+             <select class="rom-row-select" id="rom-${p.key}-select" onchange="setROMValue('${p.key}', this.value)">${options}</select>
+             <button type="button" class="rom-quick-btn wnl" onclick="setROMQuick('${p.key}','WNL')">WNL</button>
+             <button type="button" class="rom-quick-btn nt" onclick="setROMQuick('${p.key}','NT')">NT</button>
+           </div>
+           <div class="rom-row-display" id="rom-${p.key}-display">—</div>
            <label class="rom-row-pain"><input type="checkbox" id="rom-${p.key}-pain" onchange="updateROMPain('${p.key}', this.checked)"> Pain</label>
-         </div>`).join('')}
+         </div>`;
+       }).join('')}
      </div>`
   ).join('');
 }
 
-function updateROMField(key, value){
+function setROMValue(key, value){
   S.exam.chiro.rom[key] = S.exam.chiro.rom[key] || {};
   S.exam.chiro.rom[key].value = value;
+  const display = document.getElementById('rom-' + key + '-display');
+  if(display) display.textContent = value || '—';
 }
+
+function setROMQuick(key, label){
+  S.exam.chiro.rom[key] = S.exam.chiro.rom[key] || {};
+  S.exam.chiro.rom[key].value = label;
+  // Clear the dropdown since we picked a quick-option
+  const sel = document.getElementById('rom-' + key + '-select');
+  if(sel) sel.value = '';
+  const display = document.getElementById('rom-' + key + '-display');
+  if(display){
+    display.textContent = label;
+    display.className = 'rom-row-display ' + (label === 'WNL' ? 'wnl-set' : 'nt-set');
+  }
+}
+
+// Legacy shim for older callers that used updateROMField (kept for safety)
+function updateROMField(key, value){ setROMValue(key, value); }
+
 function updateROMPain(key, painful){
   S.exam.chiro.rom[key] = S.exam.chiro.rom[key] || {};
   S.exam.chiro.rom[key].painful = painful;
@@ -10206,10 +11182,14 @@ function buildTodayTxRegions(){
       if(chip.classList.contains('sel')){
         chip.classList.remove('sel');
         S.exam.chiro.today.regions = S.exam.chiro.today.regions.filter(r => r !== val);
+        // Remove per-region techniques for this region (optional cleanup)
+        if(S.exam.chiro.today.regionTechniques) delete S.exam.chiro.today.regionTechniques[val];
       } else {
         chip.classList.add('sel');
         if(!S.exam.chiro.today.regions.includes(val)) S.exam.chiro.today.regions.push(val);
       }
+      // Rebuild per-region technique grid whenever a region toggles
+      buildPerRegionTechniques();
     };
   });
 
@@ -10221,24 +11201,132 @@ function buildTodayTxRegions(){
       if(chip) chip.classList.add('sel');
     });
   }
+  // Build per-region technique rows
+  buildPerRegionTechniques();
+}
+
+function buildPerRegionTechniques(){
+  const container = document.getElementById('tx-region-techniques');
+  if(!container) return;
+  const regions = S.exam.chiro.today.regions || [];
+  const REGION_LABELS = {
+    'neck':'Neck / Cervical','upper-back':'Upper Back / T-spine','mid-back':'Mid Back','low-back':'Low Back / L-spine',
+    'shoulder':'Shoulder','shoulder-l':'L Shoulder','shoulder-r':'R Shoulder',
+    'hip':'Hip / Pelvis','hip-l':'L Hip','hip-r':'R Hip',
+    'si':'SI Joint','si-l':'L SI','si-r':'R SI',
+    'elbow':'Elbow','wrist':'Wrist/Hand','knee':'Knee','ankle':'Ankle/Foot','jaw':'TMJ','head':'Head'
+  };
+  const TECHNIQUES = [
+    {val:'diversified', label:'Diversified'},
+    {val:'gonstead', label:'Gonstead'},
+    {val:'thompson', label:'Thompson / Drop'},
+    {val:'activator', label:'Activator'},
+    {val:'flex-dist', label:'Flex-Distraction'},
+    {val:'sot', label:'SOT'},
+    {val:'mfr', label:'Myofascial Release'},
+    {val:'iastm', label:'IASTM / Graston'},
+    {val:'cupping', label:'Cupping'},
+    {val:'estim', label:'E-stim'},
+    {val:'ultrasound', label:'Ultrasound'},
+    {val:'manual-stretch', label:'Manual Stretch'},
+    {val:'ther-ex', label:'Ther-Ex'},
+    {val:'neuro-reed', label:'Neuromusc Re-ed'},
+    {val:'pir', label:'PIR / MET'},
+    {val:'pnf', label:'PNF Stretch'},
+  ];
+
+  // Ensure state container exists
+  if(!S.exam.chiro.today.regionTechniques) S.exam.chiro.today.regionTechniques = {};
+
+  if(regions.length === 0){
+    container.innerHTML = '<div style="padding:12px;color:var(--ink-sm);font-style:italic;font-size:.82rem;">Select at least one region above to document techniques.</div>';
+    return;
+  }
+
+  container.innerHTML = regions.map(r => {
+    const label = REGION_LABELS[r] || r;
+    const regionTechs = S.exam.chiro.today.regionTechniques[r] || [];
+    const chips = TECHNIQUES.map(t => {
+      const isSel = regionTechs.includes(t.val);
+      return `<div class="chip${isSel ? ' sel' : ''}" data-region="${escapeHtml(r)}" data-tech="${t.val}">${escapeHtml(t.label)}</div>`;
+    }).join('');
+    return `<div class="region-tx-block">
+      <div class="region-tx-title">${escapeHtml(label)}</div>
+      <div class="chips region-tx-chips" data-region="${escapeHtml(r)}">${chips}</div>
+    </div>`;
+  }).join('');
+
+  // Wire chips
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => {
+      const region = chip.dataset.region;
+      const tech = chip.dataset.tech;
+      if(!S.exam.chiro.today.regionTechniques[region]) S.exam.chiro.today.regionTechniques[region] = [];
+      const arr = S.exam.chiro.today.regionTechniques[region];
+      if(chip.classList.contains('sel')){
+        chip.classList.remove('sel');
+        const idx = arr.indexOf(tech);
+        if(idx >= 0) arr.splice(idx, 1);
+      } else {
+        chip.classList.add('sel');
+        if(!arr.includes(tech)) arr.push(tech);
+      }
+      // Maintain legacy flat list of all techniques (for PDF + signoff summary)
+      syncFlatTechniques();
+    };
+  });
+}
+
+function syncFlatTechniques(){
+  const perReg = S.exam.chiro.today.regionTechniques || {};
+  const union = new Set(S.exam.chiro.today.techniques || []);
+  Object.values(perReg).forEach(arr => arr.forEach(t => union.add(t)));
+  S.exam.chiro.today.techniques = Array.from(union);
+}
+
+function toggleTxTechniquesGlobal(){
+  const el = document.getElementById('tx-techniques-chips');
+  const btn = document.getElementById('tx-tech-global-toggle');
+  if(!el) return;
+  if(el.style.display === 'none' || !el.style.display){
+    el.style.display = '';
+    if(btn) btn.textContent = '− Hide global picker';
+  } else {
+    el.style.display = 'none';
+    if(btn) btn.textContent = '+ Pick global techniques';
+  }
 }
 
 function buildTodayTxTechniques(){
   const container = document.getElementById('tx-techniques-chips');
   if(!container) return;
   container.querySelectorAll('.chip').forEach(chip => {
-    // Restore prior selection if coming back to step
     const val = chip.dataset.val;
     if(S.exam.chiro.today.techniques.includes(val)) chip.classList.add('sel');
     else chip.classList.remove('sel');
     chip.onclick = () => {
-      if(chip.classList.contains('sel')){
-        chip.classList.remove('sel');
-        S.exam.chiro.today.techniques = S.exam.chiro.today.techniques.filter(v => v !== val);
-      } else {
+      const isAddingTech = !chip.classList.contains('sel');
+      if(isAddingTech){
         chip.classList.add('sel');
         if(!S.exam.chiro.today.techniques.includes(val)) S.exam.chiro.today.techniques.push(val);
+        // Also apply to every currently-treated region
+        const regions = S.exam.chiro.today.regions || [];
+        if(!S.exam.chiro.today.regionTechniques) S.exam.chiro.today.regionTechniques = {};
+        regions.forEach(r => {
+          if(!S.exam.chiro.today.regionTechniques[r]) S.exam.chiro.today.regionTechniques[r] = [];
+          if(!S.exam.chiro.today.regionTechniques[r].includes(val)) S.exam.chiro.today.regionTechniques[r].push(val);
+        });
+      } else {
+        chip.classList.remove('sel');
+        S.exam.chiro.today.techniques = S.exam.chiro.today.techniques.filter(v => v !== val);
+        // Also remove from every region
+        const perReg = S.exam.chiro.today.regionTechniques || {};
+        Object.keys(perReg).forEach(r => {
+          perReg[r] = perReg[r].filter(v => v !== val);
+        });
       }
+      // Re-render the per-region grid to reflect the global change
+      buildPerRegionTechniques();
     };
   });
 }
@@ -10464,42 +11552,70 @@ function initPlanHomeCareChips(){
 
 function renderPlanStep(){
   // Called when entering plan step — bootstrap all plan UI
-  buildTodayTxRegions();
-  buildTodayTxTechniques();
-  buildTodayTxSegments();
-  initTodayTxDeferralChips();
-  initPlanHomeCareChips();
-  renderPlanGoals();
-  updatePlanTotals();
-  // Restore provided toggle state
-  setTodayTxProvided(S.exam.chiro.today.provided);
-  setPlanMode(S.exam.chiro.plan.mode);
-  // Restore input values
-  const restoreVal = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined && val !== null) el.value = val; };
-  restoreVal('tx-segments-notes', S.exam.chiro.today.segmentsNotes);
-  restoreVal('tx-today-notes', S.exam.chiro.today.todayNotes);
-  restoreVal('tx-imaging-region', S.exam.chiro.today.imagingRegion);
-  restoreVal('tx-imaging-facility', S.exam.chiro.today.imagingFacility);
-  restoreVal('tx-specialist-target', S.exam.chiro.today.specialistTarget);
-  restoreVal('tx-specialist-urgency', S.exam.chiro.today.specialistUrgency);
-  restoreVal('tx-followup-date', S.exam.chiro.today.followupDate);
-  restoreVal('tx-followup-type', S.exam.chiro.today.followupType);
-  restoreVal('tx-defer-rationale', S.exam.chiro.today.deferRationale);
-  restoreVal('phase-acute-visits', S.exam.chiro.plan.acuteVisits);
-  restoreVal('phase-acute-freq', S.exam.chiro.plan.acuteFreq);
-  restoreVal('phase-acute-goal', S.exam.chiro.plan.acuteGoal);
-  restoreVal('phase-subacute-visits', S.exam.chiro.plan.subacuteVisits);
-  restoreVal('phase-subacute-freq', S.exam.chiro.plan.subacuteFreq);
-  restoreVal('phase-subacute-goal', S.exam.chiro.plan.subacuteGoal);
-  restoreVal('phase-corrective-visits', S.exam.chiro.plan.correctiveVisits);
-  restoreVal('phase-corrective-freq', S.exam.chiro.plan.correctiveFreq);
-  restoreVal('phase-corrective-goal', S.exam.chiro.plan.correctiveGoal);
-  restoreVal('plan-single-visits', S.exam.chiro.plan.singleVisits);
-  restoreVal('plan-single-freq', S.exam.chiro.plan.singleFreq);
-  restoreVal('plan-additional-notes', S.exam.chiro.plan.additionalNotes);
+  const services = (S.exam.patient && S.exam.patient.services) || [];
+  const hasChiro = services.includes('CHIRO');
+  const hasSW = services.includes('SW');
+  const hasNP = services.includes('NP');
+  const hasWL = services.includes('WL');
 
-  // Also render ICD assessment so selectedICD syncs with goals
-  renderICDAssessment();
+  // Show/hide service-scoped plan cards based on services selected
+  const showHide = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; };
+  showHide('plan-sw-card', hasSW);
+  showHide('plan-np-card', hasNP);
+  showHide('plan-wl-card', hasWL);
+  showHide('plan-chiro-wrapper', hasChiro);
+  showHide('plan-chiro-dx-wrapper', hasChiro);
+
+  // Service-scoped cards: render them when their service is active
+  if(hasSW) renderPlanSWCard();
+  if(hasNP) renderPlanNPCard();
+  if(hasWL) renderPlanWLCard();
+
+  // Skip the rest if chiro isn't active (chiro has the ICD + visit plan builder)
+  if(hasChiro){
+    buildTodayTxRegions();
+    buildTodayTxTechniques();
+    buildTodayTxSegments();
+    initTodayTxDeferralChips();
+    initPlanHomeCareChips();
+    renderPlanGoals();
+    updatePlanTotals();
+    // Restore provided toggle state
+    setTodayTxProvided(S.exam.chiro.today.provided);
+    setPlanMode(S.exam.chiro.plan.mode);
+    // Restore input values
+    const restoreVal = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined && val !== null) el.value = val; };
+    restoreVal('tx-segments-notes', S.exam.chiro.today.segmentsNotes);
+    restoreVal('tx-today-notes', S.exam.chiro.today.todayNotes);
+    restoreVal('tx-imaging-region', S.exam.chiro.today.imagingRegion);
+    restoreVal('tx-imaging-facility', S.exam.chiro.today.imagingFacility);
+    restoreVal('tx-specialist-target', S.exam.chiro.today.specialistTarget);
+    restoreVal('tx-specialist-urgency', S.exam.chiro.today.specialistUrgency);
+    restoreVal('tx-followup-date', S.exam.chiro.today.followupDate);
+    restoreVal('tx-followup-type', S.exam.chiro.today.followupType);
+    restoreVal('tx-defer-rationale', S.exam.chiro.today.deferRationale);
+    restoreVal('phase-acute-visits', S.exam.chiro.plan.acuteVisits);
+    restoreVal('phase-acute-freq', S.exam.chiro.plan.acuteFreq);
+    restoreVal('phase-acute-goal', S.exam.chiro.plan.acuteGoal);
+    restoreVal('phase-subacute-visits', S.exam.chiro.plan.subacuteVisits);
+    restoreVal('phase-subacute-freq', S.exam.chiro.plan.subacuteFreq);
+    restoreVal('phase-subacute-goal', S.exam.chiro.plan.subacuteGoal);
+    restoreVal('phase-corrective-visits', S.exam.chiro.plan.correctiveVisits);
+    restoreVal('phase-corrective-freq', S.exam.chiro.plan.correctiveFreq);
+    restoreVal('phase-corrective-goal', S.exam.chiro.plan.correctiveGoal);
+    restoreVal('plan-single-visits', S.exam.chiro.plan.singleVisits);
+    restoreVal('plan-single-freq', S.exam.chiro.plan.singleFreq);
+    restoreVal('plan-additional-notes', S.exam.chiro.plan.additionalNotes);
+
+    // Also render ICD assessment so selectedICD syncs with goals
+    renderICDAssessment();
+    // Compute & show auto-plan suggestion banner if a primary dx is selected
+    updateAutoPlanBanner();
+  } else {
+    // Non-chiro: hide the auto-plan banner
+    const banner = document.getElementById('plan-autofill-banner');
+    if(banner) banner.style.display = 'none';
+  }
 }
 
 // Capture today's-treatment text fields into state on blur (lightweight)
@@ -10514,6 +11630,595 @@ function syncTodayTxNotes(){
   S.exam.chiro.today.followupType = getVal('tx-followup-type');
   S.exam.chiro.today.deferRationale = getVal('tx-defer-rationale');
   S.exam.chiro.plan.additionalNotes = getVal('plan-additional-notes');
+}
+
+/* ═════════════════════════════════════════════════
+   SERVICE-SCOPED PLAN CARDS (Chunk 2C)
+   Each service gets its own plan card in the Plan
+   step, showing exam summary + pricing/tier selector.
+   ═════════════════════════════════════════════════ */
+
+function renderPlanSWCard(){
+  const summary = document.getElementById('plan-sw-summary');
+  if(!summary) return;
+  const sw = S.exam.sw;
+  const nTargets = (sw.targetTissues || []).length;
+  const cxCount = (sw.contraindications || []).length;
+
+  summary.innerHTML = `
+    <div class="plan-svc-summary-grid">
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Candidacy</div><div class="plan-svc-mval">${escapeHtml(sw.candidacyVerdict || '—')}</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Target Tissues</div><div class="plan-svc-mval">${nTargets}</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Protocol</div><div class="plan-svc-mval">${sw.hz}Hz · ${sw.bar}bar</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Shocks/Visit</div><div class="plan-svc-mval">${(sw.shocks || 0) * (sw.areas || 0)}</div></div>
+    </div>
+  `;
+
+  // Wire sessions chips
+  const chipGrp = document.getElementById('plan-sw-sessions-chips');
+  if(chipGrp){
+    chipGrp.querySelectorAll('.chip').forEach(chip => {
+      const val = chip.dataset.val;
+      const isSel = (val === 'custom' && ![1,5,10].includes(sw.totalSessions)) || parseInt(val) === sw.totalSessions;
+      if(isSel) chip.classList.add('sel');
+      else chip.classList.remove('sel');
+      chip.onclick = () => {
+        chipGrp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        if(val === 'custom'){
+          document.getElementById('plan-sw-custom-row').style.display = '';
+          sw.totalSessions = sw.customSessions || 3;
+        } else {
+          document.getElementById('plan-sw-custom-row').style.display = 'none';
+          sw.totalSessions = parseInt(val);
+        }
+        updatePlanSWPricing();
+      };
+    });
+    // Show custom row if currently custom
+    if(![1,5,10].includes(sw.totalSessions)){
+      document.getElementById('plan-sw-custom-row').style.display = '';
+      const customInp = document.getElementById('plan-sw-custom-sessions');
+      if(customInp) customInp.value = sw.totalSessions;
+    }
+  }
+
+  // Restore freq + notes from state
+  const freqEl = document.getElementById('plan-sw-frequency');
+  if(freqEl) freqEl.value = sw.frequency || '1x/wk';
+  const notesEl = document.getElementById('plan-sw-package-notes');
+  if(notesEl && sw.packageNotes) notesEl.value = sw.packageNotes;
+
+  updatePlanSWPricing();
+}
+
+function updatePlanSWPricing(){
+  const sw = S.exam.sw;
+  // If custom, read from input
+  const customInp = document.getElementById('plan-sw-custom-sessions');
+  const chipGrp = document.getElementById('plan-sw-sessions-chips');
+  const selChip = chipGrp && chipGrp.querySelector('.chip.sel');
+  if(selChip && selChip.dataset.val === 'custom' && customInp){
+    sw.totalSessions = parseInt(customInp.value) || 3;
+    sw.customSessions = sw.totalSessions;
+  }
+
+  const display = document.getElementById('plan-sw-pricing-display');
+  if(display){
+    display.innerHTML = SW_PRICING_TIERS.map(tier => {
+      const isMatch = tier.sessions === sw.totalSessions ||
+                      (sw.totalSessions !== 1 && sw.totalSessions !== 5 && sw.totalSessions !== 10 && tier.sessions === 5);
+      const total = tier.pricePerSession * sw.totalSessions;
+      return `<div class="sw-pricing-tier${isMatch ? ' match' : ''}">
+        <div class="sw-tier-lbl">${escapeHtml(tier.tier)}</div>
+        <div class="sw-tier-price">$${tier.pricePerSession}/session</div>
+        <div class="sw-tier-total">${sw.totalSessions} × $${tier.pricePerSession} = <strong>$${total.toLocaleString()}</strong></div>
+        <div class="sw-tier-desc">${escapeHtml(tier.description)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Compute duration
+  const freqEl = document.getElementById('plan-sw-frequency');
+  const dur = document.getElementById('plan-sw-duration');
+  if(freqEl && dur){
+    sw.frequency = freqEl.value;
+    const wksPerSession = sw.frequency === '2x/wk' ? 0.5 : sw.frequency === '3x/wk' ? 0.33 : sw.frequency === 'every-other' ? 2 : 1;
+    const totalWks = Math.ceil(sw.totalSessions * wksPerSession);
+    dur.value = totalWks + ' week' + (totalWks !== 1 ? 's' : '');
+  }
+}
+
+function syncSWToState(){
+  S.exam.sw.frequency = getVal('plan-sw-frequency');
+  S.exam.sw.packageNotes = getVal('plan-sw-package-notes');
+  updatePlanSWPricing();
+}
+
+function renderPlanNPCard(){
+  const summary = document.getElementById('plan-np-summary');
+  if(!summary) return;
+  const np = S.exam.np;
+  const maxLoss = np._maxLoss || 0;
+
+  // Find per-limb losses
+  const limbs = ['lf','rf','lh','rh'].map(k => {
+    const vals = Object.values(np.scores[k] || {});
+    if(vals.length < 7) return null;
+    const total = vals.reduce((a, b) => a + Math.max(0, b), 0);
+    return { k, label:NP_LIMB_SHORT[k], total, loss: 100 - Math.round((total/70)*100) };
+  }).filter(x => x);
+
+  const limbsHtml = limbs.length ? limbs.map(l => {
+    const sev = npSevLabel(l.loss);
+    return `<div class="plan-svc-metric"><div class="plan-svc-mlabel">${l.label}</div><div class="plan-svc-mval">${l.loss}%</div><div style="font-size:.6rem;margin-top:2px;"><span class="np-sev-badge ${sev.cls}">${sev.label}</span></div></div>`;
+  }).join('') : '<div style="font-size:.82rem;color:var(--ink-sm);font-style:italic;padding:8px;">No sensory data yet — complete NeuroPath exam.</div>';
+
+  const recTier = np._recommendedTier || 0;
+  const recBadge = recTier ? `<span style="background:var(--gold);color:white;padding:3px 10px;border-radius:12px;font-size:.65rem;font-weight:700;">Tier ${recTier} recommended</span>` : '';
+
+  summary.innerHTML = `
+    <div class="plan-svc-summary-grid">${limbsHtml}</div>
+    <div style="margin-top:10px;font-size:.82rem;color:var(--ink-md);">
+      <strong>Max sensory loss:</strong> ${maxLoss}% &nbsp; ${recBadge}
+    </div>
+  `;
+
+  // Build tier grid with current tier highlighted
+  const grid = document.getElementById('plan-np-tier-grid');
+  if(grid){
+    const selected = np.tierSelected;
+    grid.innerHTML = NP_TIERS.map(t => {
+      const isRec = t.tier === recTier;
+      const isSel = t.tier === selected;
+      return `<div class="np-tier-card${isSel?' sel':''}" onclick="selectPlanNPTier(${t.tier})">
+        ${isRec ? '<div class="np-tier-rec-badge">Recommended</div>' : ''}
+        <div class="np-tier-num">Tier ${t.tier}</div>
+        <div class="np-tier-name">${escapeHtml(t.name)}</div>
+        <div class="np-tier-price">$${t.price.toLocaleString()}</div>
+        <div class="np-tier-desc">${escapeHtml(t.desc)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Restore notes
+  const notes = document.getElementById('plan-np-tier-notes');
+  if(notes && np.tierNotes) notes.value = np.tierNotes;
+}
+
+function selectPlanNPTier(tier){
+  S.exam.np.tierSelected = tier;
+  renderPlanNPCard();
+  // Also sync to the exam-step tier grid if visible
+  if(typeof renderNPTierGrid === 'function') renderNPTierGrid();
+}
+
+function syncNPPlanToState(){
+  S.exam.np.tierNotes = getVal('plan-np-tier-notes');
+}
+
+function renderPlanWLCard(){
+  const summary = document.getElementById('plan-wl-summary');
+  if(!summary) return;
+  const wl = S.exam.wl;
+
+  const bmiTxt = document.getElementById('wl-metric-bmi') ? getText('wl-metric-bmi') : '—';
+  const tdeeTxt = document.getElementById('wl-metric-tdee') ? getText('wl-metric-tdee') : '—';
+  const targetCalTxt = document.getElementById('wl-target-cal') ? getText('wl-target-cal') : '—';
+  const toLose = (wl.weight && wl.goal) ? (wl.weight - wl.goal).toFixed(0) + ' lbs' : '—';
+
+  const recTier = wl._recommendedTier || 0;
+  const riskLevel = wl._riskLevel || 'unknown';
+  const recBadge = recTier ? `<span style="background:var(--gold);color:white;padding:3px 10px;border-radius:12px;font-size:.65rem;font-weight:700;">Tier ${recTier} recommended</span>` : '';
+
+  summary.innerHTML = `
+    <div class="plan-svc-summary-grid">
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Current / Goal</div><div class="plan-svc-mval">${wl.weight || '—'} → ${wl.goal || '—'} lbs</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">To Lose</div><div class="plan-svc-mval">${toLose}</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">BMI</div><div class="plan-svc-mval">${bmiTxt}</div></div>
+      <div class="plan-svc-metric"><div class="plan-svc-mlabel">Target Cal</div><div class="plan-svc-mval">${targetCalTxt}</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:.82rem;color:var(--ink-md);">
+      <strong>Risk level:</strong> ${escapeHtml(riskLevel)} &nbsp; ${recBadge}
+    </div>
+  `;
+
+  // Build tier grid
+  const grid = document.getElementById('plan-wl-tier-grid');
+  if(grid){
+    const selected = wl.tierSelected;
+    grid.innerHTML = WL_TIERS.map(t => {
+      const isRec = t.tier === recTier;
+      const isSel = t.tier === selected;
+      return `<div class="wl-tier-card${isSel?' sel':''}" onclick="selectPlanWLTier(${t.tier})">
+        ${isRec ? '<div class="wl-tier-rec-badge">Recommended</div>' : ''}
+        <div class="np-tier-num">Tier ${t.tier}</div>
+        <div class="np-tier-name">${escapeHtml(t.name)}</div>
+        <div class="wl-tier-price">$${t.price.toLocaleString()}</div>
+        <div class="np-tier-desc">${t.weeks}-wk · ${escapeHtml(t.desc)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Restore notes
+  const notes = document.getElementById('plan-wl-tier-notes');
+  if(notes && wl.planRationale) notes.value = wl.planRationale;
+}
+
+function selectPlanWLTier(tier){
+  S.exam.wl.tierSelected = tier;
+  renderPlanWLCard();
+  // Sync to exam-step grid if visible
+  if(typeof computeWLTierRecommendation === 'function') computeWLTierRecommendation(S.exam.wl.weight, S.exam.wl.goal);
+}
+
+function syncWLPlanToState(){
+  S.exam.wl.planRationale = getVal('plan-wl-tier-notes');
+}
+
+/* ═════════════════════════════════════════════════
+   AUTO-PLAN SUGGESTION ENGINE (Chunk 2D)
+   Maps primary diagnosis to a suggested treatment
+   template: visit counts, phase lengths, home care.
+   Provider can Apply or Dismiss.
+   ═════════════════════════════════════════════════ */
+
+// Template library — keyed by ICD code prefix OR exact code
+const AUTO_PLAN_TEMPLATES = {
+  // ═ Cervical region ═
+  'M54.2': {
+    name:'Cervicalgia — Standard plan',
+    mode:'phased', acute:{visits:6, freq:'3'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','ergonomics'],
+    rationale:'Uncomplicated mechanical neck pain responds well to 3-2-1 phased chiropractic care with home exercises.',
+  },
+  'M54.12': {
+    name:'Cervical radiculopathy — Extended plan',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','ergonomics','sleep-position','activity-modification'],
+    rationale:'Radiculopathy requires longer acute phase (3 wks @ 3x/wk) with nerve glides + postural correction. Re-image if no improvement at week 4.',
+  },
+  'S13.4XXA': {
+    name:'Cervical sprain (MVA/trauma) — Aggressive acute',
+    mode:'phased', acute:{visits:9, freq:'3'}, subacute:{visits:6, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification','sleep-position'],
+    rationale:'Acute whiplash-type injury — aggressive early care reduces chronicity risk. Document mechanism of injury for insurance.',
+  },
+  'M53.0': {
+    name:'Cervicogenic headache — Combined plan',
+    mode:'phased', acute:{visits:6, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['posture','ergonomics','stretching','sleep-position','stress-management'],
+    rationale:'CGH responds to upper cervical mobilization + postural retraining. Expect 50% headache reduction by week 4.',
+  },
+  // ═ Thoracic ═
+  'M54.6': {
+    name:'Thoracic pain — Standard',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['posture','ergonomics','hep','stretching'],
+    rationale:'Thoracic pain often postural. Emphasize ergonomics + thoracic extension exercises.',
+  },
+  // ═ Lumbar ═
+  'M54.50': {
+    name:'Low back pain — Standard',
+    mode:'phased', acute:{visits:6, freq:'3'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','activity-modification'],
+    rationale:'Uncomplicated LBP responds well to 3-2-1 phased care. Most patients improve 50%+ in 2 weeks.',
+  },
+  'M54.16': {
+    name:'Lumbar radiculopathy — Extended',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','activity-modification','sleep-position'],
+    rationale:'Radiculopathy — longer acute phase warranted. Consider flexion-distraction + nerve glides. Reassess week 4; MRI if no progress.',
+  },
+  'M54.17': {
+    name:'Lumbosacral radiculopathy — Extended',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','activity-modification','sleep-position'],
+    rationale:'S1 radiculopathy protocol — aggressive acute management + home program.',
+  },
+  'M54.41': {
+    name:'Lumbago w/ R sciatica — Extended',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Sciatica requires longer acute phase. Flexion-distraction well-tolerated. Reassess at week 4.',
+  },
+  'M54.42': {
+    name:'Lumbago w/ L sciatica — Extended',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Sciatica requires longer acute phase. Flexion-distraction well-tolerated. Reassess at week 4.',
+  },
+  'M47.816-facet': {
+    name:'Lumbar facet syndrome — Standard',
+    mode:'phased', acute:{visits:6, freq:'3'}, subacute:{visits:6, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['hep','stretching','posture','ergonomics','activity-modification'],
+    rationale:'Facet syndrome responds to specific segmental manipulation. Avoid prolonged extension. Home program emphasizes flexion-biased exercises.',
+  },
+  'M51.36': {
+    name:'Lumbar disc degeneration — Conservative',
+    mode:'phased', acute:{visits:6, freq:'3'}, subacute:{visits:8, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','posture','activity-modification','weight-management'],
+    rationale:'DDD is chronic-progressive. Focus: core stability, weight management, functional movement. Long-term maintenance warranted.',
+  },
+  'S33.5XXA': {
+    name:'Lumbar sprain — Acute injury',
+    mode:'phased', acute:{visits:8, freq:'3'}, subacute:{visits:6, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','activity-modification','hep','stretching'],
+    rationale:'Acute lumbar sprain — aggressive early care, activity modification. Document mechanism for insurance.',
+  },
+  'M53.3': {
+    name:'SI joint dysfunction — Targeted',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['hep','stretching','posture','activity-modification'],
+    rationale:'SI dysfunction responds to targeted pelvic adjusting + stabilization exercises. Emphasize glute activation.',
+  },
+  // ═ Shoulder ═
+  'M75.41': {
+    name:'R shoulder impingement — Targeted',
+    mode:'phased', acute:{visits:6, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['hep','stretching','posture','activity-modification'],
+    rationale:'Impingement — rotator cuff strengthening, scapular stabilization, posterior capsule stretching. Consider shockwave if persistent.',
+  },
+  'M75.42': {
+    name:'L shoulder impingement — Targeted',
+    mode:'phased', acute:{visits:6, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:6, freq:'1'},
+    homeCare:['hep','stretching','posture','activity-modification'],
+    rationale:'Impingement — rotator cuff strengthening, scapular stabilization. Consider shockwave if persistent.',
+  },
+  'M75.30': {
+    name:'Calcific tendinitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Calcific tendinitis is a STRONG shockwave indication. Recommend 5-session SW package + concurrent chiropractic for shoulder mobility.',
+  },
+  'M75.01': {
+    name:'R adhesive capsulitis — Mobility focus',
+    mode:'phased', acute:{visits:6, freq:'2'}, subacute:{visits:10, freq:'2'}, corrective:{visits:8, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Frozen shoulder is long. Acute/freezing: gentle ROM + pain control. Frozen: aggressive mobilization. Thawing: strengthening.',
+  },
+  'M75.02': {
+    name:'L adhesive capsulitis — Mobility focus',
+    mode:'phased', acute:{visits:6, freq:'2'}, subacute:{visits:10, freq:'2'}, corrective:{visits:8, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Frozen shoulder is long. Acute/freezing: gentle ROM + pain control. Frozen: aggressive mobilization. Thawing: strengthening.',
+  },
+  // ═ Elbow ═
+  'M77.11': {
+    name:'R lateral epicondylitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification','ergonomics'],
+    rationale:'Tennis elbow responds well to shockwave (strong evidence). Recommend concurrent SW 5-session package. Activity modification critical.',
+  },
+  'M77.12': {
+    name:'L lateral epicondylitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification','ergonomics'],
+    rationale:'Tennis elbow responds well to shockwave. Recommend concurrent SW 5-session package.',
+  },
+  'M77.01': {
+    name:'R medial epicondylitis (golfer\'s)',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Golfer\'s elbow — forearm strengthening, flexor stretching, activity mod. Shockwave is effective adjunct.',
+  },
+  'M77.02': {
+    name:'L medial epicondylitis (golfer\'s)',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Golfer\'s elbow — forearm strengthening, flexor stretching, activity mod. Shockwave is effective adjunct.',
+  },
+  // ═ Wrist ═
+  'G56.00': {
+    name:'Carpal tunnel — Conservative',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:5, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['hep','stretching','ergonomics','activity-modification','sleep-position'],
+    rationale:'CTS conservative care: nerve glides, wrist splint at night, workstation ergonomics. Refer if no improvement at 6 weeks.',
+  },
+  'G56.01': { name:'R carpal tunnel — Conservative', mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:5, freq:'2'}, corrective:{visits:4, freq:'1'}, homeCare:['hep','stretching','ergonomics','activity-modification','sleep-position'], rationale:'CTS: nerve glides, wrist splint at night, ergonomics. Refer if no improvement at 6 weeks.' },
+  'G56.02': { name:'L carpal tunnel — Conservative', mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:5, freq:'2'}, corrective:{visits:4, freq:'1'}, homeCare:['hep','stretching','ergonomics','activity-modification','sleep-position'], rationale:'CTS: nerve glides, wrist splint at night, ergonomics. Refer if no improvement at 6 weeks.' },
+  // ═ Hip ═
+  'M25.551': {
+    name:'R hip pain — Standard',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Hip pain — assess for SI, lumbar, or intra-articular source. Address driver of dysfunction.',
+  },
+  'M25.552': {
+    name:'L hip pain — Standard',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Hip pain — assess for SI, lumbar, or intra-articular source. Address driver of dysfunction.',
+  },
+  'M70.61': {
+    name:'R trochanteric bursitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Trochanteric bursitis — shockwave is first-line per evidence. Consider 5-session SW package + glute strengthening.',
+  },
+  'M70.62': {
+    name:'L trochanteric bursitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Trochanteric bursitis — shockwave is first-line. Consider 5-session SW package + glute strengthening.',
+  },
+  // ═ Knee ═
+  'M23.205': {
+    name:'Meniscus derangement — Conservative',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:4, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Meniscus injury — assess for mechanical sx (locking, giving way). Strengthen quads + VMO. Refer ortho if mechanical.',
+  },
+  'M17.11': {
+    name:'R knee OA — Long-term management',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:8, freq:'1'},
+    homeCare:['hep','stretching','activity-modification','weight-management'],
+    rationale:'Knee OA is chronic — focus on strengthening, weight management, activity mod. Maintenance care appropriate.',
+  },
+  'M17.12': {
+    name:'L knee OA — Long-term management',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:6, freq:'2'}, corrective:{visits:8, freq:'1'},
+    homeCare:['hep','stretching','activity-modification','weight-management'],
+    rationale:'Knee OA is chronic — focus on strengthening, weight management, activity mod. Maintenance care appropriate.',
+  },
+  'M76.51': {
+    name:'R patellar tendinitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Patellar tendinopathy — shockwave is effective per evidence. Consider 5-session SW + eccentric quad loading (Alfredson protocol).',
+  },
+  'M76.52': {
+    name:'L patellar tendinitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Patellar tendinopathy — shockwave is effective. Consider 5-session SW + eccentric quad loading.',
+  },
+  // ═ Ankle/Foot ═
+  'M72.2': {
+    name:'Plantar fasciitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Plantar fasciitis has the STRONGEST evidence for shockwave. Recommend 5-session SW package + plantar stretching + night splint.',
+  },
+  'M77.31': {
+    name:'R calcaneal spur / plantar fasciitis — Shockwave',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Plantar fasciitis with heel spur — strong SW indication. 5-session package + stretching + supportive footwear.',
+  },
+  'M77.32': {
+    name:'L calcaneal spur / plantar fasciitis — Shockwave',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Plantar fasciitis with heel spur — strong SW indication. 5-session package + stretching + supportive footwear.',
+  },
+  'M76.61': {
+    name:'R Achilles tendinitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Achilles tendinopathy — strong SW evidence. 5-session SW + Alfredson eccentric loading protocol.',
+  },
+  'M76.62': {
+    name:'L Achilles tendinitis — Shockwave candidate',
+    mode:'phased', acute:{visits:4, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:3, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Achilles tendinopathy — strong SW evidence. 5-session SW + Alfredson eccentric loading protocol.',
+  },
+  'S93.401A': {
+    name:'R ankle sprain — Acute',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:2, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Acute ankle sprain — PRICE protocol + progressive loading. Proprioceptive retraining critical.',
+  },
+  'S93.402A': {
+    name:'L ankle sprain — Acute',
+    mode:'phased', acute:{visits:5, freq:'2'}, subacute:{visits:4, freq:'2'}, corrective:{visits:2, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Acute ankle sprain — PRICE protocol + progressive loading. Proprioceptive retraining critical.',
+  },
+  // ═ Muscle/Misc ═
+  'M62.830': {
+    name:'Muscle spasm of back — Symptomatic',
+    mode:'phased', acute:{visits:4, freq:'3'}, subacute:{visits:4, freq:'2'}, corrective:{visits:2, freq:'1'},
+    homeCare:['ice-heat','hep','stretching','activity-modification'],
+    rationale:'Acute muscle spasm — aggressive early care to break pain cycle. Soft tissue + adjustment.',
+  },
+  'M79.18': {
+    name:'Generalized myalgia — Short plan',
+    mode:'phased', acute:{visits:3, freq:'2'}, subacute:{visits:3, freq:'2'}, corrective:{visits:2, freq:'1'},
+    homeCare:['hep','stretching','activity-modification'],
+    rationale:'Myalgia — soft tissue work, stretching, consider underlying driver (stress, posture, overuse).',
+  },
+};
+
+// Find the best auto-plan template for currently selected dx list
+function findAutoPlanTemplate(){
+  const icds = S.exam.chiro.selectedICD || [];
+  if(!icds.length) return null;
+  // Prioritize primary dx
+  const primary = icds.find(d => d.primary) || icds[0];
+  const tpl = AUTO_PLAN_TEMPLATES[primary.code];
+  if(tpl) return { ...tpl, forCode: primary.code, forCodeName: primary.name };
+  return null;
+}
+
+function updateAutoPlanBanner(){
+  const banner = document.getElementById('plan-autofill-banner');
+  const content = document.getElementById('plan-autofill-content');
+  if(!banner || !content) return;
+  if(S.exam._autoPlanDismissed){ banner.style.display = 'none'; return; }
+
+  const tpl = findAutoPlanTemplate();
+  if(!tpl){ banner.style.display = 'none'; return; }
+
+  banner.style.display = '';
+  const totalVisits = (tpl.acute.visits || 0) + (tpl.subacute.visits || 0) + (tpl.corrective.visits || 0);
+  content.innerHTML = `
+    <div style="font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:4px;">${escapeHtml(tpl.name)}</div>
+    <div style="font-size:.78rem;color:var(--ink-sm);margin-bottom:10px;">For: <strong>${escapeHtml(tpl.forCode)}</strong> — ${escapeHtml(tpl.forCodeName)}</div>
+    <div style="background:var(--white);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:.82rem;">
+      <strong>Suggested Plan (Phased):</strong><br>
+      • Acute: ${tpl.acute.visits} visits @ ${tpl.acute.freq}×/wk<br>
+      • Subacute: ${tpl.subacute.visits} visits @ ${tpl.subacute.freq}×/wk<br>
+      • Corrective: ${tpl.corrective.visits} visits @ ${tpl.corrective.freq}×/wk<br>
+      <strong>Total:</strong> ${totalVisits} visits<br>
+      <strong>Home care:</strong> ${tpl.homeCare.length} items
+    </div>
+    <div style="background:var(--cream);border-radius:var(--rs);padding:10px 12px;font-size:.8rem;line-height:1.5;color:var(--ink-md);">
+      <strong>Rationale:</strong> ${escapeHtml(tpl.rationale)}
+    </div>
+  `;
+}
+
+function applyAutoPlan(){
+  const tpl = findAutoPlanTemplate();
+  if(!tpl) return;
+  // Apply to state
+  S.exam.chiro.plan.mode = tpl.mode;
+  S.exam.chiro.plan.acuteVisits = tpl.acute.visits;
+  S.exam.chiro.plan.acuteFreq = tpl.acute.freq;
+  S.exam.chiro.plan.subacuteVisits = tpl.subacute.visits;
+  S.exam.chiro.plan.subacuteFreq = tpl.subacute.freq;
+  S.exam.chiro.plan.correctiveVisits = tpl.corrective.visits;
+  S.exam.chiro.plan.correctiveFreq = tpl.corrective.freq;
+  S.exam.chiro.plan.homeCare = [...(tpl.homeCare || [])];
+  // Update DOM inputs
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  set('phase-acute-visits', tpl.acute.visits);
+  set('phase-acute-freq', tpl.acute.freq);
+  set('phase-subacute-visits', tpl.subacute.visits);
+  set('phase-subacute-freq', tpl.subacute.freq);
+  set('phase-corrective-visits', tpl.corrective.visits);
+  set('phase-corrective-freq', tpl.corrective.freq);
+  // Apply plan mode
+  setPlanMode(tpl.mode);
+  // Apply home care chips
+  const hcGrp = document.getElementById('plan-homecare-chips');
+  if(hcGrp){
+    hcGrp.querySelectorAll('.chip').forEach(chip => {
+      if((tpl.homeCare || []).includes(chip.dataset.val)) chip.classList.add('sel');
+      else chip.classList.remove('sel');
+    });
+  }
+  // Update totals
+  updatePlanTotals();
+  // Hide the banner after applying (provider can re-show by picking a new primary dx)
+  S.exam._autoPlanApplied = true;
+  const banner = document.getElementById('plan-autofill-banner');
+  if(banner){
+    const notice = `<div style="font-size:.82rem;color:var(--green);font-weight:600;padding:8px 0;">✓ Plan suggestion applied — edit any fields below as needed.</div>`;
+    const content = document.getElementById('plan-autofill-content');
+    if(content) content.innerHTML = notice;
+    // Hide the buttons
+    const btns = banner.querySelectorAll('button');
+    btns.forEach(b => b.style.display = 'none');
+  }
+}
+
+function dismissAutoPlan(){
+  S.exam._autoPlanDismissed = true;
+  const banner = document.getElementById('plan-autofill-banner');
+  if(banner) banner.style.display = 'none';
 }
 
 /* ═════════════════════════════════════════════════
@@ -11720,6 +13425,12 @@ function syncWLNotes(){
    ═════════════════════════════════════════════════ */
 function renderSignoffStep(){
   if(!S.exam.patient) return;
+  // Re-enable button every time this step is entered (defensive against stuck-disabled state)
+  const btn = document.getElementById('signoff-submit-btn');
+  if(btn) btn.disabled = false;
+  // Reset the attestation checkbox (must re-check for each exam)
+  const attestBox = document.getElementById('signoff-attest-box');
+  if(attestBox) attestBox.checked = false;
   // Default date if empty
   const dateEl = document.getElementById('signoff-date');
   if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
@@ -11736,6 +13447,15 @@ function renderSignoffStep(){
   initSig('signoff-sig');
   requestAnimationFrame(() => initSig('signoff-sig'));
   setTimeout(() => initSig('signoff-sig'), 120);
+  // Apply initial button state based on checkbox
+  updateSignoffButtonState();
+}
+
+function updateSignoffButtonState(){
+  const btn = document.getElementById('signoff-submit-btn');
+  const attestBox = document.getElementById('signoff-attest-box');
+  if(!btn || !attestBox) return;
+  btn.disabled = !attestBox.checked;
 }
 
 function buildSignoffSummary(){
@@ -11866,8 +13586,14 @@ function buildSignoffSummary(){
 async function submitExamSignoff(){
   const status = document.getElementById('signoff-status');
   const btn = document.getElementById('signoff-submit-btn');
+  const attestBox = document.getElementById('signoff-attest-box');
 
-  // Validate
+  // Validate — attestation checkbox MUST be checked
+  if(attestBox && !attestBox.checked){
+    showSignoffStatus('error', '⚠ You must check the attestation box before signing off.');
+    setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
+    return;
+  }
   if(isSigEmpty('signoff-sig')){
     showSignoffStatus('error', '⚠ Provider signature is required.');
     setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
@@ -11934,7 +13660,8 @@ async function submitExamSignoff(){
 
   } catch(e){
     console.error('Signoff error:', e);
-    btn.disabled = false;
+    // Re-enable button tied to checkbox state so provider can retry
+    updateSignoffButtonState();
     showSignoffStatus('error', 'Error: ' + (e.message || String(e)));
     setTimeout(() => status.scrollIntoView({behavior:'smooth', block:'center'}), 50);
   }
@@ -11960,6 +13687,7 @@ function showSignoffCompletion(pdfLink){
       <p>The chart for <strong>${escapeHtml(S.exam.patient.first)} ${escapeHtml(S.exam.patient.last)}</strong> has been saved to Drive and the patient record has been marked completed.</p>
       <div class="signoff-completion-btns">
         <a class="btn" href="${pdfLink}" target="_blank">📄 View Chart in Drive</a>
+        <button class="btn" onclick="downloadPatientROF()">📋 Download Patient ROF</button>
         <button class="btn" onclick="finishExamToWaitingRoom()">← Back to Waiting Room</button>
         <button class="btn" onclick="finishExamToLanding()">🏠 Back to Landing</button>
       </div>
@@ -12420,6 +14148,389 @@ function buildExamAppendixPdfBlob(){
 function getText(id){
   const el = document.getElementById(id);
   return el ? el.textContent : '—';
+}
+
+/* ═════════════════════════════════════════════════
+   PATIENT-FACING ROF (Report of Findings) PDF
+   Plain-language, patient-friendly version of the
+   exam findings + plan. Generated separately from the
+   clinical chart. Triggered from signoff completion.
+   ═════════════════════════════════════════════════ */
+
+// Plain-language translations for common technical terms
+const ROF_ICD_PLAIN = {
+  'M54.50':'Low back pain',
+  'M54.51':'Low back pain stemming from the vertebrae',
+  'M54.16':'Low back pain with nerve irritation',
+  'M54.17':'Low back pain with nerve irritation near the tailbone',
+  'M54.41':'Low back pain with pain traveling down the right leg (sciatica)',
+  'M54.42':'Low back pain with pain traveling down the left leg (sciatica)',
+  'M54.31':'Sciatica on the right side',
+  'M54.32':'Sciatica on the left side',
+  'M54.2':'Neck pain',
+  'M54.12':'Neck pain with nerve irritation into the arm',
+  'M54.6':'Mid-back pain',
+  'S13.4XXA':'Neck sprain (ligament injury)',
+  'S33.5XXA':'Low back sprain (ligament injury)',
+  'S39.012A':'Low back muscle strain',
+  'S16.1XXA':'Neck muscle strain',
+  'M47.816':'Low back arthritis (spondylosis)',
+  'M47.812':'Neck arthritis (spondylosis)',
+  'M47.816-facet':'Low back joint pain (facet syndrome)',
+  'M51.36':'Low back disc wear',
+  'M51.16':'Low back disc problem pressing on a nerve',
+  'M50.30':'Neck disc wear',
+  'M53.3':'SI (pelvis) joint pain',
+  'M53.0':'Headache coming from the neck',
+  'M75.41':'Right shoulder impingement',
+  'M75.42':'Left shoulder impingement',
+  'M75.30':'Shoulder tendon inflammation with calcium deposit',
+  'M75.101':'Right shoulder rotator cuff injury',
+  'M75.102':'Left shoulder rotator cuff injury',
+  'M77.11':'Right tennis elbow',
+  'M77.12':'Left tennis elbow',
+  'M77.01':'Right golfer\'s elbow',
+  'M77.02':'Left golfer\'s elbow',
+  'G56.01':'Right carpal tunnel syndrome',
+  'G56.02':'Left carpal tunnel syndrome',
+  'M25.551':'Right hip pain',
+  'M25.552':'Left hip pain',
+  'M70.61':'Right hip trochanteric bursitis',
+  'M70.62':'Left hip trochanteric bursitis',
+  'M17.11':'Right knee arthritis',
+  'M17.12':'Left knee arthritis',
+  'M23.205':'Meniscus injury',
+  'M76.51':'Right knee patellar tendon pain',
+  'M76.52':'Left knee patellar tendon pain',
+  'M72.2':'Plantar fasciitis (heel/arch pain)',
+  'M77.31':'Right plantar fasciitis with heel spur',
+  'M77.32':'Left plantar fasciitis with heel spur',
+  'M76.61':'Right Achilles tendon pain',
+  'M76.62':'Left Achilles tendon pain',
+  'S93.401A':'Right ankle sprain',
+  'S93.402A':'Left ankle sprain',
+  'M62.830':'Muscle spasm in the back',
+  'M79.18':'Muscle pain',
+  'R51.9':'Headache',
+};
+
+const HOMECARE_PLAIN = {
+  'ice-heat':'Ice or heat therapy as directed',
+  'hep':'Home exercise program (we\'ll give you specific exercises)',
+  'stretching':'Daily stretching routine',
+  'posture':'Posture awareness and corrections',
+  'ergonomics':'Workstation / daily habit adjustments',
+  'activity-modification':'Modified activity during healing phase',
+  'sleep-position':'Sleep position changes for better recovery',
+  'stress-management':'Stress management techniques',
+  'weight-management':'Weight management support',
+};
+
+function buildPatientRofPdfBlob(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'pt', format:'letter'});
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 50;
+  let y = margin;
+
+  const sage = [47, 92, 67];
+  const sageLt = [184, 216, 196];
+  const sageXl = [234, 244, 238];
+  const gold = [192, 138, 50];
+  const ink = [24, 40, 32];
+  const inkMd = [59, 78, 65];
+  const inkSm = [103, 122, 110];
+
+  const patient = S.exam.patient;
+  const ptName = `${patient.first || ''} ${patient.last || ''}`.trim();
+  const today = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+  const services = patient.services || [];
+
+  function ensureSpace(h){
+    if(y > H - h - 40){
+      drawFooter(doc, W, H, margin, inkSm);
+      doc.addPage();
+      y = margin;
+    }
+  }
+  function sectionTitle(title, subtitle){
+    ensureSpace(50);
+    doc.setFillColor(...sageXl);
+    doc.rect(margin, y, W - margin*2, 32, 'F');
+    doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+    doc.text(title, margin + 10, y + 18);
+    if(subtitle){
+      doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(...inkSm);
+      doc.text(subtitle, margin + 10, y + 28);
+    }
+    y += 42;
+  }
+  function paragraph(text, size=10.5){
+    doc.setFontSize(size); doc.setFont('helvetica','normal'); doc.setTextColor(...inkMd);
+    const lines = doc.splitTextToSize(String(text), W - margin*2);
+    lines.forEach(line => { ensureSpace(size+3); doc.text(line, margin, y); y += size + 3; });
+    y += 4;
+  }
+  function bulletLine(text){
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(...inkMd);
+    const lines = doc.splitTextToSize(text, W - margin*2 - 16);
+    lines.forEach((line, i) => {
+      ensureSpace(14);
+      if(i === 0){ doc.setTextColor(...gold); doc.text('•', margin + 6, y); doc.setTextColor(...inkMd); }
+      doc.text(line, margin + 16, y);
+      y += 13;
+    });
+  }
+
+  // ═══ COVER HEADER ═══
+  doc.setFillColor(...sage);
+  doc.rect(0, 0, W, 110, 'F');
+  doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('YOUR REPORT OF FINDINGS', margin, 48);
+  doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor(...sageLt);
+  doc.text('Colleyville Chiropractic | CVC Spine & Sport', margin, 68);
+  doc.setFontSize(8);
+  doc.text((cfg.clinicAddr || '1001 Glade Rd Ste 120, Colleyville TX 76034') + '  •  ' + (cfg.clinicPhone || '(817) 420-7696'), margin, 84);
+  y = 135;
+
+  // ═══ GREETING ═══
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(...ink);
+  doc.text(`Hi ${patient.first || 'there'},`, margin, y);
+  y += 22;
+  paragraph('Thank you for choosing Colleyville Chiropractic for your care. After reviewing your intake and completing your examination today, we\'ve put together this summary to help you understand what we found and how we plan to help you feel better and get moving again.');
+  paragraph('This report is written for you — not your insurance company. If anything is unclear, please ask us. Your health is a partnership, and understanding your body is step one.');
+
+  // ═══ PATIENT INFO BOX ═══
+  y += 6;
+  doc.setFillColor(...sageXl);
+  doc.rect(margin, y, W - margin*2, 38, 'F');
+  doc.setDrawColor(...sage); doc.setLineWidth(0.5);
+  doc.line(margin, y, margin, y + 38);
+  doc.line(margin, y, margin + 3, y);
+  doc.line(margin, y + 38, margin + 3, y + 38);
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(...inkSm);
+  doc.text('PATIENT', margin + 10, y + 12);
+  doc.text('DATE OF EXAM', 250, y + 12);
+  doc.text('PROVIDER', 400, y + 12);
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(...ink);
+  doc.text(ptName || '—', margin + 10, y + 28);
+  doc.text(S.exam.signoff.date ? new Date(S.exam.signoff.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : today, 250, y + 28);
+  doc.text(S.exam.signoff.providerName || 'Dr. Rudy Urrutia, DC', 400, y + 28);
+  y += 50;
+
+  // ═══ WHAT'S GOING ON ═══
+  sectionTitle('1. What\'s Going On', 'Your main areas of concern and what we found');
+
+  // Pain regions from intake
+  const painRegions = (patient.payload && patient.payload.complaint && patient.payload.complaint.regions) || {};
+  const regionNames = Object.keys(painRegions).map(r => ({
+    'neck':'Neck','upper-back':'Upper Back','mid-back':'Mid Back','low-back':'Low Back',
+    'shoulder':'Shoulder','hip':'Hip','elbow':'Elbow','wrist':'Wrist/Hand','knee':'Knee',
+    'ankle':'Ankle/Foot','jaw':'Jaw','head':'Head'
+  }[r] || r));
+  if(regionNames.length){
+    paragraph('You came in with symptoms in these areas: ' + regionNames.join(', ') + '.');
+  }
+  const onset = patient.payload && patient.payload.complaint && patient.payload.complaint.onset;
+  const onsetPlain = {
+    'today':'today','this-week':'this week','2-4-wk':'over the past 2–4 weeks',
+    '1-3-mo':'for the past 1–3 months','3-plus-mo':'for more than 3 months','chronic':'for a long time'
+  };
+  if(onset && onsetPlain[onset]){
+    paragraph('You\'ve been dealing with this ' + onsetPlain[onset] + '.');
+  }
+
+  // Findings summary (chiro)
+  if(services.includes('CHIRO')){
+    const c = S.exam.chiro;
+    const findings = [];
+    const orthoPos = Object.values(c.orthoTests || {}).filter(v => v.result === 'positive').length;
+    const segCount = Object.keys(c.palpSpine || {}).length;
+    const muscleCount = Object.keys(c.palpMuscles || {}).length;
+    if(orthoPos) findings.push(`${orthoPos} positive orthopedic test${orthoPos>1?'s':''} confirming the pattern of your symptoms`);
+    if(segCount) findings.push(`${segCount} area${segCount>1?'s':''} of restricted spinal motion`);
+    if(muscleCount) findings.push(`${muscleCount} area${muscleCount>1?'s':''} of muscle tension or trigger points`);
+    if(findings.length){
+      paragraph('Here\'s what we found during your exam:');
+      findings.forEach(f => bulletLine(f));
+      y += 4;
+    }
+  }
+
+  // NP findings
+  if(services.includes('NP')){
+    const np = S.exam.np;
+    const maxLoss = np._maxLoss || 0;
+    if(maxLoss){
+      paragraph(`Your neuropathy assessment showed up to ${maxLoss}% sensory loss in your most affected limb. Here's what that means: your nerves are having trouble sending signals normally, which is why you've been feeling the symptoms you described.`);
+    }
+  }
+
+  // WL findings
+  if(services.includes('WL')){
+    const wl = S.exam.wl;
+    if(wl.weight && wl.goal){
+      const toLose = wl.weight - wl.goal;
+      paragraph(`Your goal is to lose approximately ${toLose.toFixed(0)} pounds (${wl.weight} → ${wl.goal} lbs). We've calculated a sustainable plan based on your body composition and activity level.`);
+    }
+  }
+
+  // ═══ WHAT THIS MEANS (Diagnoses in plain language) ═══
+  const icds = S.exam.chiro.selectedICD || [];
+  if(services.includes('CHIRO') && icds.length){
+    sectionTitle('2. What This Means', 'In plain language');
+    paragraph('Here\'s what the findings add up to:');
+    icds.forEach(d => {
+      const plain = ROF_ICD_PLAIN[d.code] || d.name;
+      const sideLabel = d.laterality === 'R' ? ' (right side)' : d.laterality === 'L' ? ' (left side)' : d.laterality === 'B' ? ' (both sides)' : '';
+      const primaryMark = d.primary ? ' — this is the main issue we\'re focusing on' : '';
+      bulletLine(plain + sideLabel + primaryMark);
+    });
+    y += 6;
+  }
+
+  // ═══ HOW WE'LL HELP ═══
+  sectionTitle('3. How We\'ll Help You', 'Your personalized plan');
+
+  // CHIRO plan
+  if(services.includes('CHIRO')){
+    const plan = S.exam.chiro.plan || {};
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+    doc.text('Chiropractic Care Schedule', margin, y);
+    y += 16;
+    if(plan.mode === 'phased'){
+      const total = (plan.acuteVisits || 0) + (plan.subacuteVisits || 0) + (plan.correctiveVisits || 0);
+      paragraph(`We\'re recommending a ${total}-visit phased plan to help you heal completely, not just temporarily:`);
+      bulletLine(`First phase (getting you out of pain): ${plan.acuteVisits} visits, ${plan.acuteFreq}× per week`);
+      bulletLine(`Second phase (rebuilding function): ${plan.subacuteVisits} visits, ${plan.subacuteFreq}× per week`);
+      bulletLine(`Third phase (keeping you there): ${plan.correctiveVisits} visits, ${plan.correctiveFreq}× per week`);
+    } else {
+      paragraph(`We\'re recommending ${plan.singleVisits} visits at ${plan.singleFreq}× per week.`);
+    }
+    y += 4;
+    if((plan.homeCare || []).length){
+      doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+      doc.text('What You Can Do At Home', margin, y);
+      y += 16;
+      paragraph('Your recovery isn\'t just what happens in our office — it\'s also what you do between visits. Here are the home care items we\'ve prescribed:');
+      plan.homeCare.forEach(hc => {
+        bulletLine(HOMECARE_PLAIN[hc] || hc);
+      });
+    }
+  }
+
+  // SW plan
+  if(services.includes('SW')){
+    const sw = S.exam.sw;
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...gold);
+    doc.text('Shockwave Therapy', margin, y);
+    y += 16;
+    paragraph(`Shockwave therapy uses sound waves to break up scar tissue and stimulate your body\'s natural healing. We\'re recommending a ${sw.totalSessions}-session package at ${sw.frequency || '1× per week'}.`);
+    paragraph('Most patients start feeling improvement by the third session. Full results typically show up a few weeks after the last session, since your body continues healing after each treatment.');
+    y += 4;
+  }
+
+  // NP plan
+  if(services.includes('NP')){
+    const np = S.exam.np;
+    const tierNum = np.tierSelected || np._recommendedTier || 1;
+    const tier = NP_TIERS.find(t => t.tier === tierNum);
+    if(tier){
+      doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(61, 42, 96);
+      doc.text('NeuroPath Program', margin, y);
+      y += 16;
+      paragraph(`Based on your exam, we\'re recommending the ${tier.name} program. This is a 12-week protocol designed to help your nerves recover and restore sensation. You\'ll get specific at-home tools, weekly in-office treatments, and nutritional support to rebuild nerve health from the inside out.`);
+    }
+  }
+
+  // WL plan
+  if(services.includes('WL')){
+    const wl = S.exam.wl;
+    const tierNum = wl.tierSelected || wl._recommendedTier || 1;
+    const tier = WL_TIERS.find(t => t.tier === tierNum);
+    if(tier){
+      doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(13, 115, 119);
+      doc.text('Weight Loss Program', margin, y);
+      y += 16;
+      paragraph(`We\'re recommending the ${tier.name} program — a ${tier.weeks}-week plan built around your body composition and lifestyle. This isn\'t a diet; it\'s a sustainable approach to getting healthier, losing weight, and keeping it off.`);
+    }
+  }
+
+  // ═══ WHAT TO EXPECT ═══
+  sectionTitle('4. What To Expect', 'Your recovery timeline');
+  paragraph('Healing takes time, and it\'s rarely a straight line — you\'ll have good days and bad days, but the overall trend should be improvement.');
+  if(services.includes('CHIRO')){
+    bulletLine('First 2–4 visits: focus on reducing your pain and getting you out of the acute phase');
+    bulletLine('Middle phase: rebuilding strength, flexibility, and function');
+    bulletLine('Final phase: locking in your progress and preventing recurrence');
+    bulletLine('Most patients notice significant improvement within the first 2–3 weeks');
+  }
+  paragraph('If at any point you\'re not seeing the progress we expect, we\'ll adjust your plan. Your health is the priority — not the plan.');
+
+  // ═══ NEXT STEPS / QUESTIONS ═══
+  sectionTitle('5. Next Steps', 'What happens after this visit');
+  bulletLine('Schedule your follow-up visits at the front desk before you leave');
+  bulletLine('Start your home care recommendations today');
+  bulletLine('If you have any questions, call us at ' + (cfg.clinicPhone || '(817) 420-7696'));
+  bulletLine('Bring this report to every visit so we can reference it together');
+  y += 10;
+
+  // ═══ CLOSING ═══
+  ensureSpace(80);
+  doc.setFillColor(...sageXl);
+  doc.rect(margin, y, W - margin*2, 60, 'F');
+  doc.setFontSize(10); doc.setFont('helvetica','italic'); doc.setTextColor(...inkMd);
+  const closing = 'We\'re committed to getting you better. This plan represents our best clinical recommendation based on the exam today, and we\'ll refine it as you progress. Your investment in your health matters to us, and we\'re honored you\'ve trusted us with your care.';
+  const clines = doc.splitTextToSize(closing, W - margin*2 - 20);
+  let ly = y + 18;
+  clines.forEach(line => { doc.text(line, margin + 10, ly); ly += 13; });
+  y += 70;
+
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...sage);
+  doc.text('— ' + (S.exam.signoff.providerName || 'Dr. Rudy Urrutia, DC'), margin, y);
+
+  // Footer on all pages
+  drawFooter(doc, W, H, margin, inkSm);
+  const pageCount = doc.getNumberOfPages();
+  for(let i = 1; i <= pageCount; i++){
+    doc.setPage(i);
+    drawFooter(doc, W, H, margin, inkSm, i, pageCount);
+  }
+
+  return doc.output('blob');
+}
+
+function drawFooter(doc, W, H, margin, inkSm, pageNum, pageCount){
+  const fy = H - 26;
+  doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.5);
+  doc.line(margin, fy - 6, W - margin, fy - 6);
+  doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(...inkSm);
+  doc.text('This report is a summary of today\'s findings. It is not a substitute for clinical documentation and does not replace any diagnostic imaging or specialty consultations.', W/2, fy, {align:'center'});
+  if(pageNum && pageCount){
+    doc.setFont('helvetica','normal');
+    doc.text(`Page ${pageNum} of ${pageCount}`, W/2, fy + 10, {align:'center'});
+  }
+}
+
+async function downloadPatientROF(){
+  try {
+    const blob = buildPatientRofPdfBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const last = (S.exam.patient.last || '').replace(/[^a-zA-Z0-9]/g,'');
+    const first = (S.exam.patient.first || '').replace(/[^a-zA-Z0-9]/g,'');
+    const date = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `${last}_${first}_${date}_ROF.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch(e){
+    alert('Error generating ROF: ' + (e.message || e));
+    console.error('ROF error:', e);
+  }
 }
 
 /* ═════════════════════════════════════════════════

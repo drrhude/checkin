@@ -4651,6 +4651,10 @@ function goLanding(){
   stopWaitingRoomPolling();
 }
 function enterPatient(){
+  // ═══ Chunk 1 fix: always start patient intake from a clean slate ═══
+  // Prevents carry-over of any prior patient's form fields, chip selections,
+  // signature strokes, or selected services.
+  _resetIntakeForm();
   S.role = 'patient';
   document.body.dataset.role = 'patient';
   document.getElementById('landing').classList.remove('show');
@@ -4658,6 +4662,44 @@ function enterPatient(){
   document.getElementById('provider-app').style.display = 'none';
   goStep(0);
 }
+
+function _resetIntakeForm(){
+  // Reset global intake state
+  S.currentStep = 0;
+  S.selectedSvcs = [];
+  S.pendingKey = null;
+  // Clear all fields inside patient-app
+  document.querySelectorAll('#patient-app input, #patient-app textarea, #patient-app select').forEach(el => {
+    if(el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+    else if(el.type === 'range'){
+      const def = el.getAttribute('value') || el.defaultValue;
+      if(def) el.value = def;
+    }
+    else el.value = '';
+  });
+  // Clear chips
+  document.querySelectorAll('#patient-app .chip.sel, #patient-app .chip.on').forEach(el => el.classList.remove('sel','on'));
+  // Clear service cards
+  document.querySelectorAll('#patient-app .svc-card.sel, #svc-grid .svc-card.sel').forEach(el => el.classList.remove('sel'));
+  // Clear pain sliders & scale displays
+  document.querySelectorAll('#patient-app [data-pain-for]').forEach(el => { el.textContent = '—'; });
+  // Clear signature canvas
+  const sigCv = document.getElementById('pt-sig');
+  if(sigCv){
+    const ctx = sigCv.getContext('2d');
+    if(ctx) ctx.clearRect(0, 0, sigCv.width, sigCv.height);
+    sigCv._init = false;
+  }
+  // Clear region selections
+  document.querySelectorAll('.region-btn.sel, .region-btn.active').forEach(el => el.classList.remove('sel','active'));
+  // Clear health-focus sub-sections
+  const hfContainers = ['np-meds-list','wl-barriers-list'];
+  hfContainers.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = ''; });
+  // Hide any open status bar
+  const statusBar = document.querySelector('#patient-app .status-bar');
+  if(statusBar){ statusBar.className = 'status-bar'; statusBar.innerHTML = ''; }
+}
+
 function enterStaff(){
   openPinModal();
 }
@@ -5941,7 +5983,18 @@ async function sheetsAppendRow(tabName, row){
       body: JSON.stringify({values: [row]})
     }
   );
-  if(!resp.ok) throw new Error('Sheets append failed: ' + resp.status);
+  if(!resp.ok){
+    // Surface the actual Google error body so the provider can see what's wrong
+    let errBody = '';
+    try { errBody = await resp.text(); } catch(_){}
+    console.error('Sheets append failed', resp.status, errBody);
+    let detail = '';
+    try {
+      const j = JSON.parse(errBody);
+      if(j.error && j.error.message) detail = ' — ' + j.error.message;
+    } catch(_){}
+    throw new Error('Sheets append failed: ' + resp.status + detail);
+  }
   return resp.json();
 }
 
@@ -8835,6 +8888,10 @@ const SW_PRICING_TIERS = [
 function enterExamView(patient){
   if(!patient) return;
 
+  // ═══ Chunk 1 fix: wipe all prior exam state before touching this one ═══
+  // Prevents carry-over of previous patient's ortho/neuro/palp/ICD/plan/SW/NP/WL data.
+  _resetExamStateForNewPatient();
+
   S.exam.active = true;
   S.exam.patient = patient;
   S.exam.currentStep = 0;
@@ -8892,9 +8949,18 @@ function enterExamView(patient){
 }
 
 function exitExamToWaitingRoom(){
-  // Returns to waiting room — exam state PERSISTS in memory (can resume)
-  // Only abandonExam() or completing the exam resets state.
+  // PAUSE path — state persists, can resume mid-exam.
+  // Used by the "Back to Queue" button at the top of the exam form.
   S.exam.active = false;
+  document.getElementById('exam-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = '';
+  startWaitingRoomPolling();
+}
+
+function finishExamToWaitingRoom(){
+  // COMPLETION path — state is wiped.
+  // Used by the signoff completion card's "Back to Waiting Room" button.
+  _resetExamStateForNewPatient();
   document.getElementById('exam-app').style.display = 'none';
   document.getElementById('provider-app').style.display = '';
   startWaitingRoomPolling();
@@ -8907,12 +8973,26 @@ function abandonExam(){
     wrSelectedPatient = S.exam.patient;
     markPatientStatus('pending').catch(e => console.warn('Revert status failed:', e));
   }
-  // Reset exam state
-  S.exam = {
+  // Full reset
+  _resetExamStateForNewPatient();
+  document.getElementById('exam-app').style.display = 'none';
+  document.getElementById('provider-app').style.display = '';
+  startWaitingRoomPolling();
+}
+
+/* ═════════════════════════════════════════════════
+   EXAM STATE RESET HELPERS (Chunk 1 · state-leak fix)
+   One source of truth for pristine exam state. Call
+   from: enterExamView (before setting new patient),
+   abandonExam, and finishExamToLanding.
+   ═════════════════════════════════════════════════ */
+function _buildPristineExamState(){
+  return {
     active: false,
     patient: null,
     currentStep: 0,
     stepKeys: [],
+    lastKey: null,
     chiro: {
       vitals: {bp:'', hr:'', painToday:''},
       observation: '',
@@ -8978,25 +9058,94 @@ function abandonExam(){
       date: '', finalNotes: '', submitted: false, combinedPdfLink: '',
     },
   };
-  // Reset ICD show-more flag
-  _icdShowMore = false;
-  // Clear all exam form fields
+}
+
+function _clearExamFormUI(){
+  // Clear every input/textarea/select inside #exam-app
   document.querySelectorAll('#exam-app input, #exam-app textarea, #exam-app select').forEach(el => {
-    if(el.type === 'checkbox') el.checked = false;
+    if(el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+    else if(el.type === 'range'){
+      // Restore range sliders to their "default" — HTML default attribute if any, else midpoint
+      const def = el.getAttribute('value') || el.defaultValue;
+      if(def) el.value = def;
+    }
     else el.value = '';
   });
-  document.querySelectorAll('#exam-app .chip.sel').forEach(el => el.classList.remove('sel'));
+  // Clear all "selected" chip states inside #exam-app
+  document.querySelectorAll('#exam-app .chip.sel, #exam-app .chip.on').forEach(el => el.classList.remove('sel','on'));
+  // Chiro ortho test buttons
   document.querySelectorAll('.ortho-result-btn').forEach(el => el.classList.remove('neg-sel','pos-sel','np-sel'));
   document.querySelectorAll('.ortho-test-item').forEach(el => el.classList.remove('positive','negative','not-performed'));
-  // Clear ICD UI elements
-  const icdContainers = ['icd-suggestions-top','icd-suggestions-more','icd-reasoning-summary','icd-search-results','icd-selected-list'];
-  icdContainers.forEach(id => {
+  // NeuroPath buttons
+  document.querySelectorAll('#exam-app .np-limb-tab').forEach(el => el.classList.remove('done'));
+  document.querySelectorAll('#exam-app .np-sb').forEach(el => {
+    el.className = 'np-sb';
+  });
+  document.querySelectorAll('#exam-app .np-rbb').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('#exam-app .np-bo').forEach(el => {
+    el.className = 'np-bo';
+  });
+  document.querySelectorAll('#exam-app .np-oo').forEach(el => {
+    el.className = 'np-oo';
+  });
+  document.querySelectorAll('#exam-app .np-tho').forEach(el => {
+    el.className = 'np-tho';
+  });
+  document.querySelectorAll('#exam-app .np-tier-card, #exam-app .wl-tier-card').forEach(el => el.classList.remove('sel'));
+  // WL supplement rows
+  document.querySelectorAll('#exam-app .wl-supp-row').forEach(el => el.classList.remove('sel'));
+  // Clear ICD UI containers + palpation lists + NP summary cards + WL metric displays
+  const containersToBlank = [
+    'icd-suggestions-top','icd-suggestions-more','icd-reasoning-summary',
+    'icd-search-results','icd-selected-list',
+    'spine-findings-list','muscle-findings-list',
+    'np-sensory-panel','np-sum-grid','np-sum-sensory-bars','np-sum-tx-content','np-sum-flags-content',
+    'np-sensory-summary-content','np-tier-grid','np-intake-summary',
+    'wl-intake-summary','wl-tier-grid','wl-tier-rec-banner',
+    'signoff-summary-grid','signoff-completion-card',
+  ];
+  containersToBlank.forEach(id => {
     const el = document.getElementById(id);
     if(el) el.innerHTML = '';
   });
-  document.getElementById('exam-app').style.display = 'none';
-  document.getElementById('provider-app').style.display = '';
-  startWaitingRoomPolling();
+  // Hide summary cards that only appear with data
+  ['np-intake-summary-card','np-sensory-summary-card','wl-intake-summary-card','np-limb-result','wl-risk-banner','signoff-completion-card']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+  // Reset WL metric tile display values
+  ['wl-metric-bmi','wl-metric-bf','wl-metric-lbm','wl-metric-whr','wl-metric-bmr','wl-metric-tdee','wl-target-cal',
+    'wl-val-protein','wl-val-carbs','wl-val-fat',
+    'wl-timeline-rate','wl-timeline-weeks','wl-timeline-date',
+    'np-lr-score-text','np-lr-total']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
+  ['wl-bar-protein','wl-bar-carbs','wl-bar-fat']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.style.width = '0%'; });
+  const proteinCheck = document.getElementById('wl-protein-check');
+  if(proteinCheck) proteinCheck.innerHTML = '';
+  // Reset WL deficit slider display
+  const defVal = document.getElementById('wl-deficit-val');
+  if(defVal) defVal.textContent = '20';
+  const defSlider = document.getElementById('wl-deficit-slider');
+  if(defSlider) defSlider.value = '20';
+  // Clear signature canvases inside exam-app
+  document.querySelectorAll('#exam-app canvas').forEach(cv => {
+    const ctx = cv.getContext && cv.getContext('2d');
+    if(ctx){ ctx.clearRect(0, 0, cv.width, cv.height); cv._init = false; }
+  });
+  // Clear status bar
+  const statusEl = document.getElementById('signoff-status');
+  if(statusEl){ statusEl.className = 'status-bar'; statusEl.innerHTML = ''; }
+  // Show the signoff brow again in case it was hidden by a previous completion
+  const brow = document.getElementById('signoff-brow');
+  if(brow) brow.style.display = '';
+}
+
+function _resetExamStateForNewPatient(){
+  S.exam = _buildPristineExamState();
+  // Reset the per-module-level flags that live outside S.exam
+  _icdShowMore = false;
+  _currentSpineSeg = null;
+  _currentMuscleId = null;
+  _clearExamFormUI();
 }
 
 /* Populate exam header with patient info */
@@ -11811,7 +11960,7 @@ function showSignoffCompletion(pdfLink){
       <p>The chart for <strong>${escapeHtml(S.exam.patient.first)} ${escapeHtml(S.exam.patient.last)}</strong> has been saved to Drive and the patient record has been marked completed.</p>
       <div class="signoff-completion-btns">
         <a class="btn" href="${pdfLink}" target="_blank">📄 View Chart in Drive</a>
-        <button class="btn" onclick="exitExamToWaitingRoom()">← Back to Waiting Room</button>
+        <button class="btn" onclick="finishExamToWaitingRoom()">← Back to Waiting Room</button>
         <button class="btn" onclick="finishExamToLanding()">🏠 Back to Landing</button>
       </div>
     </div>`;
@@ -11819,9 +11968,8 @@ function showSignoffCompletion(pdfLink){
 }
 
 function finishExamToLanding(){
-  // Clear exam state and return to landing
-  S.exam.active = false;
-  S.exam.patient = null;
+  // Clear exam state completely and return to landing
+  _resetExamStateForNewPatient();
   document.getElementById('exam-app').style.display = 'none';
   document.getElementById('provider-app').style.display = 'none';
   goLanding();

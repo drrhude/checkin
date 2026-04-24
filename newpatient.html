@@ -2653,7 +2653,7 @@ function isSigEmpty(id){
 
 /* ── Google API ────────────────────────────────────────────── */
 function gapiLoaded(){ gapi.load('client', () => { S.drive.gapiInited = true; initGapiClient(); }); }
-function gisLoaded(){ S.drive.gisInited = true; }
+function gisLoaded(){ S.drive.gisInited = true; setTimeout(tryAutoReconnectDrive, 300); }
 async function initGapiClient(){
   try {
     const initOpts = { discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4'] };
@@ -2674,6 +2674,8 @@ function connectDrive(){
       if(resp.error){ console.error(resp); alert('OAuth failed: ' + (resp.error_description||resp.error)); return; }
       S.drive.accessToken = resp.access_token;
       S.drive.connected = true;
+      S.drive.priorConsent = true;
+      try { localStorage.setItem('cvc-drive-consented','yes'); } catch(e){}
       // Make token available to gapi client for calls
       if(gapi.client && gapi.client.setToken) gapi.client.setToken({access_token: resp.access_token});
       updateDriveIndicator();
@@ -2737,7 +2739,30 @@ function loadSettings(){
   try {
     const saved = localStorage.getItem('cvc-settings');
     if(saved) Object.assign(S.settings, JSON.parse(saved));
+    // Track prior consent so we can attempt silent reconnect without re-prompting
+    S.drive.priorConsent = localStorage.getItem('cvc-drive-consented') === 'yes';
   } catch(e){}
+}
+
+// Attempt a silent re-auth on page load when GIS is ready + we've previously consented
+function tryAutoReconnectDrive(){
+  if(!S.settings.gClientId || !S.drive.priorConsent || !S.drive.gisInited || S.drive.connected) return;
+  try {
+    S.drive.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: S.settings.gClientId,
+      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
+      callback: (resp) => {
+        if(resp.error){ console.warn('silent auth failed:', resp.error); return; }
+        S.drive.accessToken = resp.access_token;
+        S.drive.connected = true;
+        if(gapi.client && gapi.client.setToken) gapi.client.setToken({access_token: resp.access_token});
+        updateDriveIndicator();
+        scheduleSilentRefresh();
+      }
+    });
+    // prompt: '' = silent (uses existing session if user is signed in to Google)
+    S.drive.tokenClient.requestAccessToken({prompt: ''});
+  } catch(e){ console.warn('auto-reconnect failed:', e); }
 }
 
 
@@ -3153,7 +3178,15 @@ async function submitIntake(){
   showStatus('submit-status', 'loading', 'Submitting...');
 
   const payload = collectFullPayload();
-  const key = 'PT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+  const now = new Date();
+  const ts = now.getFullYear().toString() +
+    String(now.getMonth()+1).padStart(2,'0') +
+    String(now.getDate()).padStart(2,'0') +
+    String(now.getHours()).padStart(2,'0') +
+    String(now.getMinutes()).padStart(2,'0') +
+    String(now.getSeconds()).padStart(2,'0');
+  const cleanName = (s) => String(s||'').replace(/[^A-Za-z0-9]/g,'');
+  const key = `NP_${cleanName(payload.last)}_${cleanName(payload.first)}_${ts}`;
   payload.key = key;
 
   try {
@@ -3171,9 +3204,11 @@ async function submitIntake(){
       if(S.settings.gSheetId){
         try {
           await sheetsEnsureTab();
+          // Uppercase services for readability in sheet, preserve array in JSON
+          const servicesUpper = (payload.services || []).map(s => String(s).toUpperCase()).join(', ');
           await sheetsAppendRow([
             key, payload.submittedAt, payload.last, payload.first, payload.dob,
-            payload.phone, (payload.services || []).join(','), 'waiting',
+            payload.phone, servicesUpper, 'pending',
             pdfLink, JSON.stringify(payload)
           ]);
         } catch(e){ console.warn('Sheet append failed:', e); }
@@ -3280,7 +3315,7 @@ async function loadWaitingRoom(showLoading=false){
       first: r[3] || '',
       dob: r[4] || '',
       phone: r[5] || '',
-      services: (r[6] || '').split(',').filter(Boolean),
+      services: (r[6] || '').split(/[,\s]+/).map(s => s.trim().toLowerCase()).filter(Boolean),
       status: r[7] || 'waiting',
       pdfLink: r[8] || '',
       payloadStr: r[9] || '{}',
@@ -3422,10 +3457,11 @@ async function markPatientStatus(key, status){
 
 async function startExam(key){
   const patient = (S.waitingRoom || []).find(p => p.key === key);
-  if(!patient) return;
-  await markPatientStatus(key, 'in-exam');
+  if(!patient) { alert('Patient not found in current queue. Try refreshing.'); return; }
+  // Try to mark in-exam but don't block exam entry if sheet write fails
+  try { await markPatientStatus(key, 'in-exam'); } catch(e){ console.warn('Could not mark in-exam:', e); }
   let payload = {};
-  try { payload = JSON.parse(patient.payloadStr); } catch(e){}
+  try { payload = JSON.parse(patient.payloadStr); } catch(e){ console.warn('Payload parse failed:', e); }
   enterExamView(patient, payload);
 }
 
@@ -4412,14 +4448,23 @@ function initExamState(){
   };
 }
 
-function enterExamView(patient){
+function enterExamView(patient, payload){
   S.activePatient = patient;
+  // Populate S.data from intake payload so all exam modules can pre-fill
+  S.data = payload || {};
   initExamState();
-  show('#view-exam');
-  hideAll('#view-landing, #view-patient, #view-staff, #view-handoff');
+  // Use the actual app-container IDs from markup
+  $('landing').classList.remove('show');
+  $('patient-app').style.display = 'none';
+  $('provider-app').style.display = 'none';
+  $('exam-app').style.display = '';
+  $('handoff').classList.remove('show');
+  document.body.setAttribute('data-role','staff');
+  if(S.wrPollTimer){ clearInterval(S.wrPollTimer); S.wrPollTimer = null; }
   populateExamHeader();
   buildExamSteps();
   examGoStep('subjective');
+  window.scrollTo(0,0);
 }
 
 function populateExamHeader(){
@@ -4435,9 +4480,9 @@ function buildExamSteps(){
     {k:'subjective', lbl:'Subjective'},
     {k:'chiro', lbl:'Chiro Exam'}
   ];
-  if(services.includes('shockwave')) steps.push({k:'sw', lbl:'Shockwave'});
-  if(services.includes('neuropath')) steps.push({k:'np', lbl:'NeuroPath'});
-  if(services.includes('weightloss')) steps.push({k:'wl', lbl:'Weight Loss'});
+  if(services.includes('sw')) steps.push({k:'sw', lbl:'Shockwave'});
+  if(services.includes('np')) steps.push({k:'np', lbl:'NeuroPath'});
+  if(services.includes('wl')) steps.push({k:'wl', lbl:'Weight Loss'});
   steps.push({k:'plan', lbl:'Assessment & Plan'});
   steps.push({k:'signoff', lbl:'Sign-off'});
   S.examSteps = steps;
@@ -4484,15 +4529,15 @@ function abandonExam(){
   if(!confirm('Abandon this exam and return to waiting room? Any unsaved exam data will be lost.')) return;
   S.activePatient = null;
   initExamState();
-  hideAll('#view-exam');
-  show('#view-staff');
+  $('exam-app').style.display = 'none';
+  $('provider-app').style.display = '';
   loadWaitingRoom();
 }
 
 function exitExamToWaitingRoom(){
   S.activePatient = null;
-  hideAll('#view-exam');
-  show('#view-staff');
+  $('exam-app').style.display = 'none';
+  $('provider-app').style.display = '';
   loadWaitingRoom();
 }
 
@@ -5023,7 +5068,7 @@ function buildSWSessionChips(){
 
 /* ============ SIGN-OFF MODULE ============ */
 function populateSignoffSummary(){
-  const c = $('signoff-summary');
+  const c = $('signoff-summary-container');
   if(!c) return;
   const d = S.data, e = S.exam;
   const p = S.activePatient || {};
@@ -5073,7 +5118,7 @@ function populateSignoffSummary(){
   </div>`);
 
   // Shockwave
-  if(services.includes('shockwave')){
+  if(services.includes('sw')){
     const targets = [...(e.sw.targetTissues||new Set())].map(k => SW_TARGET_TISSUES.find(t=>t.k===k)?.lbl).filter(Boolean).join(', ');
     const tier = SW_PRICING_TIERS.find(t => t.k === e.sw.sessions);
     cards.push(`<div class="signoff-summary-card">
@@ -5089,7 +5134,7 @@ function populateSignoffSummary(){
   }
 
   // NeuroPath
-  if(services.includes('neuropath')){
+  if(services.includes('np')){
     const zones = [...(e.np.zones||new Set())].join(', ');
     const tier = e.np.selectedTier || e.np.recommendedTier;
     cards.push(`<div class="signoff-summary-card">
@@ -5105,7 +5150,7 @@ function populateSignoffSummary(){
   }
 
   // Weight Loss
-  if(services.includes('weightloss')){
+  if(services.includes('wl')){
     const tier = e.wl.selectedTier || e.wl.recommendedTier;
     cards.push(`<div class="signoff-summary-card">
       <div class="signoff-card-title">Weight Loss Program</div>
@@ -5143,8 +5188,13 @@ function populateSignoffSummary(){
 
   c.innerHTML = cards.join('');
 
-  // Initialize signature pad if not already
-  setTimeout(() => initProviderSig(), 100);
+  // Initialize signature pad on the actual markup canvas
+  setTimeout(() => { try { initSig('signoff-sig'); } catch(e){ console.warn('initSig failed:', e); } }, 100);
+  // Pre-fill provider name + date
+  const nameEl = $('signoff-provider-name');
+  if(nameEl && !nameEl.value) nameEl.value = 'Jonathan M. Urrutia, DC';
+  const dateEl = $('signoff-date');
+  if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
 }
 
 function initProviderSig(){
@@ -5285,7 +5335,7 @@ async function buildCombinedPdfBlob(){
 
   // SW module
   const services = patient.services||[];
-  if(services.includes('shockwave')){
+  if(services.includes('sw')){
     h1('Shockwave Therapy Assessment');
     kv('Candidacy', e.sw.candidacy);
     kv('Chronicity', e.sw.chronicity);
@@ -5302,7 +5352,7 @@ async function buildCombinedPdfBlob(){
   }
 
   // NP module
-  if(services.includes('neuropath')){
+  if(services.includes('np')){
     h1('NeuroPath Program Assessment');
     kv('Stage', e.np.stage);
     kv('MNSI Part A (intake)', (d.mnsiScore||0) + ' / 13');
@@ -5319,7 +5369,7 @@ async function buildCombinedPdfBlob(){
   }
 
   // WL module
-  if(services.includes('weightloss')){
+  if(services.includes('wl')){
     h1('Weight Loss Program Assessment');
     kv('BMI', e.wl.bmi ? e.wl.bmi.toFixed(1)+' ('+e.wl.bmiCategory+')' : '—');
     kv('Body fat %', e.wl.bodyFatPct ? e.wl.bodyFatPct.toFixed(1)+'%' : '—');
@@ -5426,12 +5476,9 @@ async function buildCombinedPdfBlob(){
 }
 
 async function completeExamSignoff(){
-  // Validate
-  if(!$('provider-attestation-check').checked){
-    alert('Please check the attestation box before signing off.');
-    return;
-  }
-  if(isProviderSigEmpty()){
+  // Validate signature against real canvas ID in markup
+  const sigCanvas = $('signoff-sig');
+  if(!sigCanvas || isSigEmpty('signoff-sig')){
     alert('Please provide your signature before signing off.');
     return;
   }
@@ -5440,70 +5487,93 @@ async function completeExamSignoff(){
   }
 
   S.exam.signoff.providerAttestation = true;
+  S.exam.signoff.providerName = getVal('signoff-provider-name') || 'Jonathan M. Urrutia, DC';
   S.exam.signoff.providerSignatureTime = new Date().toISOString();
   S.exam.signoff.finalNotes = getVal('signoff-final-notes');
+  try { S.exam.signoff.providerSignature = sigCanvas.toDataURL('image/png'); } catch(e){}
 
   const statusEl = $('signoff-status');
-  const setStat = (msg, cls='') => { if(statusEl){ statusEl.className = 'status-msg ' + cls; statusEl.textContent = msg; } };
+  const setStat = (msg, cls='') => { if(statusEl){ statusEl.className = 'status-bar ' + cls; statusEl.textContent = msg; } };
+  const btn = $('signoff-submit-btn');
+  if(btn) btn.disabled = true;
 
-  setStat('Generating combined PDF…', 'info');
+  setStat('Generating combined PDF…', 'loading');
   let combinedPdf;
   try {
     combinedPdf = await buildCombinedPdfBlob();
   } catch(err){
     console.error(err);
-    setStat('❌ Could not build PDF: ' + (err.message||err), 'bad');
+    setStat('❌ Could not build PDF: ' + (err.message||err), 'error');
+    if(btn) btn.disabled = false;
     return;
   }
-  if(!combinedPdf){ setStat('❌ PDF generation failed.', 'bad'); return; }
+  if(!combinedPdf){ setStat('❌ PDF generation failed.', 'error'); if(btn) btn.disabled = false; return; }
 
   // Upload to Drive
-  setStat('Uploading to Drive…', 'info');
+  setStat('Uploading combined chart to Drive…', 'loading');
   let pdfLink = '';
   try {
     const patient = S.activePatient || {};
-    const fname = `${patient.last||'Patient'}_${patient.first||''}_Complete_${new Date().toISOString().slice(0,10)}.pdf`;
+    const fname = `Chart_${patient.last||'Patient'}_${patient.first||''}_${new Date().toISOString().slice(0,10)}.pdf`;
     const uploaded = await uploadPdfToDrive(combinedPdf, fname);
     pdfLink = uploaded?.webViewLink || '';
   } catch(err){
     console.warn('Drive upload failed', err);
-    setStat('⚠️ PDF created but Drive upload failed. Downloaded locally.', 'warn');
+    setStat('⚠️ PDF created but Drive upload failed. Downloading locally…', 'warn');
     const url = URL.createObjectURL(combinedPdf);
     const a = document.createElement('a'); a.href = url;
-    a.download = `${(S.activePatient?.last||'Patient')}_Complete_${Date.now()}.pdf`;
+    a.download = `Chart_${(S.activePatient?.last||'Patient')}_${Date.now()}.pdf`;
     a.click(); URL.revokeObjectURL(url);
   }
 
-  // Update Sheet row (col H = status, col I = combined PDF link)
+  // Update Sheet row (status=completed, column I gets combined chart link)
   try {
-    if(S.driveConnected && S.activePatient?.key){
+    if(S.drive.connected && S.activePatient?.key){
       await updateSheetRowStatus(S.activePatient.key, 'completed', pdfLink);
     }
   } catch(err){ console.warn('sheet update failed', err); }
 
-  setStat('✓ Exam signed off. Combined chart saved.', 'good');
-  setTimeout(() => {
-    exitExamToWaitingRoom();
-  }, 1400);
+  // Show completion screen with both options
+  setStat('✓ Exam signed off. Combined chart saved to Drive.', 'success');
+  showSignoffComplete(pdfLink);
+}
+
+function showSignoffComplete(pdfLink){
+  // Replace signoff panel contents with a completion card
+  const panel = $('exam-step-signoff');
+  if(!panel) return;
+  panel.innerHTML = `
+    <div class="phase-hdr"><div class="phase-lbl">✓ Complete</div><div class="phase-title">Exam Signed &amp; Saved</div><div class="phase-desc">Combined intake + exam chart uploaded to Drive. Patient status updated to <strong>completed</strong>.</div></div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:3rem;margin-bottom:10px;">📄✓</div>
+      <div style="font-size:1.05rem;margin-bottom:16px;"><strong>${(S.activePatient?.first||'')} ${(S.activePatient?.last||'')}</strong> — chart saved.</div>
+      ${pdfLink ? `<div style="margin-bottom:20px;"><a href="${pdfLink}" target="_blank" class="btn btn-h btn-sm">📎 Open combined chart in Drive</a></div>` : ''}
+      <div class="brow" style="justify-content:center;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-p" onclick="exitExamToWaitingRoom()">← Back to Waiting Room</button>
+        <button class="btn btn-h" onclick="S.activePatient=null; $('exam-app').style.display='none'; goLanding();">🏠 Back to Landing</button>
+      </div>
+    </div>`;
 }
 
 async function updateSheetRowStatus(key, status, pdfLink){
-  if(!S.sheetId) return;
+  const sheetId = S.settings?.gSheetId;
+  if(!sheetId || !S.drive.accessToken) return;
   // Read rows to find matching key
-  const readRes = await gapi.client.sheets.spreadsheets.values.get({
-    spreadsheetId: S.sheetId,
-    range: 'NewPatient_Intake!A:J'
+  const readResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/NewPatient_Intake!A:J`, {
+    headers: {'Authorization': 'Bearer ' + S.drive.accessToken}
   });
-  const rows = readRes.result.values || [];
+  if(!readResp.ok) throw new Error('Sheet read failed: ' + readResp.status);
+  const data = await readResp.json();
+  const rows = data.values || [];
   const idx = rows.findIndex(r => r[0] === key);
   if(idx < 0) return;
   const rowNum = idx + 1;
-  await gapi.client.sheets.spreadsheets.values.update({
-    spreadsheetId: S.sheetId,
-    range: `NewPatient_Intake!H${rowNum}:I${rowNum}`,
-    valueInputOption: 'USER_ENTERED',
-    resource: { values: [[status, pdfLink]] }
+  const updateResp = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/NewPatient_Intake!H${rowNum}:I${rowNum}?valueInputOption=USER_ENTERED`, {
+    method: 'PUT',
+    headers: {'Authorization': 'Bearer ' + S.drive.accessToken, 'Content-Type': 'application/json'},
+    body: JSON.stringify({ values: [[status, pdfLink || rows[idx][8] || '']] })
   });
+  if(!updateResp.ok) throw new Error('Sheet update failed: ' + updateResp.status);
 }
 
 

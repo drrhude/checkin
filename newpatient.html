@@ -1908,7 +1908,7 @@ body[data-role="provider"] .lang-toggle{display:none;}
     <div class="row r1"><div class="field"><label>Clinic Address</label><input id="s-clinic-addr" value="1001 Glade Rd, Suite 120, Colleyville, TX 76034"></div></div>
     <div class="sec-lbl" style="margin-top:14px;">Google Drive &amp; Sheets Integration</div>
     <div class="field"><label>Google OAuth Client ID</label><input id="s-gclient-id" placeholder="xxxxx.apps.googleusercontent.com"></div>
-    <div class="field" style="margin-top:8px;"><label>Google API Key</label><input id="s-gapi-key" placeholder="AIzaSy..."></div>
+    <div class="field" style="margin-top:8px;"><label>Google API Key <span style="opacity:.6;font-weight:400">(optional)</span></label><input id="s-gapi-key" placeholder="AIzaSy... (leave blank if unsure)"></div>
     <div class="field" style="margin-top:8px;"><label>Drive Folder ID (optional)</label><input id="s-gdrive-folder" placeholder="Leave blank for root"></div>
     <div class="field" style="margin-top:8px;"><label>Spreadsheet ID</label><input id="s-gsheet-id" placeholder=""></div>
     <div class="brow" style="margin-top:10px;"><button class="btn btn-o btn-sm" onclick="connectDrive()">🔌 Connect Google</button><div class="spacer"></div><span id="s-gconn-status" style="font-size:.8rem;color:var(--ink-sm);align-self:center;">Not connected</span></div>
@@ -2655,21 +2655,27 @@ function isSigEmpty(id){
 function gapiLoaded(){ gapi.load('client', () => { S.drive.gapiInited = true; initGapiClient(); }); }
 function gisLoaded(){ S.drive.gisInited = true; }
 async function initGapiClient(){
-  if(!S.settings.gApiKey) return;
   try {
-    await gapi.client.init({apiKey: S.settings.gApiKey, discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4']});
+    const initOpts = { discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4'] };
+    if(S.settings.gApiKey) initOpts.apiKey = S.settings.gApiKey;
+    await gapi.client.init(initOpts);
+    S.drive.clientInited = true;
   } catch(e){ console.warn('gapi init failed:', e); }
 }
 function connectDrive(){
-  if(!S.settings.gClientId || !S.settings.gApiKey){ alert('Set Google Client ID and API Key in Settings first.'); return; }
+  if(!S.settings.gClientId){ alert('Set Google OAuth Client ID in Settings first.'); return; }
   if(!S.drive.gisInited){ alert('Google Identity Services not ready. Try again in a moment.'); return; }
+  // Ensure gapi client is initialized (retry if key was just added)
+  if(!S.drive.clientInited && S.drive.gapiInited) initGapiClient();
   S.drive.tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: S.settings.gClientId,
     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets',
     callback: (resp) => {
-      if(resp.error){ console.error(resp); return; }
+      if(resp.error){ console.error(resp); alert('OAuth failed: ' + (resp.error_description||resp.error)); return; }
       S.drive.accessToken = resp.access_token;
       S.drive.connected = true;
+      // Make token available to gapi client for calls
+      if(gapi.client && gapi.client.setToken) gapi.client.setToken({access_token: resp.access_token});
       updateDriveIndicator();
       scheduleSilentRefresh();
     }
@@ -5507,13 +5513,22 @@ function init(){
   setLang(S.lang || 'en');
 
   // PIN input auto-advance
-  document.querySelectorAll('.pin-input').forEach((inp, idx, all) => {
+  document.querySelectorAll('.pin-box').forEach((inp, idx, all) => {
     inp.addEventListener('input', e => {
+      // Keep only digits
+      e.target.value = e.target.value.replace(/\D/g,'').slice(0,1);
       if(e.target.value.length === 1 && idx < all.length - 1) all[idx+1].focus();
+      // Auto-submit when last digit filled
+      if(idx === all.length - 1 && e.target.value.length === 1){
+        const all4 = [...all].map(i => i.value).join('');
+        if(all4.length === 4) setTimeout(() => checkPin(), 50);
+      }
     });
     inp.addEventListener('keydown', e => {
       if(e.key === 'Backspace' && !e.target.value && idx > 0) all[idx-1].focus();
+      if(e.key === 'Enter') checkPin();
     });
+    inp.addEventListener('focus', e => e.target.select());
   });
 
   // Close modals on overlay click

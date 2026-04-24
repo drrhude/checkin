@@ -569,6 +569,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--sage-lt);outline
 .wl-supplement-name{font-weight:700;font-size:.9rem;color:var(--ink);margin-bottom:2px;}
 .wl-supplement-purpose{font-size:.76rem;color:var(--ink-sm);line-height:1.5;}
 .signoff-summary-card{background:var(--cream);border:1px solid var(--border-lt);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px;}
+.subj-row{padding:8px 0;border-bottom:1px dashed var(--border-lt);}
+.subj-row:last-child{border-bottom:none;}
+.subj-label{font-size:.72rem;color:var(--ink-sm);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:3px;}
+.subj-value{font-size:.93rem;color:var(--ink);line-height:1.5;}
+.subj-row.alert{background:rgba(200,50,50,.06);border-radius:6px;padding:10px;border-bottom:none;margin:4px 0;}
 .signoff-summary-title{font-weight:700;color:var(--sage-dk);font-size:.88rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border-lt);display:flex;align-items:center;gap:8px;}
 .signoff-summary-body{font-size:.82rem;line-height:1.7;color:var(--ink-md);}
 .signoff-summary-body strong{color:var(--ink);}
@@ -3208,7 +3213,7 @@ async function submitIntake(){
           const servicesUpper = (payload.services || []).map(s => String(s).toUpperCase()).join(', ');
           await sheetsAppendRow([
             key, payload.submittedAt, payload.last, payload.first, payload.dob,
-            payload.phone, servicesUpper, 'pending',
+            payload.phone, servicesUpper, 'waiting',
             pdfLink, JSON.stringify(payload)
           ]);
         } catch(e){ console.warn('Sheet append failed:', e); }
@@ -3316,7 +3321,12 @@ async function loadWaitingRoom(showLoading=false){
       dob: r[4] || '',
       phone: r[5] || '',
       services: (r[6] || '').split(/[,\s]+/).map(s => s.trim().toLowerCase()).filter(Boolean),
-      status: r[7] || 'waiting',
+      status: (() => {
+        const s = (r[7] || '').toLowerCase().trim();
+        // Normalize older or unknown values so they show in Waiting filter
+        if(s === '' || s === 'pending' || s === 'new') return 'waiting';
+        return s;
+      })(),
       pdfLink: r[8] || '',
       payloadStr: r[9] || '{}',
     })).filter(p => {
@@ -4061,10 +4071,10 @@ function buildICDContext(){
   const regions = new Set();
   (S.data.regions||[]).forEach(r => regions.add(r.region || r));
   const text = [
-    S.data.complaint || '',
-    S.data.mechanism || '',
-    S.data.aggFactors || '',
-    S.data.goal || '',
+    S.data.mechanismText || '',
+    S.data.aggFactorsText || '',
+    S.data.onsetText || '',
+    S.data.goalText || '',
     ...(S.data.neuroSymptoms||[])
   ].join(' ');
   // Ortho positives from exam
@@ -4448,12 +4458,65 @@ function initExamState(){
   };
 }
 
+
 function enterExamView(patient, payload){
   S.activePatient = patient;
-  // Populate S.data from intake payload so all exam modules can pre-fill
-  S.data = payload || {};
+  // Build S.data that satisfies BOTH the subjective review (nested shape) and downstream exam modules (flat fields).
+  const p = payload || {};
+  const c = p.complaint || {};
+  const h = p.health || {};
+  const hx = p.hx || {};
+
+  S.data = {
+    // Nested originals for populateSubjectiveReview cards
+    complaint: c, health: h, hx: hx,
+    social: p.social || {}, activity: p.activity || {},
+    sw: p.sw || null, np: p.np || null, wl: p.wl || null,
+    insurance: p.insurance || {},
+
+    // Demographics
+    first: p.first, last: p.last, dob: p.dob, sex: p.sex, phone: p.phone, email: p.email,
+    caseType: p.insurance?.caseType || '',
+
+    // Flattened for exam engine
+    regions: (c.regions || []).map(r => ({ region: r.region, side: r.side, pain: r.level, level: r.level })),
+    mechanismText: (c.mechanism || []).join(', '),
+    aggFactorsText: (c.aggravators || []).join(', '),
+    onsetText: (c.onset || []).join(', '),
+    relFactorsText: (c.relievers || []).join(', '),
+    priorTxText: (c.priorTx || []).join(', '),
+    goalText: c.goal || '',
+
+    neuroSymptoms: h.neuro || [],
+    neuroWhere: h.neuroWhere || '',
+    redFlags: (h.redFlags || []).map(f => typeof f === 'object' ? f.v : f),
+    functionalGoals: h.goals || [],
+
+    healthConditions: hx.conditions || [],
+    medications: hx.meds || '',
+    allergies: hx.allergies || '',
+    surgeries: hx.surgCategories || [],
+    surgeriesNotes: hx.surgeries || '',
+    injuries: hx.injuries || '',
+
+    mnsiScore: p.np?.mnsiScore || 0,
+    mnsiAnswers: p.np?.mnsiAnswers || {},
+
+    weight: p.wl?.weight || '',
+    goalWeight: p.wl?.goalWeight || '',
+    heightFt: p.wl?.heightFt || '',
+    heightIn: p.wl?.heightIn || '',
+    age: p.wl?.age || '',
+    wlPriorMethods: p.wl?.priorMethodsLabels || p.wl?.priorMethods || [],
+    wlPriorMax: p.wl?.priorMax || '',
+    wlPriorMin: p.wl?.priorMin || '',
+    wlMetabolic: p.wl?.metabolicLabels || p.wl?.metabolic || [],
+    wlEatingPatterns: p.wl?.eatingPatternsLabels || p.wl?.eatingPatterns || [],
+
+    _raw: p
+  };
+
   initExamState();
-  // Use the actual app-container IDs from markup
   $('landing').classList.remove('show');
   $('patient-app').style.display = 'none';
   $('provider-app').style.display = 'none';
@@ -4542,24 +4605,110 @@ function exitExamToWaitingRoom(){
 }
 
 function populateSubjectiveReview(){
-  const c = $('subjective-review');
-  if(!c) return;
-  const d = S.data;
-  const regions = (d.regions||[]).map(r => `${r.region||r} (${r.pain||'—'}/10)`).join(', ');
-  c.innerHTML = `
-    <div class="subj-card"><div class="subj-label">Chief Complaint</div><div class="subj-value">${d.complaint || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Regions Involved</div><div class="subj-value">${regions || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Onset</div><div class="subj-value">${d.onset || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Mechanism</div><div class="subj-value">${d.mechanism || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Aggravating</div><div class="subj-value">${d.aggFactors || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Relieving</div><div class="subj-value">${d.relFactors || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Prior Treatment</div><div class="subj-value">${d.priorTx || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Patient Goal</div><div class="subj-value">${d.goal || '—'}</div></div>
-    <div class="subj-card"><div class="subj-label">Neuro Symptoms</div><div class="subj-value">${(d.neuroSymptoms||[]).join(', ') || 'None'}</div></div>
-    <div class="subj-card"><div class="subj-label">Red Flags</div><div class="subj-value ${(d.redFlags||[]).length?'alert':''}">${(d.redFlags||[]).join(', ') || 'None'}</div></div>
-    <div class="subj-card"><div class="subj-label">Health History</div><div class="subj-value">${(d.healthConditions||[]).join(', ') || 'None'}</div></div>
-    <div class="subj-card"><div class="subj-label">Medications</div><div class="subj-value">${d.medications || 'None'}</div></div>
-    <div class="subj-card"><div class="subj-label">Surgeries</div><div class="subj-value">${(d.surgeries||[]).join(', ') || 'None'}</div></div>`;
+  const d = S.data || {};
+  const c = d.complaint || {};
+  const h = d.health || {};
+  const hx = d.hx || {};
+  const soc = d.social || {};
+  const act = d.activity || {};
+
+  // Chief complaint card
+  const ccEl = $('exam-subj-complaint');
+  if(ccEl){
+    const regions = (c.regions || []).map(r => `${r.region}${r.side && r.side !== 'bilateral' ? ' ('+r.side+')' : r.side==='bilateral'?' (bilateral)':''} — <strong>${r.level||'—'}/10</strong>`).join('<br>');
+    const bits = [];
+    if(regions) bits.push(`<div class="subj-row"><div class="subj-label">Regions &amp; Pain</div><div class="subj-value">${regions}</div></div>`);
+    if((c.onset||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Onset</div><div class="subj-value">${c.onset.join(', ')}</div></div>`);
+    if((c.mechanism||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Mechanism</div><div class="subj-value">${c.mechanism.join(', ')}</div></div>`);
+    if((c.aggravators||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Aggravators</div><div class="subj-value">${c.aggravators.join(', ')}</div></div>`);
+    if((c.relievers||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Relievers</div><div class="subj-value">${c.relievers.join(', ')}</div></div>`);
+    if((c.priorTx||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Prior treatment tried</div><div class="subj-value">${c.priorTx.join(', ')}</div></div>`);
+    ccEl.innerHTML = bits.length ? bits.join('') : '<em style="color:var(--muted)">No complaint details recorded.</em>';
+  }
+
+  // Patient goals card
+  const goalsEl = $('exam-subj-goals');
+  if(goalsEl){
+    const bits = [];
+    if(c.goal) bits.push(`<div class="subj-row"><div class="subj-label">Main goal (patient's words)</div><div class="subj-value" style="font-style:italic">"${c.goal}"</div></div>`);
+    if((h.goals||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Functional goals</div><div class="subj-value">${h.goals.join(', ')}</div></div>`);
+    goalsEl.innerHTML = bits.length ? bits.join('') : '<em style="color:var(--muted)">No goals recorded.</em>';
+  }
+
+  // Medical history card
+  const hxEl = $('exam-subj-hx');
+  if(hxEl){
+    const bits = [];
+    if((hx.conditions||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Conditions</div><div class="subj-value">${hx.conditions.join(', ')}</div></div>`);
+    if(hx.meds) bits.push(`<div class="subj-row"><div class="subj-label">Medications</div><div class="subj-value">${hx.meds}</div></div>`);
+    if(hx.allergies) bits.push(`<div class="subj-row"><div class="subj-label">Allergies</div><div class="subj-value">${hx.allergies}</div></div>`);
+    if((hx.surgCategories||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Surgical history</div><div class="subj-value">${hx.surgCategories.join(', ')}${hx.surgeries?' · '+hx.surgeries:''}</div></div>`);
+    else if(hx.surgeries) bits.push(`<div class="subj-row"><div class="subj-label">Surgical notes</div><div class="subj-value">${hx.surgeries}</div></div>`);
+    if(hx.injuries) bits.push(`<div class="subj-row"><div class="subj-label">Prior injuries</div><div class="subj-value">${hx.injuries}</div></div>`);
+    hxEl.innerHTML = bits.length ? bits.join('') : '<em style="color:var(--muted)">No medical history recorded.</em>';
+  }
+
+  // Lifestyle & activity card
+  const lifeEl = $('exam-subj-lifestyle');
+  if(lifeEl){
+    const bits = [];
+    if(act.occupation) bits.push(`<div class="subj-row"><div class="subj-label">Occupation</div><div class="subj-value">${act.occupation}${act.workHours?' · '+act.workHours+' hrs/wk':''}</div></div>`);
+    if((act.workDemands||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Work demands</div><div class="subj-value">${act.workDemands.join(', ')}</div></div>`);
+    if(act.activityLevel) bits.push(`<div class="subj-row"><div class="subj-label">Activity level</div><div class="subj-value">${act.activityLevel}${act.days?' · '+act.days+' days/wk':''}${act.duration?' × '+act.duration:''}</div></div>`);
+    if((act.activities||[]).length) bits.push(`<div class="subj-row"><div class="subj-label">Activities</div><div class="subj-value">${act.activities.join(', ')}${act.competitive?' · '+act.competitive:''}</div></div>`);
+    if(act.activityChanged) bits.push(`<div class="subj-row"><div class="subj-label">Recent activity change</div><div class="subj-value">${act.activityChangeDetail||'Yes — details not specified'}</div></div>`);
+    // Social
+    const socBits = [];
+    if(soc.smoking) socBits.push(`Smoking: ${soc.smoking}${soc.smokingDetail?' ('+soc.smokingDetail+')':''}${soc.smokingYears?', '+soc.smokingYears+' yrs':''}`);
+    if(soc.alcohol) socBits.push(`Alcohol: ${soc.alcohol}`);
+    if(soc.caffeine) socBits.push(`Caffeine: ${soc.caffeine}`);
+    if((soc.recSubstances||[]).length) socBits.push(`Rec substances: ${soc.recSubstances.join(', ')}${soc.recSubstancesDetail?' · '+soc.recSubstancesDetail:''}`);
+    if(socBits.length) bits.push(`<div class="subj-row"><div class="subj-label">Social history</div><div class="subj-value">${socBits.join('<br>')}</div></div>`);
+    lifeEl.innerHTML = bits.length ? bits.join('') : '<em style="color:var(--muted)">No lifestyle data recorded.</em>';
+  }
+
+  // Nerve symptoms & safety screen card
+  const neuroEl = $('exam-subj-neuro');
+  if(neuroEl){
+    const bits = [];
+    if((h.neuro||[]).length){
+      bits.push(`<div class="subj-row"><div class="subj-label">Nerve symptoms reported</div><div class="subj-value">${h.neuro.join(', ')}${h.neuroWhere?' — <em>'+h.neuroWhere+'</em>':''}</div></div>`);
+    }
+    if((h.redFlags||[]).length){
+      const flags = h.redFlags.map(f => typeof f==='object' ? `${f.v}${f.sev?' ('+f.sev+')':''}` : f);
+      bits.push(`<div class="subj-row alert"><div class="subj-label" style="color:var(--danger)">⚠️ RED FLAGS</div><div class="subj-value"><strong>${flags.join(', ')}</strong></div></div>`);
+    }
+    // Service-specific screens
+    if(d.sw){
+      const sw = d.sw;
+      const swBits = [];
+      if((sw.prior||[]).length) swBits.push(`Prior tx: ${sw.prior.join(', ')}`);
+      if(sw.cortisoneCount) swBits.push(`Cortisone injections: ${sw.cortisoneCount}${sw.cortisoneDate?' (last '+sw.cortisoneDate+')':''}`);
+      if(sw.imagingNotes) swBits.push(`Imaging: ${sw.imagingNotes}`);
+      if((sw.limits||[]).length) swBits.push(`Limits: ${sw.limits.join(', ')}`);
+      if(swBits.length) bits.push(`<div class="subj-row"><div class="subj-label">Shockwave intake</div><div class="subj-value">${swBits.join('<br>')}</div></div>`);
+    }
+    if(d.np){
+      const np = d.np;
+      const npBits = [];
+      if(np.diabetic) npBits.push(`Diabetic status: ${np.diabetic}${np.hba1c?' (HbA1c '+np.hba1c+')':''}`);
+      if(np.nocturnal) npBits.push(`Nocturnal pain: ${np.nocturnal}`);
+      if(np.falls) npBits.push(`Falls: ${np.falls}`);
+      if((np.meds||[]).length) npBits.push(`Nerve meds: ${np.meds.join(', ')}`);
+      if(typeof np.mnsiScore !== 'undefined') npBits.push(`<strong>MNSI Part A: ${np.mnsiScore}/13</strong>${np.mnsiScore>=7?' — <span style="color:var(--danger)">HIGH probability neuropathy</span>':''}`);
+      if(npBits.length) bits.push(`<div class="subj-row"><div class="subj-label">NeuroPath intake</div><div class="subj-value">${npBits.join('<br>')}</div></div>`);
+    }
+    if(d.wl){
+      const wl = d.wl;
+      const wlBits = [];
+      if(wl.weight) wlBits.push(`Current weight: ${wl.weight} lbs`);
+      if(wl.goalWeight) wlBits.push(`Goal: ${wl.goalWeight} lbs`);
+      if(wl.priorMethodsLabels?.length || wl.priorMethods?.length) wlBits.push(`Prior methods: ${(wl.priorMethodsLabels||wl.priorMethods).join(', ')}`);
+      if(wl.metabolicLabels?.length || wl.metabolic?.length) wlBits.push(`Metabolic: ${(wl.metabolicLabels||wl.metabolic).join(', ')}`);
+      if(wlBits.length) bits.push(`<div class="subj-row"><div class="subj-label">Weight loss intake</div><div class="subj-value">${wlBits.join('<br>')}</div></div>`);
+    }
+    neuroEl.innerHTML = bits.length ? bits.join('') : '<em style="color:var(--muted)">No nerve symptoms or red flags reported.</em>';
+  }
 }
 
 /* --- Chiro exam: ROM --- */

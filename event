@@ -1,1 +1,923 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CVC Spine & Sport — Find Your Care</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+<style>
+:root{
+  --sage:#5a8f6e;--sage-dk:#2f5c43;--sage-lt:#b8d8c4;--sage-xl:#eaf4ee;
+  --ink:#182820;--ink-md:#3b4e41;--ink-sm:#677a6e;
+  --cream:#f6faf7;--white:#ffffff;
+  --border:#c8dcd0;--border-lt:#e2ede7;
+  --gold:#c08a32;--gold-lt:#fdf3e3;--gold-dk:#8a6020;
+  --red:#c0392b;--red-lt:#fdf0ee;
+  --blue:#2563a8;--blue-lt:#eaf1fc;
+  --purple:#6a4a8f;--purple-lt:#f0eaf7;
+  --teal:#2a8a8e;--teal-lt:#e5f4f5;
+  --radius:14px;--radius-sm:9px;
+  --shadow:0 2px 10px rgba(0,0,0,.06);
+  --shadow-md:0 6px 24px rgba(0,0,0,.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--radius);padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+.modal h2{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:16px;}
+.modal .close-btn{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ink-sm);margin-top:-4px;}
+
+/* TOP BAR */
+.topbar{background:var(--white);border-bottom:2px solid var(--sage-lt);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--shadow);}
+.brand{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--sage-dk);line-height:1.1;}
+.brand em{color:var(--sage);font-style:italic;}
+.brand-sub{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-sm);margin-top:2px;font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.lang-toggle{display:flex;background:var(--sage-xl);border:1.5px solid var(--sage-lt);border-radius:100px;overflow:hidden;}
+.lang-btn{padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;color:var(--ink-sm);transition:all .15s;}
+.lang-btn.active{background:var(--sage-dk);color:white;}
+.settings-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.8rem;cursor:pointer;color:var(--ink-sm);font-family:'DM Sans',sans-serif;}
+.settings-btn:hover{border-color:var(--sage);color:var(--sage-dk);}
+
+/* PROGRESS */
+.progress-strip{background:var(--white);border-bottom:1px solid var(--border-lt);padding:10px 20px 12px;}
+.psteps{display:flex;gap:4px;margin-bottom:5px;}
+.ps{flex:1;height:4px;background:var(--border-lt);border-radius:2px;transition:background .3s;}
+.ps.done{background:var(--sage-dk);}
+.ps.active{background:var(--sage);}
+.phase-lbl{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-dk);}
+
+/* LAYOUT */
+.app{max-width:660px;margin:0 auto;padding:0 0 120px;}
+.screen{display:none;}
+.screen.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.inner{padding:24px 18px 18px;}
+
+/* TYPO */
+h1{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,4.5vw,2.2rem);color:var(--ink);margin-bottom:8px;line-height:1.2;}
+h2{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--ink);margin-bottom:6px;}
+.sec-desc{color:var(--ink-sm);font-size:.92rem;margin-bottom:20px;line-height:1.65;}
+.step-num{display:inline-block;background:var(--sage-dk);color:white;border-radius:100px;font-size:.72rem;font-weight:700;padding:2px 10px;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* CARDS */
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);}
+
+/* CHOICE BUTTONS */
+.choice-grid{display:flex;flex-direction:column;gap:10px;}
+.choice-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--white);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:15px 18px;
+  cursor:pointer;transition:all .18s;text-align:left;
+  font-family:'DM Sans',sans-serif;width:100%;
+}
+.choice-btn:hover{border-color:var(--sage);transform:translateX(3px);}
+.choice-btn.sel{border-color:var(--sage-dk);background:var(--sage-xl);}
+.choice-btn .ci{font-size:1.6rem;flex-shrink:0;width:38px;text-align:center;}
+.choice-btn .ct{flex:1;}
+.choice-btn .ct strong{display:block;font-size:.97rem;color:var(--ink);margin-bottom:2px;}
+.choice-btn .ct span{font-size:.8rem;color:var(--ink-sm);line-height:1.4;}
+.choice-btn .ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;transition:all .18s;}
+.choice-btn.sel .ck{background:var(--sage-dk);border-color:var(--sage-dk);}
+
+/* MULTI-SELECT note */
+.multi-note{font-size:.78rem;color:var(--ink-sm);margin-bottom:12px;font-style:italic;}
+
+/* FORM */
+.fg{margin-bottom:16px;}
+label.fl{font-size:.87rem;font-weight:600;color:var(--ink-md);display:block;margin-bottom:7px;}
+input[type=text],input[type=tel],input[type=email]{
+  width:100%;background:var(--cream);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:13px 15px;
+  font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--ink);
+  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+input:focus{border-color:var(--sage);background:var(--white);box-shadow:0 0 0 3px rgba(90,143,110,.14);}
+input::placeholder{color:#b0c4b8;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;white-space:nowrap;}
+.btn-green{background:var(--sage-dk);color:white;box-shadow:0 3px 14px rgba(47,92,67,.28);}
+.btn-green:hover{background:#1f4530;transform:translateY(-1px);}
+.btn-ghost{background:var(--white);border:1.5px solid var(--border);color:var(--ink-md);}
+.btn-ghost:hover{border-color:var(--sage);color:var(--sage-dk);}
+.btn-gold{background:var(--gold);color:white;box-shadow:0 3px 14px rgba(192,138,50,.28);}
+.btn-gold:hover{background:#9e7028;transform:translateY(-1px);}
+.btn-full{width:100%;padding:17px;font-size:1rem;border-radius:12px;}
+.btn-row{display:flex;justify-content:space-between;gap:10px;margin-top:22px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* RESULT CARD */
+.result-hero{text-align:center;padding:10px 0 22px;}
+.result-icon{font-size:4rem;display:block;margin-bottom:10px;}
+.result-badge{display:inline-block;padding:5px 18px;border-radius:100px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
+.result-badge.chiro{background:var(--sage-xl);color:var(--sage-dk);border:1px solid var(--sage-lt);}
+.result-badge.sw{background:var(--gold-lt);color:var(--gold-dk);border:1px solid #e8c97a;}
+.result-badge.np{background:var(--purple-lt);color:var(--purple);border:1px solid #d0bae0;}
+.result-badge.rehab{background:var(--blue-lt);color:var(--blue);border:1px solid #b5cef0;}
+.result-badge.multi{background:var(--teal-lt);color:var(--teal);border:1px solid #a8d4d6;}
+.result-title{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--ink);margin-bottom:8px;line-height:1.2;}
+.result-why{background:var(--sage-xl);border:1px solid var(--sage-lt);border-radius:var(--radius-sm);padding:16px;margin:16px 0;font-size:.9rem;color:var(--ink-md);line-height:1.7;}
+.result-why strong{color:var(--sage-dk);}
+
+.also-consider{margin-top:14px;}
+.also-consider-title{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-sm);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.also-consider-title::after{content:'';flex:1;height:1px;background:var(--border-lt);}
+.mini-cards{display:flex;flex-direction:column;gap:8px;}
+.mini-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;display:flex;align-items:center;gap:12px;}
+.mini-card .mi{font-size:1.4rem;flex-shrink:0;}
+.mini-card .mt{flex:1;}
+.mini-card .mt strong{display:block;font-size:.9rem;color:var(--ink);margin-bottom:2px;}
+.mini-card .mt span{font-size:.78rem;color:var(--ink-sm);}
+
+.offer-box{background:linear-gradient(135deg,var(--sage-dk),#1e4530);color:white;border-radius:var(--radius);padding:24px 20px;text-align:center;margin-top:18px;}
+.offer-box .ob-label{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.8;margin-bottom:6px;}
+.offer-box .ob-price{font-family:'DM Serif Display',serif;font-size:2.8rem;line-height:1;margin-bottom:4px;}
+.offer-box .ob-name{font-size:1rem;font-weight:600;opacity:.9;margin-bottom:14px;}
+.offer-box .ob-sub{font-size:.82rem;opacity:.72;margin-bottom:18px;line-height:1.6;}
+
+/* SUCCESS */
+.success-screen{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:44px 20px;}
+.success-icon{width:90px;height:90px;border-radius:50%;background:var(--sage-xl);border:3px solid var(--sage-lt);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2.4rem;}
+.success-title{font-family:'DM Serif Display',serif;font-size:2rem;margin-bottom:10px;}
+.success-sub{color:var(--ink-sm);font-size:.95rem;line-height:1.7;max-width:340px;}
+
+/* DRIVE STATUS */
+.drive-status{margin-top:12px;font-size:.82rem;padding:7px 16px;border-radius:100px;font-weight:600;display:inline-block;}
+.drive-status.uploading{background:#eaf1fc;color:var(--blue);border:1px solid #b5cef0;}
+.drive-status.success{background:var(--sage-xl);color:var(--sage-dk);border:1px solid var(--sage-lt);}
+.drive-status.error{background:var(--red-lt);color:var(--red);border:1px solid #e8b4ad;}
+
+@media(max-width:580px){
+  .inner{padding:18px 14px;}
+  .topbar{padding:11px 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeSettings()">✕</button>
+    <h2>⚙ Settings</h2>
+    <p style="font-size:.83rem;color:var(--ink-sm);margin-bottom:16px;">Saved to this device only.</p>
+    <div class="fg"><label class="fl">Booking Link (URL for $47 special)</label><input type="text" id="cfg-booking" placeholder="https://your-jane-app-link.com"></div>
+    <div style="border-top:1px solid var(--border-lt);margin:16px 0;padding-top:16px;">
+      <h2 style="font-size:1.05rem;margin-bottom:10px;">🔗 Google Sheets</h2>
+      <p style="font-size:.8rem;color:var(--ink-sm);margin-bottom:12px;line-height:1.6;">Leads auto-save to your Google Sheet on submit.</p>
+      <div class="fg"><label class="fl">Google OAuth Client ID</label><input type="text" id="cfg-goog-id" placeholder="xxxx.apps.googleusercontent.com"></div>
+      <div class="fg"><label class="fl">Google Sheet ID</label><input type="text" id="cfg-sheet-id" placeholder="Sheet ID from the URL"></div>
+      <div id="drive-auth-status" style="margin-bottom:12px;"></div>
+      <button class="btn btn-ghost" id="drive-connect-btn" onclick="initDriveAuth()" style="width:100%;margin-bottom:12px;">Connect Google Account</button>
+    </div>
+    <button class="btn btn-green btn-full" onclick="saveSettings()">Save Settings</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="brand">CVC Spine &amp; Sport <em>Care Finder</em></div>
+      <div class="brand-sub">Colleyville, TX · (817) 420-7696</div>
+    </div>
+    <div class="topbar-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="lang-es" onclick="setLang('es')">ES</button>
+      </div>
+      <button class="settings-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-strip" id="progress-strip">
+    <div class="psteps">
+      <div class="ps active" id="ps0"></div>
+      <div class="ps" id="ps1"></div>
+      <div class="ps" id="ps2"></div>
+      <div class="ps" id="ps3"></div>
+      <div class="ps" id="ps4"></div>
+      <div class="ps" id="ps5"></div>
+    </div>
+    <div class="phase-lbl" id="phase-lbl" data-en="About You" data-es="Sobre Ti">About You</div>
+  </div>
+
+  <!-- ═══ SCREEN 0: WELCOME ═══ -->
+  <div class="screen active" id="screen-0">
+    <div class="inner">
+      <div style="text-align:center;padding:8px 0 24px;">
+        <div style="font-size:3rem;margin-bottom:12px;">🏥</div>
+        <h1 data-en="What's Stopping You?" data-es="¿Qué Te Detiene?">What's Stopping You?</h1>
+        <p class="sec-desc" data-en="Answer 5 quick questions and we'll tell you exactly which care is right for you — and why." data-es="Responde 5 preguntas rápidas y te diremos exactamente qué cuidado es el adecuado para ti.">Answer 5 quick questions and we'll tell you exactly which care is right for you — and why.</p>
+        <p style="font-size:.8rem;color:var(--ink-sm);margin-top:-8px;" data-en="Takes less than 60 seconds." data-es="Menos de 60 segundos.">Takes less than 60 seconds.</p>
+      </div>
+      <button class="btn btn-green btn-full" onclick="goScreen(1)">
+        <span data-en="Find My Care →" data-es="Encontrar Mi Cuidado →">Find My Care →</span>
+      </button>
+      <p style="text-align:center;font-size:.78rem;color:var(--ink-sm);margin-top:12px;" data-en="Colleyville Chiropractic | CVC Spine &amp; Sport · 1001 Glade Rd, Suite 120" data-es="Colleyville Chiropractic | CVC Spine &amp; Sport · 1001 Glade Rd, Suite 120">Colleyville Chiropractic | CVC Spine &amp; Sport · 1001 Glade Rd, Suite 120</p>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 1: Q1 — WHO ARE YOU ═══ -->
+  <div class="screen" id="screen-1">
+    <div class="inner">
+      <div class="step-num" data-en="Question 1 of 5" data-es="Pregunta 1 de 5">Question 1 of 5</div>
+      <h2 data-en="Which best describes you?" data-es="¿Cuál te describe mejor?">Which best describes you?</h2>
+      <p class="sec-desc multi-note" data-en="Pick all that apply." data-es="Selecciona todo lo que aplique.">Pick all that apply.</p>
+      <div class="choice-grid" id="q1-choices">
+        <button class="choice-btn" onclick="toggleQ('q1','athlete')" data-val="athlete">
+          <div class="ci">🏃</div>
+          <div class="ct">
+            <strong data-en="Athlete / Active Person" data-es="Atleta / Persona Activa">Athlete / Active Person</strong>
+            <span data-en="Sport, training, performance — you move and want to stay moving" data-es="Deporte, entrenamiento — te mueves y quieres seguir moviéndote">Sport, training, performance — you move and want to stay moving</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q1','worker')" data-val="worker">
+          <div class="ci">🔧</div>
+          <div class="ct">
+            <strong data-en="Manual / Physical Worker" data-es="Trabajador Manual / Físico">Manual / Physical Worker</strong>
+            <span data-en="Construction, trades, warehouse, labor — your body takes a beating daily" data-es="Construcción, oficios, almacén — tu cuerpo trabaja duro cada día">Construction, trades, warehouse, labor — your body takes a beating daily</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q1','parent')" data-val="parent">
+          <div class="ci">👨‍👩‍👧</div>
+          <div class="ct">
+            <strong data-en="Parent / Family" data-es="Padre/Madre / Familia">Parent / Family</strong>
+            <span data-en="You carry kids, sit at desks, and forget about yourself — until it hurts" data-es="Cargas niños, te sientas en escritorios y te olvidas de ti mismo">You carry kids, sit at desks, and forget about yourself — until it hurts</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q1','senior')" data-val="senior">
+          <div class="ci">🧓</div>
+          <div class="ct">
+            <strong data-en="55+ / Senior" data-es="55+ / Mayor">55+ / Senior</strong>
+            <span data-en="Staying mobile, managing chronic pain or nerve symptoms, or just feeling better" data-es="Mantenerse móvil, manejar dolor crónico o síntomas nerviosos">Staying mobile, managing chronic pain or nerve symptoms, or just feeling better</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q1','office')" data-val="office">
+          <div class="ci">💻</div>
+          <div class="ct">
+            <strong data-en="Desk / Office Worker" data-es="Trabajador de Oficina">Desk / Office Worker</strong>
+            <span data-en="Long hours sitting — neck, back, or headaches are a daily battle" data-es="Largas horas sentado — cuello, espalda o dolores de cabeza son un problema diario">Long hours sitting — neck, back, or headaches are a daily battle</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goScreen(0)">← <span data-en="Back" data-es="Atrás">Back</span></button>
+        <button class="btn btn-green" id="q1-next" onclick="goScreen(2)" disabled><span data-en="Next →" data-es="Siguiente →">Next →</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 2: Q2 — MAIN COMPLAINT ═══ -->
+  <div class="screen" id="screen-2">
+    <div class="inner">
+      <div class="step-num" data-en="Question 2 of 5" data-es="Pregunta 2 de 5">Question 2 of 5</div>
+      <h2 data-en="What's your main issue right now?" data-es="¿Cuál es tu problema principal ahora mismo?">What's your main issue right now?</h2>
+      <p class="sec-desc multi-note" data-en="Pick all that apply." data-es="Selecciona todo lo que aplique.">Pick all that apply.</p>
+      <div class="choice-grid" id="q2-choices">
+        <button class="choice-btn" onclick="toggleQ('q2','back')" data-val="back">
+          <div class="ci">🔙</div>
+          <div class="ct"><strong data-en="Back or neck pain" data-es="Dolor de espalda o cuello">Back or neck pain</strong><span data-en="Upper, mid, or lower — aching, stiff, or sharp" data-es="Superior, media o baja — dolor, rigidez o agudo">Upper, mid, or lower — aching, stiff, or sharp</span></div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q2','joint')" data-val="joint">
+          <div class="ci">🦵</div>
+          <div class="ct"><strong data-en="Joint, shoulder, hip, or knee pain" data-es="Dolor de articulación, hombro, cadera o rodilla">Joint, shoulder, hip, or knee pain</strong><span data-en="Hurt with movement, after activity, or at rest" data-es="Duele con el movimiento, después de actividad, o en reposo">Hurt with movement, after activity, or at rest</span></div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q2','nerve')" data-val="nerve">
+          <div class="ci">⚡</div>
+          <div class="ct"><strong data-en="Numbness, tingling, or burning" data-es="Entumecimiento, hormigueo o ardor">Numbness, tingling, or burning</strong><span data-en="Hands, feet, arms or legs feel electric, cold, or numb" data-es="Manos, pies, brazos o piernas — sensación eléctrica, fría o adormecida">Hands, feet, arms or legs feel electric, cold, or numb</span></div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q2','chronic')" data-val="chronic">
+          <div class="ci">🔄</div>
+          <div class="ct"><strong data-en="Old injury or chronic pain that never fully healed" data-es="Lesión antigua o dolor crónico que nunca sanó por completo">Old injury or chronic pain that never fully healed</strong><span data-en="Tendon, plantar fascia, rotator cuff, tennis elbow, etc." data-es="Tendón, fascia plantar, manguito rotador, codo de tenista, etc.">Tendon, plantar fascia, rotator cuff, tennis elbow, etc.</span></div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q2','headache')" data-val="headache">
+          <div class="ci">🤕</div>
+          <div class="ct"><strong data-en="Headaches or migraines" data-es="Dolores de cabeza o migrañas">Headaches or migraines</strong><span data-en="Frequent, tension-type, or coming from the neck" data-es="Frecuentes, tensionales o que vienen del cuello">Frequent, tension-type, or coming from the neck</span></div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="toggleQ('q2','weight')" data-val="weight">
+          <div class="ci">⚖️</div>
+          <div class="ct"><strong data-en="Weight or body composition goals" data-es="Metas de peso o composición corporal">Weight or body composition goals</strong><span data-en="Lose fat, feel better in your body, build a sustainable plan" data-es="Perder grasa, sentirte mejor en tu cuerpo, construir un plan sostenible">Lose fat, feel better in your body, build a sustainable plan</span></div>
+          <div class="ck">✓</div>
+        </button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goScreen(1)">← <span data-en="Back" data-es="Atrás">Back</span></button>
+        <button class="btn btn-green" id="q2-next" onclick="goScreen(3)" disabled><span data-en="Next →" data-es="Siguiente →">Next →</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 3: Q3 — IMPACT ═══ -->
+  <div class="screen" id="screen-3">
+    <div class="inner">
+      <div class="step-num" data-en="Question 3 of 6" data-es="Pregunta 3 de 6">Question 3 of 6</div>
+      <h2 data-en="How bad has it gotten?" data-es="¿Qué tan grave se ha puesto?">How bad has it gotten?</h2>
+      <p class="sec-desc" data-en="Choose the one that fits best." data-es="Elige la que mejor se adapte.">Choose the one that fits best.</p>
+      <div class="choice-grid" id="q3impact-choices">
+        <button class="choice-btn" onclick="selectImpact('manageable')" data-val="manageable">
+          <div class="ci">😐</div>
+          <div class="ct">
+            <strong data-en="Manageable but annoying" data-es="Manejable pero molesto">Manageable but annoying</strong>
+            <span data-en="I can push through it — but it's always there in the background" data-es="Puedo aguantarlo — pero siempre está presente en el fondo">I can push through it — but it's always there in the background</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="selectImpact('affecting')" data-val="affecting">
+          <div class="ci">😟</div>
+          <div class="ct">
+            <strong data-en="Affecting my daily routine" data-es="Afectando mi rutina diaria">Affecting my daily routine</strong>
+            <span data-en="Work, sleep, or basic activities are harder than they should be" data-es="El trabajo, el sueño o las actividades básicas son más difíciles de lo que deberían">Work, sleep, or basic activities are harder than they should be</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="selectImpact('stopping')" data-val="stopping">
+          <div class="ci">🛑</div>
+          <div class="ct">
+            <strong data-en="Stopping me from things I love" data-es="Impidiéndome hacer lo que amo">Stopping me from things I love</strong>
+            <span data-en="Sport, family, hobbies — this is stealing time from my life" data-es="Deporte, familia, pasatiempos — esto está robando tiempo de mi vida">Sport, family, hobbies — this is stealing time from my life</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+        <button class="choice-btn" onclick="selectImpact('accepted')" data-val="accepted">
+          <div class="ci">😔</div>
+          <div class="ct">
+            <strong data-en="I've just accepted it" data-es="Simplemente lo he aceptado">I've just accepted it</strong>
+            <span data-en="It's been this way so long I thought this was just how life is now" data-es="Ha sido así por tanto tiempo que pensé que así era la vida ahora">It's been this way so long I thought this was just how life is now</span>
+          </div>
+          <div class="ck">✓</div>
+        </button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goScreen(2)">← <span data-en="Back" data-es="Atrás">Back</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 4: Q4–Q6 RAPID FIRE ═══ -->
+  <div class="screen" id="screen-4">
+    <div class="inner">
+      <div class="step-num" data-en="Questions 4–6 of 6" data-es="Preguntas 4–6 de 6">Questions 4–6 of 6</div>
+      <h2 data-en="Three quick ones:" data-es="Tres rápidas:">Three quick ones:</h2>
+      <p class="sec-desc" data-en="Tap your answer for each." data-es="Toca tu respuesta para cada una.">Tap your answer for each.</p>
+
+      <!-- Q4: How long -->
+      <div class="card">
+        <p style="font-weight:700;font-size:.95rem;margin-bottom:12px;" data-en="How long has this been bothering you?" data-es="¿Cuánto tiempo lleva molestándote?">How long has this been bothering you?</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="chip-btn" onclick="selectChip('q3',this,'new')" data-en="Just started" data-es="Recién empezó">Just started</button>
+          <button class="chip-btn" onclick="selectChip('q3',this,'weeks')" data-en="A few weeks" data-es="Unas semanas">A few weeks</button>
+          <button class="chip-btn" onclick="selectChip('q3',this,'months')" data-en="Months" data-es="Meses">Months</button>
+          <button class="chip-btn" onclick="selectChip('q3',this,'years')" data-en="Years / chronic" data-es="Años / crónico">Years / chronic</button>
+        </div>
+      </div>
+
+      <!-- Q5: Tried before -->
+      <div class="card">
+        <p style="font-weight:700;font-size:.95rem;margin-bottom:12px;" data-en="Have you tried treatment before?" data-es="¿Has intentado tratamiento antes?">Have you tried treatment before?</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="chip-btn" onclick="selectChip('q4',this,'nothing')" data-en="Nothing yet" data-es="Nada todavía">Nothing yet</button>
+          <button class="chip-btn" onclick="selectChip('q4',this,'pt')" data-en="PT / massage" data-es="Fisioterapia / masaje">PT / massage</button>
+          <button class="chip-btn" onclick="selectChip('q4',this,'chiro')" data-en="Chiro before" data-es="Quiro antes">Chiro before</button>
+          <button class="chip-btn" onclick="selectChip('q4',this,'surgery')" data-en="Shots / surgery" data-es="Inyecciones / cirugía">Shots / surgery</button>
+        </div>
+      </div>
+
+      <!-- Q6: Goal -->
+      <div class="card">
+        <p style="font-weight:700;font-size:.95rem;margin-bottom:12px;" data-en="What matters most to you?" data-es="¿Qué es lo más importante para ti?">What matters most to you?</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="chip-btn" onclick="selectChip('q5',this,'pain')" data-en="Get out of pain" data-es="Salir del dolor">Get out of pain</button>
+          <button class="chip-btn" onclick="selectChip('q5',this,'perform')" data-en="Perform better" data-es="Rendir mejor">Perform better</button>
+          <button class="chip-btn" onclick="selectChip('q5',this,'prevent')" data-en="Prevent future problems" data-es="Prevenir problemas futuros">Prevent future problems</button>
+          <button class="chip-btn" onclick="selectChip('q5',this,'understand')" data-en="Understand what's wrong" data-es="Entender qué está mal">Understand what's wrong</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goScreen(3)">← <span data-en="Back" data-es="Atrás">Back</span></button>
+        <button class="btn btn-green" id="q345-next" onclick="goScreen(5)" disabled><span data-en="See My Results →" data-es="Ver Mis Resultados →">See My Results →</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 5: CONTACT GATE ═══ -->
+  <div class="screen" id="screen-5">
+    <div class="inner">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:2.8rem;margin-bottom:8px;">🎯</div>
+        <h2 data-en="Your results are ready!" data-es="¡Tus resultados están listos!">Your results are ready!</h2>
+        <p class="sec-desc" data-en="Enter your info below to see which care is best for you — and claim your $47 New Patient Special." data-es="Ingresa tu información para ver qué cuidado es mejor para ti y reclamar tu Especial de Nuevo Paciente por $47.">Enter your info below to see which care is best for you — and claim your $47 New Patient Special.</p>
+      </div>
+      <div class="card">
+        <div class="fg">
+          <label class="fl" data-en="First & Last Name" data-es="Nombre y Apellido">First & Last Name</label>
+          <input type="text" id="lead-name" placeholder="Your full name" data-ph-en="Your full name" data-ph-es="Tu nombre completo" autocomplete="name">
+        </div>
+        <div class="fg">
+          <label class="fl" data-en="Phone Number" data-es="Número de Teléfono">Phone Number</label>
+          <input type="tel" id="lead-phone" placeholder="(817) 000-0000" autocomplete="tel">
+        </div>
+        <div class="fg">
+          <label class="fl" data-en="Email (optional)" data-es="Correo Electrónico (opcional)">Email (optional)</label>
+          <input type="email" id="lead-email" placeholder="you@email.com" autocomplete="email">
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" id="submit-btn" onclick="submitLead()" disabled>
+        <span data-en="Show My Results →" data-es="Mostrar Mis Resultados →">Show My Results →</span>
+      </button>
+      <p style="text-align:center;font-size:.75rem;color:var(--ink-sm);margin-top:10px;" data-en="We don't spam. We call once — only if you want us to." data-es="No hacemos spam. Llamamos una vez — solo si lo deseas.">We don't spam. We call once — only if you want us to.</p>
+      <div class="btn-row" style="justify-content:flex-start;margin-top:8px;">
+        <button class="btn btn-ghost" onclick="goScreen(4)">← <span data-en="Back" data-es="Atrás">Back</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 6: RESULTS ═══ -->
+  <div class="screen" id="screen-6">
+    <div class="inner">
+      <div class="result-hero">
+        <span class="result-icon" id="result-icon">🦴</span>
+        <div class="result-badge" id="result-badge">Chiropractic</div>
+        <div class="result-title" id="result-title">Chiropractic Care</div>
+      </div>
+      <div class="result-why" id="result-why"></div>
+      <div class="also-consider" id="also-consider"></div>
+      <div class="offer-box">
+        <div class="ob-label" data-en="Today's Special" data-es="Especial de Hoy">Today's Special</div>
+        <div class="ob-price">$47</div>
+        <div class="ob-name" data-en="New Patient Exam + Consultation" data-es="Examen + Consulta de Nuevo Paciente">New Patient Exam + Consultation</div>
+        <div class="ob-sub" data-en="Includes full evaluation, X-ray review if needed, and a personalized care plan. No pressure. No commitment." data-es="Incluye evaluación completa, revisión de rayos X si es necesario y un plan de cuidado personalizado.">Includes full evaluation, X-ray review if needed, and a personalized care plan. No pressure. No commitment.</div>
+        <button class="btn btn-gold btn-full" id="book-btn" onclick="bookNow()">
+          <span data-en="Book My $47 Exam →" data-es="Reservar Mi Examen de $47 →">Book My $47 Exam →</span>
+        </button>
+        <p style="font-size:.75rem;opacity:.7;margin-top:10px;" data-en="Or call/text us: (817) 420-7696" data-es="O llámanos/escríbenos: (817) 420-7696">Or call/text us: (817) 420-7696</p>
+      </div>
+      <div id="sheets-status" style="text-align:center;margin-top:10px;"></div>
+      <div style="margin-top:18px;text-align:center;">
+        <button class="btn btn-ghost" onclick="resetQuiz()" style="font-size:.85rem;">
+          <span data-en="Start Over" data-es="Comenzar de Nuevo">Start Over</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<style>
+.chip-btn{
+  padding:9px 16px;border-radius:100px;border:1.5px solid var(--border);
+  background:var(--white);color:var(--ink-md);font-size:.85rem;font-weight:500;
+  cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.chip-btn:hover{border-color:var(--sage);}
+.chip-btn.sel{background:var(--sage-dk);border-color:var(--sage-dk);color:white;}
+</style>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────
+const CFG_KEY='cvc_quiz_cfg';
+const SHEETS_API='https://sheets.googleapis.com/v4/spreadsheets';
+const DRIVE_SCOPE='https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SHEET_HEADERS=['timestamp','name','phone','email','persona','complaints','impact','duration','prior_treatment','goal','recommended_service','language','source'];
+
+let cfg={};
+let driveToken=null,gapiReady=false,gisReady=false,tokenClient=null;
+let SHEET_ID='',BOOKING_URL='';
+let LANG='en';
+
+// Quiz state
+let Q={q1:[],q2:[],impact:null,q3:null,q4:null,q5:null};
+let leadData={name:'',phone:'',email:''};
+
+// ─── GOOGLE AUTH ──────────────────────────────────
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({apiKey:'',discoveryDocs:[]});
+    gapiReady=true;
+    tryRestoreToken();
+  });
+}
+function gisLoaded(){gisReady=true;if(gapiReady)tryRestoreToken();}
+
+function tryRestoreToken(){
+  const saved=localStorage.getItem('quiz_drive_token');
+  const expiry=parseInt(localStorage.getItem('quiz_drive_expiry')||'0');
+  const clientId=cfg.goog_id||'';
+  if(!saved||!clientId)return;
+  if(Date.now()<expiry){
+    driveToken=saved;
+    gapi.client.setToken({access_token:driveToken});
+    const remaining=expiry-Date.now();
+    clearTimeout(window._refreshTimer);
+    window._refreshTimer=setTimeout(silentRefresh,remaining);
+    setConnectedUI();
+  } else if(clientId&&gisReady){
+    silentRefresh();
+  }
+}
+
+function silentRefresh(){
+  if(!cfg.goog_id||!gisReady)return;
+  const c=google.accounts.oauth2.initTokenClient({
+    client_id:cfg.goog_id,scope:DRIVE_SCOPE,
+    callback:(resp)=>{
+      if(resp.error)return;
+      driveToken=resp.access_token;
+      gapi.client.setToken({access_token:driveToken});
+      const expiry=Date.now()+(55*60*1000);
+      localStorage.setItem('quiz_drive_token',driveToken);
+      localStorage.setItem('quiz_drive_expiry',String(expiry));
+      clearTimeout(window._refreshTimer);
+      window._refreshTimer=setTimeout(silentRefresh,55*60*1000);
+    }
+  });
+  c.requestAccessToken({prompt:''});
+}
+
+function initDriveAuth(){
+  const clientId=document.getElementById('cfg-goog-id').value.trim()||cfg.goog_id;
+  if(!clientId){alert('Enter your Google OAuth Client ID first.');return;}
+  if(!gisReady){alert('Google auth still loading. Try again in a moment.');return;}
+  cfg.goog_id=clientId;
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:clientId,scope:DRIVE_SCOPE,
+    callback:(resp)=>{
+      if(resp.error){alert('Auth failed: '+resp.error);return;}
+      driveToken=resp.access_token;
+      gapi.client.setToken({access_token:driveToken});
+      const expiry=Date.now()+(55*60*1000);
+      localStorage.setItem('quiz_drive_token',driveToken);
+      localStorage.setItem('quiz_drive_expiry',String(expiry));
+      clearTimeout(window._refreshTimer);
+      window._refreshTimer=setTimeout(silentRefresh,55*60*1000);
+      setConnectedUI();
+      ensureHeader();
+    }
+  });
+  tokenClient.requestAccessToken({prompt:'consent'});
+}
+
+function setConnectedUI(){
+  const el=document.getElementById('drive-auth-status');
+  if(el)el.innerHTML='<span style="color:var(--sage-dk);font-weight:600;font-size:.84rem;">✓ Google Sheets connected</span>';
+  const btn=document.getElementById('drive-connect-btn');
+  if(btn){btn.textContent='✓ Connected';btn.style.background='var(--sage-dk)';btn.style.color='white';btn.disabled=true;}
+}
+
+async function ensureHeader(){
+  if(!driveToken||!SHEET_ID)return;
+  try{
+    const r=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:Z1`,{headers:{Authorization:'Bearer '+driveToken}});
+    const d=await r.json();
+    if(!d.values||!d.values[0]||!d.values[0].includes('name')){
+      await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1?valueInputOption=RAW`,{
+        method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+        body:JSON.stringify({values:[SHEET_HEADERS]})
+      });
+    }
+  }catch(e){console.warn('ensureHeader:',e);}
+}
+
+async function writeToSheet(row){
+  if(!driveToken||!SHEET_ID)return false;
+  await ensureHeader();
+  try{
+    const res=await fetch(`${SHEETS_API}/${SHEET_ID}/values/Sheet1!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+driveToken},
+      body:JSON.stringify({values:[row]})
+    });
+    return res.ok;
+  }catch(e){console.warn('writeToSheet:',e);return false;}
+}
+
+// ─── SETTINGS ─────────────────────────────────────
+window.addEventListener('load',()=>{
+  try{cfg=JSON.parse(localStorage.getItem(CFG_KEY))||{};}catch(e){cfg={};}
+  SHEET_ID=cfg.sheet_id||'';
+  BOOKING_URL=cfg.booking||'';
+  if(gapiReady&&gisReady)tryRestoreToken();
+});
+
+function openSettings(){
+  document.getElementById('settings-modal').classList.add('open');
+  if(cfg.booking)document.getElementById('cfg-booking').value=cfg.booking;
+  if(cfg.goog_id)document.getElementById('cfg-goog-id').value=cfg.goog_id;
+  if(cfg.sheet_id)document.getElementById('cfg-sheet-id').value=cfg.sheet_id;
+  if(driveToken)setConnectedUI();
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function saveSettings(){
+  cfg.booking=document.getElementById('cfg-booking').value.trim();
+  cfg.goog_id=document.getElementById('cfg-goog-id').value.trim();
+  cfg.sheet_id=document.getElementById('cfg-sheet-id').value.trim();
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  SHEET_ID=cfg.sheet_id;
+  BOOKING_URL=cfg.booking;
+  closeSettings();
+  alert('Settings saved!');
+}
+
+// ─── LANGUAGE ─────────────────────────────────────
+function setLang(lang){
+  LANG=lang;
+  document.getElementById('lang-en').classList.toggle('active',lang==='en');
+  document.getElementById('lang-es').classList.toggle('active',lang==='es');
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    const txt=el.getAttribute('data-'+lang);
+    if(txt)el.innerHTML=txt;
+  });
+  document.querySelectorAll('[data-ph-en]').forEach(el=>{
+    el.placeholder=el.getAttribute('data-ph-'+lang)||el.placeholder;
+  });
+  document.querySelectorAll('.chip-btn[data-en]').forEach(el=>{
+    el.textContent=el.getAttribute('data-'+lang)||el.textContent;
+  });
+}
+
+// ─── NAVIGATION ───────────────────────────────────
+const PHASE_LABELS={
+  en:['About You','Who Are You','Your Issues','How Bad Is It','A Few More','Your Info','Your Results'],
+  es:['Sobre Ti','Quién Eres','Tus Problemas','Qué Tan Grave','Un Poco Más','Tu Info','Tus Resultados']
+};
+
+function goScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  for(let i=0;i<6;i++){
+    const ps=document.getElementById('ps'+i);
+    if(!ps)continue;
+    const step=n-1;
+    ps.className='ps '+(i<step?'done':i===step?'active':'');
+  }
+  const lbl=document.getElementById('phase-lbl');
+  if(lbl){
+    const labels=PHASE_LABELS[LANG]||PHASE_LABELS.en;
+    lbl.textContent=labels[n]||'';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── IMPACT SINGLE SELECT (auto-advance) ──────────
+function selectImpact(val){
+  Q.impact=val;
+  document.querySelectorAll('#q3impact-choices .choice-btn').forEach(b=>{
+    b.classList.toggle('sel',b.dataset.val===val);
+  });
+  setTimeout(()=>goScreen(4),300);
+}
+
+// ─── Q1 & Q2 MULTI SELECT ─────────────────────────
+function toggleQ(qkey,val){
+  const btn=[...document.querySelectorAll(`#${qkey}-choices .choice-btn`)].find(b=>b.dataset.val===val);
+  if(!btn)return;
+  const idx=Q[qkey].indexOf(val);
+  if(idx===-1){Q[qkey].push(val);btn.classList.add('sel');}
+  else{Q[qkey].splice(idx,1);btn.classList.remove('sel');}
+  if(qkey==='q1')document.getElementById('q1-next').disabled=Q.q1.length===0;
+  if(qkey==='q2')document.getElementById('q2-next').disabled=Q.q2.length===0;
+}
+
+// ─── Q3-Q5 CHIPS ─────────────────────────────────
+function selectChip(qkey,el,val){
+  Q[qkey]=val;
+  el.closest('.card').querySelectorAll('.chip-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  checkQ345();
+}
+function checkQ345(){
+  document.getElementById('q345-next').disabled=!(Q.q3&&Q.q4&&Q.q5);
+}
+
+// ─── CONTACT GATE ─────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  ['lead-name','lead-phone'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',checkContactReady);
+  });
+});
+function checkContactReady(){
+  const name=document.getElementById('lead-name').value.trim();
+  const phone=document.getElementById('lead-phone').value.trim();
+  document.getElementById('submit-btn').disabled=!(name&&phone.length>=10);
+}
+
+// ─── SCORING ENGINE ───────────────────────────────
+const RESULTS={
+  en:{
+    chiro:{
+      icon:'🦴',badge:'Chiropractic',badgeClass:'chiro',
+      title:'Chiropractic Care',
+      why:'Based on your answers, <strong>chiropractic adjustments</strong> are likely your best starting point. Misalignment in the spine and joints directly causes the kind of pain, stiffness, and restricted movement you described. Chiropractic care restores normal joint mechanics, reduces nerve pressure, and helps your body heal without drugs or surgery. Most patients feel meaningful improvement within 3–6 visits.',
+      why_es:'Según tus respuestas, <strong>los ajustes quiroprácticos</strong> son probablemente tu mejor punto de partida. La desalineación en la columna y las articulaciones causa directamente el tipo de dolor, rigidez y movimiento restringido que describiste. La atención quiropráctica restaura la mecánica articular normal y reduce la presión nerviosa.'
+    },
+    sw:{
+      icon:'⚡',badge:'Shockwave Therapy',badgeClass:'sw',
+      title:'Shockwave Therapy (ESWT)',
+      why:'Your history of <strong>chronic or stubborn soft-tissue pain</strong> points to shockwave therapy as a strong match. Extracorporeal Shockwave Therapy (ESWT) delivers focused acoustic energy to break up scar tissue, stimulate healing in tendons and fascia, and reduce pain at the source. It\'s especially effective for problems that haven\'t responded to massage, PT, or chiro alone.',
+      why_es:'Tu historial de <strong>dolor crónico o persistente de tejido blando</strong> apunta a la terapia de ondas de choque como una excelente opción. La terapia ESWT entrega energía acústica enfocada para romper el tejido cicatricial, estimular la curación en tendones y fascia.'
+    },
+    np:{
+      icon:'🧠',badge:'NeuroPath Program',badgeClass:'np',
+      title:'NeuroPath Nerve Wellness',
+      why:'The <strong>numbness, tingling, or burning</strong> you described are classic signs of peripheral nerve dysfunction. Our NeuroPath program combines targeted electrotherapy, nerve-specific rehab, and nutritional support to improve nerve signaling and reduce those uncomfortable sensations. This is especially important if you\'ve been told there\'s "nothing to do" — there often is.',
+      why_es:'El <strong>entumecimiento, hormigueo o ardor</strong> que describiste son señales clásicas de disfunción nerviosa periférica. Nuestro programa NeuroPath combina electroterapia dirigida, rehabilitación específica del nervio y soporte nutricional.'
+    },
+    rehab:{
+      icon:'💪',badge:'Performance & Rehab',badgeClass:'rehab',
+      title:'Rehab & Performance Care',
+      why:'As an athlete or active person, you need more than pain relief — you need to <strong>move better, recover faster, and stay in the game</strong>. Our performance-based rehab combines movement assessment, corrective exercise, and manual therapy to address the root cause of your pain and get you back to full capacity. We treat athletes like athletes.',
+      why_es:'Como atleta o persona activa, necesitas más que alivio del dolor — necesitas <strong>moverte mejor, recuperarte más rápido y mantenerte en el juego</strong>. Nuestra rehabilitación basada en rendimiento combina evaluación del movimiento y ejercicios correctivos.'
+    },
+    multi:{
+      icon:'🎯',badge:'Comprehensive Care',badgeClass:'multi',
+      title:'Comprehensive Care Plan',
+      why:'Your answers suggest <strong>multiple things going on at once</strong> — which is actually very common. The good news: we treat all of it under one roof. A full evaluation will help us prioritize what to address first and build a clear, step-by-step plan so you\'re not overwhelmed and you see progress fast.',
+      why_es:'Tus respuestas sugieren <strong>múltiples cosas sucediendo a la vez</strong> — lo cual es muy común. La buena noticia: lo tratamos todo bajo un mismo techo. Una evaluación completa nos ayudará a priorizar.'
+    }
+  }
+};
+
+function scoreQuiz(){
+  let scores={chiro:0,sw:0,np:0,rehab:0};
+
+  // Q1 persona (multi-select)
+  if(Q.q1.includes('athlete')){scores.rehab+=3;scores.sw+=2;}
+  if(Q.q1.includes('worker')){scores.chiro+=3;scores.sw+=2;}
+  if(Q.q1.includes('parent')){scores.chiro+=3;}
+  if(Q.q1.includes('senior')){scores.np+=2;scores.chiro+=2;}
+  if(Q.q1.includes('office')){scores.chiro+=3;}
+
+  // Q2 complaints
+  if(Q.q2.includes('back'))scores.chiro+=3;
+  if(Q.q2.includes('joint')&&Q.q1.includes('athlete'))scores.sw+=3;
+  else if(Q.q2.includes('joint'))scores.chiro+=2;
+  if(Q.q2.includes('nerve')){scores.np+=4;scores.chiro+=1;}
+  if(Q.q2.includes('chronic'))scores.sw+=4;
+  if(Q.q2.includes('headache'))scores.chiro+=3;
+  if(Q.q2.includes('weight')){/* weight loss separate — noted in also-consider */}
+
+  // Q3 duration
+  if(Q.q3==='years'||Q.q3==='months')scores.sw+=1;
+
+  // Q4 prior treatment
+  if(Q.q4==='surgery'||Q.q4==='pt'){scores.sw+=1;scores.np+=1;}
+
+  // Q5 goal
+  if(Q.q5==='perform')scores.rehab+=2;
+  if(Q.q5==='prevent')scores.chiro+=1;
+
+  // If nerve is dominant
+  if(Q.q2.includes('nerve')&&Q.q1.includes('senior'))scores.np+=2;
+
+  return scores;
+}
+
+function getResult(){
+  const scores=scoreQuiz();
+  const hasWeight=Q.q2.includes('weight');
+  const topScore=Math.max(...Object.values(scores));
+  const topServices=Object.entries(scores).filter(([,v])=>v===topScore).map(([k])=>k);
+  const primary=topServices[0];
+
+  // Determine also-consider
+  const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const alsoConsider=sorted.slice(1,3).filter(([,v])=>v>0).map(([k])=>k);
+  if(hasWeight&&!alsoConsider.includes('weight'))alsoConsider.push('weight');
+
+  return{primary,alsoConsider,scores};
+}
+
+// ─── SUBMIT ───────────────────────────────────────
+async function submitLead(){
+  leadData.name=document.getElementById('lead-name').value.trim();
+  leadData.phone=document.getElementById('lead-phone').value.trim();
+  leadData.email=document.getElementById('lead-email').value.trim();
+
+  const {primary,alsoConsider}=getResult();
+  showResults(primary,alsoConsider);
+  goScreen(6);
+
+  // Save to sheet
+  if(driveToken&&SHEET_ID){
+    const statusEl=document.getElementById('sheets-status');
+    if(statusEl){statusEl.innerHTML='<span class="drive-status uploading">Saving your info...</span>';}
+    const row=[
+      new Date().toISOString(),
+      leadData.name,
+      leadData.phone,
+      leadData.email,
+      Q.q1.join(', '),
+      Q.q2.join(', '),
+      Q.impact||'',
+      Q.q3||'',
+      Q.q4||'',
+      Q.q5||'',
+      primary,
+      LANG,
+      'vendor-event'
+    ];
+    const ok=await writeToSheet(row);
+    if(statusEl){
+      statusEl.innerHTML=ok
+        ?'<span class="drive-status success">✓ Info saved</span>'
+        :'<span class="drive-status error">Could not save — take their card</span>';
+    }
+  }
+}
+
+// ─── SHOW RESULTS ─────────────────────────────────
+const ALSO_META={
+  en:{
+    chiro:{icon:'🦴',name:'Chiropractic',desc:'Spine & joint alignment, nerve pressure relief'},
+    sw:{icon:'⚡',name:'Shockwave Therapy',desc:'Chronic tendon & soft-tissue healing'},
+    np:{icon:'🧠',name:'NeuroPath Program',desc:'Peripheral nerve symptom relief'},
+    rehab:{icon:'💪',name:'Performance Rehab',desc:'Movement correction & athletic recovery'},
+    weight:{icon:'⚖️',name:'Weight Loss Program',desc:'Body composition & nutrition coaching'}
+  },
+  es:{
+    chiro:{icon:'🦴',name:'Quiropráctica',desc:'Alineación columna, alivio presión nerviosa'},
+    sw:{icon:'⚡',name:'Ondas de Choque',desc:'Curación de tendones y tejido blando crónico'},
+    np:{icon:'🧠',name:'Programa NeuroPath',desc:'Alivio de síntomas nerviosos periféricos'},
+    rehab:{icon:'💪',name:'Rehab de Rendimiento',desc:'Corrección de movimiento y recuperación atlética'},
+    weight:{icon:'⚖️',name:'Programa de Peso',desc:'Composición corporal y nutrición'}
+  }
+};
+
+function showResults(primary,alsoConsider){
+  const lang=LANG;
+  const R=RESULTS.en; // always use en structure, swap text by lang
+  const data=R[primary]||R.chiro;
+
+  document.getElementById('result-icon').textContent=data.icon;
+  const badge=document.getElementById('result-badge');
+  badge.textContent=lang==='es'?(ALSO_META.es[primary]?.name||data.badge):data.badge;
+  badge.className='result-badge '+data.badgeClass;
+  document.getElementById('result-title').textContent=lang==='es'?(ALSO_META.es[primary]?.name||data.title):data.title;
+  document.getElementById('result-why').innerHTML=lang==='es'?data.why_es:data.why;
+
+  // Also consider
+  const meta=ALSO_META[lang]||ALSO_META.en;
+  const ac=document.getElementById('also-consider');
+  if(alsoConsider.length){
+    const title=lang==='es'?'También podría beneficiarte:':'You may also benefit from:';
+    ac.innerHTML=`<div class="also-consider-title">${title}</div><div class="mini-cards">${
+      alsoConsider.map(k=>{
+        const m=meta[k];
+        if(!m)return'';
+        return`<div class="mini-card"><div class="mi">${m.icon}</div><div class="mt"><strong>${m.name}</strong><span>${m.desc}</span></div></div>`;
+      }).join('')
+    }</div>`;
+  } else {
+    ac.innerHTML='';
+  }
+}
+
+function bookNow(){
+  const url=BOOKING_URL||'tel:8174207696';
+  window.open(url,'_blank');
+}
+
+function resetQuiz(){
+  Q={q1:[],q2:[],impact:null,q3:null,q4:null,q5:null};
+  leadData={name:'',phone:'',email:''};
+  document.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.chip-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('lead-name').value='';
+  document.getElementById('lead-phone').value='';
+  document.getElementById('lead-email').value='';
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('q2-next').disabled=true;
+  document.getElementById('q345-next').disabled=true;
+  goScreen(0);
+}
+
+// ─── CONTACT INPUT LISTENER ───────────────────────
+window.addEventListener('load',()=>{
+  ['lead-name','lead-phone'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',checkContactReady);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CVC Bundle & ROF Builder</title>
+<style>
+  :root{
+    --bark:#2c2a25;
+    --loam:#4a4436;
+    --olive:#6b6e4f;
+    --brass:#b08d57;
+    --bone:#f4f1e9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background:var(--bone);
+    color:var(--bark);
+    margin:0;
+    padding:0;
+  }
+  header.app{
+    background:var(--bark);
+    color:var(--bone);
+    padding:18px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  header.app h1{margin:0;font-size:20px;letter-spacing:.5px;}
+  header.app .sub{font-size:12px;color:var(--brass);}
+  nav.tabs{
+    display:flex;
+    background:var(--loam);
+  }
+  nav.tabs button{
+    flex:1;
+    padding:12px;
+    background:none;
+    border:none;
+    color:var(--bone);
+    font-size:14px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  nav.tabs button.active{
+    border-bottom:3px solid var(--brass);
+    background:rgba(255,255,255,.06);
+    font-weight:600;
+  }
+  main{padding:20px 24px;max-width:1100px;margin:0 auto;}
+  .card{
+    background:#fff;
+    border:1px solid #ddd6c4;
+    border-radius:8px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .card h2{margin-top:0;font-size:16px;color:var(--loam);}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  label{font-size:12px;color:var(--loam);display:block;margin-bottom:3px;}
+  input,select{
+    padding:6px 8px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    font-size:13px;
+  }
+  button.btn{
+    background:var(--olive);
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  button.btn.brass{background:var(--brass);}
+  button.btn.outline{background:none;border:1px solid var(--olive);color:var(--olive);}
+  button.btn:hover{opacity:.88;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:6px 8px;border-bottom:1px solid #e8e2d0;text-align:left;}
+  th{background:var(--bone);color:var(--loam);font-size:11px;text-transform:uppercase;}
+  .tag{
+    display:inline-block;background:var(--bone);border:1px solid var(--brass);
+    color:var(--loam);font-size:11px;padding:2px 6px;border-radius:10px;
+  }
+  .qty-input{width:50px;}
+  .cost-input{width:80px;}
+  .totals{
+    background:var(--bone);
+    border:1px dashed var(--olive);
+    border-radius:6px;
+    padding:12px;
+    font-size:14px;
+  }
+  .totals .line{display:flex;justify-content:space-between;padding:3px 0;}
+  .totals .line.final{font-weight:700;font-size:16px;border-top:1px solid var(--brass);margin-top:6px;padding-top:8px;}
+  .muted{color:#888;font-size:11px;}
+  .search-box{width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:4px;}
+  .item-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;}
+  .item-row textarea{width:100%;font-size:12px;padding:4px;border:1px solid #ddd;border-radius:4px;}
+  .financing-opt{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .toast{position:fixed;bottom:16px;right:16px;background:var(--bark);color:#fff;padding:10px 16px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .3s;}
+  .toast.show{opacity:1;}
+
+  /* PRINT / ROF STYLES */
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;}
+    .no-print{display:none!important;}
+    .rof-page{page-break-after:always;padding:40px;}
+    .rof-page:last-child{page-break-after:auto;}
+  }
+  .rof-page{
+    width:800px;margin:0 auto 30px;background:#fff;padding:40px;border:1px solid #ddd;
+  }
+  .rof-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--olive);padding-bottom:14px;margin-bottom:20px;}
+  .rof-header h1{font-size:22px;margin:0;color:var(--bark);}
+  .rof-header .practice{font-size:12px;color:var(--loam);text-align:right;}
+  .rof-title{font-size:16px;color:var(--brass);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;}
+  .rof-item{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #eee;}
+  .rof-item .name{font-weight:700;font-size:14px;color:var(--bark);}
+  .rof-item .benefit{font-size:13px;color:#333;margin-top:4px;line-height:1.4;}
+  .price-box{background:var(--bone);border:1px solid var(--brass);border-radius:8px;padding:20px;margin:16px 0;}
+  .price-box .amount{font-size:28px;font-weight:700;color:var(--bark);}
+  .price-box .label{font-size:12px;color:var(--loam);text-transform:uppercase;letter-spacing:.5px;}
+  .option-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2dcc8;}
+  .option-row .opt-label{font-weight:600;}
+  .option-row .opt-detail{font-size:12px;color:#555;}
+  .fine{font-size:11px;color:#777;margin-top:16px;line-height:1.4;}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div>
+    <h1>CVC Bundle &amp; ROF Builder</h1>
+    <div class="sub">Colleyville Chiropractic | CVC Spine &amp; Sport</div>
+  </div>
+  <div class="sub">Wholesale x Multiplier Engine</div>
+</header>
+
+<nav class="tabs no-print">
+  <button data-tab="catalog" class="active">Catalog</button>
+  <button data-tab="builder">Bundle Builder</button>
+  <button data-tab="rof">Print ROF</button>
+</nav>
+
+<main class="no-print">
+
+  <!-- CATALOG TAB -->
+  <section id="tab-catalog">
+    <div class="card">
+      <h2>Product Catalog <span class="muted">(wholesale = your BPA cost; retail auto-calculates at each product's multiplier)</span></h2>
+      <input class="search-box" id="catalogSearch" placeholder="Search products...">
+      <div class="row" style="margin-bottom:10px;">
+        <div><label>Global default multiplier</label><input id="globalMultiplier" type="number" step="0.1" value="3" class="qty-input" style="width:60px;"></div>
+        <button class="btn outline" onclick="applyGlobalMultiplier()">Apply to all</button>
+        <button class="btn brass" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div id="addProductForm" style="display:none;margin-bottom:12px;padding:10px;background:var(--bone);border-radius:6px;">
+        <div class="row">
+          <div><label>Name</label><input id="npName"></div>
+          <div><label>Category</label><input id="npCategory" placeholder="e.g. Neuropathy"></div>
+          <div><label>Wholesale $</label><input id="npCost" type="number" class="cost-input"></div>
+          <div><label>Multiplier</label><input id="npMult" type="number" step="0.1" value="3" class="qty-input"></div>
+        </div>
+        <div style="margin-top:6px;"><label>Patient-facing benefit / what it's for</label>
+          <textarea id="npBenefit" rows="2" style="width:100%;"></textarea>
+        </div>
+        <button class="btn" onclick="saveNewProduct()" style="margin-top:6px;">Save Product</button>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Category</th><th>Wholesale</th><th>Mult.</th><th>Retail</th><th></th></tr></thead>
+        <tbody id="catalogBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BUILDER TAB -->
+  <section id="tab-builder" style="display:none;">
+    <div class="card">
+      <h2>Bundle Builder</h2>
+      <div class="row" style="margin-bottom:10px;">
+        <div><label>Bundle name</label><input id="bundleName" value="Basic Neuropathy Bundle"></div>
+        <button class="btn outline" onclick="loadPreset()">Load Basic Neuropathy Preset</button>
+        <button class="btn outline" onclick="newBundle()">New Blank Bundle</button>
+      </div>
+      <div class="row">
+        <select id="addItemSelect"></select>
+        <button class="btn" onclick="addItemToBundle()">Add to Bundle</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Bundle Contents</h2>
+      <div id="bundleItems"></div>
+    </div>
+
+    <div class="card">
+      <h2>Program Settings</h2>
+      <div class="row">
+        <div><label>Bundle multiplier override</label><input id="bundleMultiplier" type="number" step="0.1" value="3" class="qty-input"></div>
+        <div><label># of visits</label><input id="visitCount" type="number" value="12" class="qty-input"></div>
+        <div><label>$ per visit</label><input id="visitPrice" type="number" value="80" class="cost-input"></div>
+        <div><label>PIF discount %</label><input id="pifDiscount" type="number" value="5" class="qty-input"></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" onclick="recalc()">Recalculate</button>
+        <button class="btn brass" onclick="saveBundle()">Save Bundle</button>
+      </div>
+    </div>
+
+    <div class="card totals" id="totalsBox"></div>
+
+    <div class="card">
+      <h2>Saved Bundles</h2>
+      <div id="savedBundlesList"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ROF TAB (screen preview, shares content with print) -->
+<main id="tab-rof" style="display:none;">
+  <div class="card no-print">
+    <h2>Print ROF</h2>
+    <div class="row">
+      <select id="rofBundleSelect"></select>
+      <button class="btn" onclick="renderROF()">Load into ROF</button>
+      <button class="btn brass" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+
+  <div id="printArea">
+    <!-- PAGE 1 -->
+    <div class="rof-page" id="rofPage1">
+      <div class="rof-header">
+        <h1 id="rofTitle1">Report of Findings</h1>
+        <div class="practice">
+          Colleyville Chiropractic | CVC Spine &amp; Sport<br>
+          1001 Glade Rd, Suite 120, Colleyville, TX 76034<br>
+          (817) 420-7696
+        </div>
+      </div>
+      <div class="rof-title" id="rofSubtitle1">Recommended Program Components</div>
+      <div id="rofItemsList"></div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="rof-page" id="rofPage2">
+      <div class="rof-header">
+        <h1>Your Program Investment</h1>
+        <div class="practice">
+          Colleyville Chiropractic | CVC Spine &amp; Sport<br>
+          1001 Glade Rd, Suite 120, Colleyville, TX 76034<br>
+          (817) 420-7696
+        </div>
+      </div>
+      <div class="price-box">
+        <div class="label">Total Program Price</div>
+        <div class="amount" id="rofFullPrice">$0</div>
+      </div>
+      <div class="option-row">
+        <div>
+          <div class="opt-label">Pay in Full</div>
+          <div class="opt-detail">Save <span id="rofPifPct">5</span>% when paid in full today</div>
+        </div>
+        <div class="amount" id="rofPifPrice" style="font-size:20px;">$0</div>
+      </div>
+      <div class="option-row">
+        <div>
+          <div class="opt-label">Cherry Financing</div>
+          <div class="opt-detail">Flexible monthly plans &mdash; pre-approval does not affect your credit</div>
+        </div>
+        <div class="opt-detail">Ask us to check your rate</div>
+      </div>
+      <div class="option-row">
+        <div>
+          <div class="opt-label">CareCredit Financing</div>
+          <div class="opt-detail">Promotional financing available &mdash; pre-approval does not affect your credit</div>
+        </div>
+        <div class="opt-detail">Ask us to check your rate</div>
+      </div>
+      <div class="option-row" style="border-bottom:none;">
+        <div>
+          <div class="opt-label">In-House Payment Plan</div>
+          <div class="opt-detail">Available on a case-by-case hardship basis, arranged directly with our office</div>
+        </div>
+        <div class="opt-detail">See front desk</div>
+      </div>
+      <div class="fine">
+        Pricing reflects your personalized program as recommended following today's exam. Financing pre-qualification through Cherry and CareCredit uses a soft credit check and will not impact your credit score. Final financing terms are determined by the respective lender.
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let products = [];
+let bundles = [];
+let currentBundle = null;
+
+const DEFAULT_PRODUCTS = [
+  {id:'rebuilder300', name:'ReBuilder 300 Kit - E0720', category:'Neuropathy Device', cost:427.00, mult:3, benefit:'FDA-cleared electro-stimulation device that retrains nerve signaling to reduce neuropathy pain, numbness, and tingling at home.'},
+  {id:'rebuilder2407', name:'ReBuilder 2407 Kit - E0730', category:'Neuropathy Device', cost:617.00, mult:3, benefit:'Advanced dual-mode ReBuilder unit combining nerve stimulation and TENS for pain relief and nerve rehabilitation.'},
+  {id:'rebuilder2407deluxe', name:'ReBuilder 2407 Deluxe Kit', category:'Neuropathy Device', cost:1080.00, mult:3, benefit:'Full deluxe ReBuilder system with extended accessories for comprehensive at-home nerve rehab.'},
+  {id:'freedom300pro', name:'Freedom 300 Pro (2 Units)', category:'Light Therapy', cost:1198.00, mult:3, benefit:'Infrared light therapy wraps that increase circulation and nerve blood flow to reduce pain and restore sensation.'},
+  {id:'theraray', name:'TheraRay', category:'Light Therapy', cost:599.00, mult:3, benefit:'Near-infrared light therapy panel used to stimulate nerve repair and reduce inflammation in affected limbs.'},
+  {id:'kneeprosingle', name:'Knee Pro Single', category:'Light Therapy', cost:599.00, mult:3, benefit:'Infrared light wrap targeting knee pain and joint inflammation for improved mobility.'},
+  {id:'kneeprodouble', name:'Knee Pro Double', category:'Light Therapy', cost:699.00, mult:3, benefit:'Bilateral infrared light therapy for both knees, supporting joint pain relief and healing.'},
+  {id:'neuropathypremiumkit', name:'Neuropathy Premium Kit', category:'Supplement Kit', cost:449.00, mult:3, benefit:'Core nutraceutical protocol supporting nerve health, circulation, and inflammation reduction.'},
+  {id:'neuropathyguide', name:'Neuropathy Guide', category:'Education', cost:12.00, mult:3, benefit:'Patient education booklet explaining the neuropathy program, daily guidance, and what to expect.'},
+  {id:'neuromaintenance', name:'Neuropathy Maintenance Bundle', category:'Supplement Kit', cost:139.00, mult:3, benefit:'Ongoing maintenance supplement bundle to sustain nerve health after the initial program.'},
+  {id:'hometesting', name:'Home Testing Packet (set of 10)', category:'Diagnostics', cost:100.00, mult:3, benefit:'At-home monitoring kit (folder + thermometer) to track skin temperature and progress between visits.'},
+  {id:'elevatedneuro', name:'Elevated Neuro Lymphatic ReBuilder', category:'Neuropathy Device', cost:716.97, mult:3, benefit:'Combined ReBuilder + lymphatic support bundle addressing both nerve signaling and circulation/lymph drainage.'},
+  {id:'neuropathyprotocol', name:'Neuropathy Protocol', category:'Supplement Kit', cost:449.00, mult:3, benefit:'Foundational supplement protocol targeting nerve pain, inflammation, and metabolic support.'},
+  {id:'neuropathyketoprotocol', name:'Neuropathy - Keto Protocol', category:'Supplement Kit', cost:534.00, mult:3, benefit:'Neuropathy protocol paired with ketogenic metabolic support for patients also managing blood sugar/weight.'},
+  {id:'neurogutprotocol', name:'Neuropathy Gut Health Protocol', category:'Supplement Kit', cost:657.00, mult:3, benefit:'Neuropathy protocol combined with gut health support for patients with digestive involvement.'},
+  {id:'neurogutthyroid', name:'Neuropathy Gut Health Thyroid Protocol', category:'Supplement Kit', cost:727.00, mult:3, benefit:'Neuropathy, gut, and thyroid support combined for patients with metabolic/thyroid involvement.'},
+  {id:'neurogutfibro', name:'Neuropathy Gut Health Fibro Protocol', category:'Supplement Kit', cost:739.00, mult:3, benefit:'Neuropathy protocol with added gut and fibromyalgia-targeted support.'},
+  {id:'neurogutadv', name:'Neuropathy Gut Health Advanced Support Protocol', category:'Supplement Kit', cost:856.00, mult:3, benefit:'Comprehensive advanced protocol addressing neuropathy alongside deeper gut health imbalances.'},
+  {id:'immunitykit', name:'Immunity Kit', category:'Add-on Supplement', cost:97.00, mult:3, benefit:'Immune support add-on to help the body handle stress during recovery.'},
+  {id:'jointsupportkit', name:'Joint Support Kit', category:'Add-on Supplement', cost:194.00, mult:3, benefit:'Joint-focused supplement kit supporting mobility alongside nerve treatment.'},
+  {id:'sleep', name:'Sleep', category:'Add-on Supplement', cost:34.00, mult:3, benefit:'Sleep-support supplement to aid nerve repair and pain management overnight.'},
+  {id:'pulseox', name:'Pulse Oximeter', category:'Diagnostics', cost:27.00, mult:3, benefit:'Take-home device to monitor blood oxygen and circulation as part of progress tracking.'},
+  {id:'fibro', name:'Fibro', category:'Add-on Supplement', cost:46.00, mult:3, benefit:'Targeted supplement for fibromyalgia-related nerve and muscle discomfort.'},
+  {id:'protect', name:'Protect', category:'Add-on Supplement', cost:36.00, mult:3, benefit:'Enhanced immune complex supporting overall resilience during the program.'},
+  {id:'polyphenols', name:'Polyphenols', category:'Add-on Supplement', cost:34.00, mult:3, benefit:'Antioxidant complex supporting nerve and vascular health.'},
+  {id:'cortiflame', name:'CortiFlame', category:'Add-on Supplement', cost:28.00, mult:3, benefit:'Anti-inflammatory support to reduce nerve and joint inflammation.'},
+];
+
+const PRESET_BASIC_NEUROPATHY = {
+  name:'Basic Neuropathy Bundle',
+  items:[
+    {productId:'rebuilder300', qty:1},
+    {productId:'freedom300pro', qty:1},
+    {productId:'neuropathypremiumkit', qty:1},
+    {productId:'neuropathyguide', qty:1},
+    {productId:'hometesting', qty:1},
+  ],
+  multiplier:3,
+  visitCount:12,
+  visitPrice:80,
+  pifDiscount:5
+};
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+async function loadState(){
+  try{
+    const p = await window.storage.get('cvc-rof-products', false);
+    products = p ? JSON.parse(p.value) : DEFAULT_PRODUCTS.slice();
+  }catch(e){ products = DEFAULT_PRODUCTS.slice(); }
+  try{
+    const b = await window.storage.get('cvc-rof-bundles', false);
+    bundles = b ? JSON.parse(b.value) : [];
+  }catch(e){ bundles = []; }
+
+  if(bundles.length===0){
+    bundles.push(buildBundleFromPreset(PRESET_BASIC_NEUROPATHY));
+    await persistBundles();
+  }
+  await persistProducts();
+  renderCatalog();
+  populateAddItemSelect();
+  renderSavedBundles();
+  populateRofSelect();
+  currentBundle = JSON.parse(JSON.stringify(bundles[0]));
+  document.getElementById('bundleName').value = currentBundle.name;
+  document.getElementById('bundleMultiplier').value = currentBundle.multiplier;
+  document.getElementById('visitCount').value = currentBundle.visitCount;
+  document.getElementById('visitPrice').value = currentBundle.visitPrice;
+  document.getElementById('pifDiscount').value = currentBundle.pifDiscount;
+  renderBundleItems();
+  recalc();
+}
+
+function buildBundleFromPreset(preset){
+  return JSON.parse(JSON.stringify(preset));
+}
+
+async function persistProducts(){
+  try{ await window.storage.set('cvc-rof-products', JSON.stringify(products), false); }catch(e){}
+}
+async function persistBundles(){
+  try{ await window.storage.set('cvc-rof-bundles', JSON.stringify(bundles), false); }catch(e){}
+}
+
+// TAB SWITCHING
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-catalog').style.display = btn.dataset.tab==='catalog' ? 'block':'none';
+    document.getElementById('tab-builder').style.display = btn.dataset.tab==='builder' ? 'block':'none';
+    document.getElementById('tab-rof').style.display = btn.dataset.tab==='rof' ? 'block':'none';
+  });
+});
+
+// CATALOG
+function renderCatalog(filter=''){
+  const body = document.getElementById('catalogBody');
+  body.innerHTML='';
+  products.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())).forEach(p=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td><span class="tag">${p.category}</span></td>
+      <td>$${p.cost.toFixed(2)}</td>
+      <td><input type="number" step="0.1" value="${p.mult}" class="qty-input" onchange="updateMult('${p.id}', this.value)"></td>
+      <td>$${(p.cost*p.mult).toFixed(2)}</td>
+      <td><button class="btn outline" onclick="deleteProduct('${p.id}')">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+document.getElementById('catalogSearch').addEventListener('input', e=>renderCatalog(e.target.value));
+
+function updateMult(id, val){
+  const p = products.find(x=>x.id===id);
+  p.mult = parseFloat(val)||0;
+  persistProducts();
+  renderCatalog(document.getElementById('catalogSearch').value);
+}
+function deleteProduct(id){
+  products = products.filter(p=>p.id!==id);
+  persistProducts();
+  renderCatalog();
+  populateAddItemSelect();
+}
+function applyGlobalMultiplier(){
+  const m = parseFloat(document.getElementById('globalMultiplier').value)||3;
+  products.forEach(p=>p.mult=m);
+  persistProducts();
+  renderCatalog();
+  toast('Global multiplier applied to all products');
+}
+function openAddProduct(){
+  document.getElementById('addProductForm').style.display='block';
+}
+function saveNewProduct(){
+  const name = document.getElementById('npName').value.trim();
+  const category = document.getElementById('npCategory').value.trim() || 'Uncategorized';
+  const cost = parseFloat(document.getElementById('npCost').value)||0;
+  const mult = parseFloat(document.getElementById('npMult').value)||3;
+  const benefit = document.getElementById('npBenefit').value.trim();
+  if(!name){ toast('Name required'); return; }
+  const id = 'p_'+Date.now();
+  products.push({id,name,category,cost,mult,benefit});
+  persistProducts();
+  renderCatalog();
+  populateAddItemSelect();
+  document.getElementById('addProductForm').style.display='none';
+  ['npName','npCategory','npCost','npBenefit'].forEach(f=>document.getElementById(f).value='');
+  toast('Product added');
+}
+
+// BUNDLE BUILDER
+function populateAddItemSelect(){
+  const sel = document.getElementById('addItemSelect');
+  sel.innerHTML = products.map(p=>`<option value="${p.id}">${p.name} ($${p.cost.toFixed(2)})</option>`).join('');
+}
+
+function newBundle(){
+  currentBundle = {name:'New Bundle', items:[], multiplier:parseFloat(document.getElementById('globalMultiplier').value)||3, visitCount:12, visitPrice:80, pifDiscount:5};
+  document.getElementById('bundleName').value = currentBundle.name;
+  document.getElementById('bundleMultiplier').value = currentBundle.multiplier;
+  document.getElementById('visitCount').value = currentBundle.visitCount;
+  document.getElementById('visitPrice').value = currentBundle.visitPrice;
+  document.getElementById('pifDiscount').value = currentBundle.pifDiscount;
+  renderBundleItems();
+  recalc();
+}
+
+function loadPreset(){
+  currentBundle = buildBundleFromPreset(PRESET_BASIC_NEUROPATHY);
+  document.getElementById('bundleName').value = currentBundle.name;
+  document.getElementById('bundleMultiplier').value = currentBundle.multiplier;
+  document.getElementById('visitCount').value = currentBundle.visitCount;
+  document.getElementById('visitPrice').value = currentBundle.visitPrice;
+  document.getElementById('pifDiscount').value = currentBundle.pifDiscount;
+  renderBundleItems();
+  recalc();
+}
+
+function addItemToBundle(){
+  const sel = document.getElementById('addItemSelect');
+  const productId = sel.value;
+  if(!currentBundle) newBundle();
+  const existing = currentBundle.items.find(i=>i.productId===productId);
+  if(existing){ existing.qty += 1; }
+  else{ currentBundle.items.push({productId, qty:1}); }
+  renderBundleItems();
+  recalc();
+}
+
+function renderBundleItems(){
+  const wrap = document.getElementById('bundleItems');
+  wrap.innerHTML='';
+  if(!currentBundle || currentBundle.items.length===0){
+    wrap.innerHTML = '<div class="muted">No items yet — add from the catalog above.</div>';
+    return;
+  }
+  currentBundle.items.forEach((item, idx)=>{
+    const p = products.find(x=>x.id===item.productId);
+    if(!p) return;
+    const row = document.createElement('div');
+    row.className='item-row';
+    row.innerHTML = `
+      <div style="flex:1;">
+        <strong>${p.name}</strong> <span class="muted">$${p.cost.toFixed(2)} wholesale x ${p.mult}</span>
+      </div>
+      <input type="number" class="qty-input" value="${item.qty}" onchange="updateItemQty(${idx}, this.value)">
+      <button class="btn outline" onclick="removeItem(${idx})">Remove</button>
+    `;
+    wrap.appendChild(row);
+  });
+}
+function updateItemQty(idx, val){
+  currentBundle.items[idx].qty = parseInt(val)||1;
+  recalc();
+}
+function removeItem(idx){
+  currentBundle.items.splice(idx,1);
+  renderBundleItems();
+  recalc();
+}
+
+function recalc(){
+  if(!currentBundle) return;
+  currentBundle.name = document.getElementById('bundleName').value;
+  currentBundle.multiplier = parseFloat(document.getElementById('bundleMultiplier').value)||3;
+  currentBundle.visitCount = parseInt(document.getElementById('visitCount').value)||0;
+  currentBundle.visitPrice = parseFloat(document.getElementById('visitPrice').value)||0;
+  currentBundle.pifDiscount = parseFloat(document.getElementById('pifDiscount').value)||0;
+
+  let wholesaleTotal = 0;
+  currentBundle.items.forEach(item=>{
+    const p = products.find(x=>x.id===item.productId);
+    if(p) wholesaleTotal += p.cost * item.qty;
+  });
+  const retailKitTotal = wholesaleTotal * currentBundle.multiplier;
+  const visitsTotal = currentBundle.visitCount * currentBundle.visitPrice;
+  const fullProgramPrice = retailKitTotal + visitsTotal;
+  const pifPrice = fullProgramPrice * (1 - currentBundle.pifDiscount/100);
+
+  currentBundle._calc = {wholesaleTotal, retailKitTotal, visitsTotal, fullProgramPrice, pifPrice};
+
+  const box = document.getElementById('totalsBox');
+  box.innerHTML = `
+    <div class="line"><span>Kit wholesale cost (internal only)</span><span>$${wholesaleTotal.toFixed(2)}</span></div>
+    <div class="line"><span>Kit retail (x${currentBundle.multiplier})</span><span>$${retailKitTotal.toFixed(2)}</span></div>
+    <div class="line"><span>Visits (${currentBundle.visitCount} x $${currentBundle.visitPrice})</span><span>$${visitsTotal.toFixed(2)}</span></div>
+    <div class="line final"><span>Full Program Price</span><span>$${fullProgramPrice.toFixed(2)}</span></div>
+    <div class="line"><span>Pay-in-Full price (${currentBundle.pifDiscount}% off)</span><span>$${pifPrice.toFixed(2)}</span></div>
+  `;
+  renderBundleItems();
+}
+
+async function saveBundle(){
+  recalc();
+  const idx = bundles.findIndex(b=>b.name===currentBundle.name);
+  const toSave = JSON.parse(JSON.stringify(currentBundle));
+  if(idx>=0) bundles[idx]=toSave; else bundles.push(toSave);
+  await persistBundles();
+  renderSavedBundles();
+  populateRofSelect();
+  toast('Bundle saved: '+currentBundle.name);
+}
+
+function renderSavedBundles(){
+  const wrap = document.getElementById('savedBundlesList');
+  wrap.innerHTML='';
+  bundles.forEach((b,idx)=>{
+    const row = document.createElement('div');
+    row.className='item-row';
+    row.innerHTML = `<div><strong>${b.name}</strong></div>
+      <div>
+        <button class="btn outline" onclick="loadSavedBundle(${idx})">Load</button>
+        <button class="btn outline" onclick="deleteSavedBundle(${idx})">Delete</button>
+      </div>`;
+    wrap.appendChild(row);
+  });
+}
+function loadSavedBundle(idx){
+  currentBundle = JSON.parse(JSON.stringify(bundles[idx]));
+  document.getElementById('bundleName').value = currentBundle.name;
+  document.getElementById('bundleMultiplier').value = currentBundle.multiplier;
+  document.getElementById('visitCount').value = currentBundle.visitCount;
+  document.getElementById('visitPrice').value = currentBundle.visitPrice;
+  document.getElementById('pifDiscount').value = currentBundle.pifDiscount;
+  renderBundleItems();
+  recalc();
+}
+async function deleteSavedBundle(idx){
+  bundles.splice(idx,1);
+  await persistBundles();
+  renderSavedBundles();
+  populateRofSelect();
+}
+
+// ROF
+function populateRofSelect(){
+  const sel = document.getElementById('rofBundleSelect');
+  sel.innerHTML = bundles.map((b,idx)=>`<option value="${idx}">${b.name}</option>`).join('');
+}
+function renderROF(){
+  const idx = parseInt(document.getElementById('rofBundleSelect').value)||0;
+  const b = bundles[idx];
+  if(!b) return;
+  recalcForBundle(b);
+
+  document.getElementById('rofTitle1').textContent = 'Report of Findings';
+  document.getElementById('rofSubtitle1').textContent = b.name;
+
+  const list = document.getElementById('rofItemsList');
+  list.innerHTML='';
+  b.items.forEach(item=>{
+    const p = products.find(x=>x.id===item.productId);
+    if(!p) return;
+    const div = document.createElement('div');
+    div.className='rof-item';
+    div.innerHTML = `<div class="name">${p.name}${item.qty>1?' (x'+item.qty+')':''}</div>
+                      <div class="benefit">${p.benefit||'Component of your personalized recovery program.'}</div>`;
+    list.appendChild(div);
+  });
+  const visitsDiv = document.createElement('div');
+  visitsDiv.className='rof-item';
+  visitsDiv.innerHTML = `<div class="name">${b.visitCount} In-Office Visits</div>
+    <div class="benefit">Scheduled care visits (weekly, then monthly) to monitor progress, adjust your protocol, and deliver in-office therapies included in your program.</div>`;
+  list.appendChild(visitsDiv);
+
+  document.getElementById('rofFullPrice').textContent = '$'+b._calc.fullProgramPrice.toFixed(2);
+  document.getElementById('rofPifPct').textContent = b.pifDiscount;
+  document.getElementById('rofPifPrice').textContent = '$'+b._calc.pifPrice.toFixed(2);
+
+  toast('ROF loaded — use Print / Save PDF');
+}
+function recalcForBundle(b){
+  let wholesaleTotal=0;
+  b.items.forEach(item=>{
+    const p = products.find(x=>x.id===item.productId);
+    if(p) wholesaleTotal += p.cost*item.qty;
+  });
+  const retailKitTotal = wholesaleTotal*b.multiplier;
+  const visitsTotal = b.visitCount*b.visitPrice;
+  const fullProgramPrice = retailKitTotal+visitsTotal;
+  const pifPrice = fullProgramPrice*(1-b.pifDiscount/100);
+  b._calc = {wholesaleTotal, retailKitTotal, visitsTotal, fullProgramPrice, pifPrice};
+}
+
+loadState();
+</script>
+</body>
+</html>
